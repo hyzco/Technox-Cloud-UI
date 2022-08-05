@@ -1,45 +1,70 @@
 // ** React Imports
-import { useState, useEffect } from 'react'
+import { useState, useEffect } from "react";
 
 // ** Next Import
-import Link from 'next/link'
+import Link from "next/link";
 
 // ** MUI Imports
-import Grid from '@mui/material/Grid'
-import Alert from '@mui/material/Alert'
+import Grid from "@mui/material/Grid";
+import Alert from "@mui/material/Alert";
 
 // ** Third Party Components
-import axios from 'axios'
+import axios from "axios";
 
 // ** Types
-import { InvoiceType } from 'src/types/apps/invoiceTypes'
-import { UserLayoutType, UsersType } from 'src/types/apps/userTypes'
+import { InvoiceType } from "src/types/apps/invoiceTypes";
+import { UserLayoutType, UsersType } from "src/types/apps/userTypes";
 
 // ** Demo Components Imports
-import UserViewLeft from 'src/views/apps/user/view/UserViewLeft'
-import UserViewRight from 'src/views/apps/user/view/UserViewRight'
+import UserViewLeft from "src/views/apps/user/view/UserViewLeft";
+import UserViewRight from "src/views/apps/user/view/UserViewRight";
+
+import { useAuth } from "src/hooks/useAuth";
+import { UserDataType } from "src/context/types";
 
 type Props = UserLayoutType & {
-  invoiceData: InvoiceType[]
-}
+  invoiceData: InvoiceType[];
+};
 
 const UserView = ({ id, invoiceData }: Props) => {
+  const { user } = useAuth();
+  //TODO make user view page to be able to present user
+  //avatar is missing, user data should be fullfilled
+  //bkz:
+  /*
+   email,
+        password,
+        username,
+        avatar: null,
+        fullName: '',
+        role: 'admin'
+   */
+
   // ** State
-  const [error, setError] = useState<boolean>(false)
-  const [data, setData] = useState<null | UsersType>(null)
+  const [error, setError] = useState<boolean>(false);
+  const [data, setData] = useState<null | UsersType>(null);
 
   useEffect(() => {
-    axios
-      .get('/apps/user', { params: { id } })
-      .then(response => {
-        setData(response.data)
-        setError(false)
-      })
-      .catch(() => {
-        setData(null)
-        setError(true)
-      })
-  }, [id])
+    // axios
+    //   .get('/apps/user', { params: { id } })
+    //   .then(response => {
+    //     setData(response.data)
+    //     setError(false)
+    //   })
+    //   .catch(() => {
+    //     setData(null)
+    //     setError(true)
+    //   })
+    if (user) {
+      setData(null);
+      setError(false);
+    }
+
+    if (!user) {
+      setData(null);
+      setError(true);
+    }
+  }, [user]);
 
   if (data) {
     return (
@@ -51,21 +76,21 @@ const UserView = ({ id, invoiceData }: Props) => {
           <UserViewRight invoiceData={invoiceData} />
         </Grid>
       </Grid>
-    )
+    );
   } else if (error) {
     return (
       <Grid container spacing={6}>
         <Grid item xs={12}>
-          <Alert severity='error'>
-            User with the id: {id} does not exist. Please check the list of users:{' '}
-            <Link href='/apps/user/list'>User List</Link>
+          <Alert severity="error">
+            User with the id: {id} does not exist. Please check the list of
+            users: <Link href="/apps/user/list">User List</Link>
           </Alert>
         </Grid>
       </Grid>
-    )
+    );
   } else {
-    return null
+    return null;
   }
-}
+};
 
-export default UserView
+export default UserView;

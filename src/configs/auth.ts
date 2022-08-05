@@ -1,6 +1,8 @@
+import backendConfig from "./backendConfig";
+
 export default {
-  meEndpoint: '/auth/me',
-  loginEndpoint: '/jwt/login',
-  registerEndpoint: '/jwt/register',
-  storageTokenKeyName: 'accessToken'
-}
+  meEndpoint: `${backendConfig.api}/auth/me`,
+  loginEndpoint: `${backendConfig.api}/auth/login`,
+  registerEndpoint: `${backendConfig.api}/auth/register`,
+  storageTokenKeyName: `accessToken`,
+};
