@@ -18,6 +18,7 @@ import {
   ErrCallbackType,
   UserDataType,
 } from "./types";
+import backendConfig from "src/configs/backendConfig";
 
 // ** Defaults
 const defaultProvider: AuthValuesType = {
@@ -85,9 +86,12 @@ const AuthProvider = ({ children }: Props) => {
     params: LoginParams,
     errorCallback?: ErrCallbackType
   ) => {
+    console.log("handleLogin", params);
+    console.log(backendConfig.apiProperties);
     axios
       .post(authConfig.loginEndpoint, params)
       .then(async (res) => {
+        console.log(res);
         window.localStorage.setItem(
           authConfig.storageTokenKeyName,
           res.data.accessToken
@@ -118,6 +122,7 @@ const AuthProvider = ({ children }: Props) => {
           });
       })
       .catch((err) => {
+        console.log(err);
         if (errorCallback) errorCallback(err);
       });
   };

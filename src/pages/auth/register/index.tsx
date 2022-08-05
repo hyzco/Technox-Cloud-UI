@@ -129,7 +129,7 @@ const Register = () => {
   const { skin } = settings;
   const schema = yup.object().shape({
     password: yup.string().min(5).required(),
-    username: yup.string().min(3).required(),
+    // username: yup.string().min(3).required(),
     email: yup.string().email().required(),
     terms: yup
       .bool()
@@ -149,19 +149,19 @@ const Register = () => {
 
   const onSubmit = (data: FormData) => {
     const { email, username, password } = data;
-    register({ email, username, password }, (err) => {
+    register({ email, password }, (err) => {
       if (err.email) {
         setError("email", {
           type: "manual",
           message: err.email,
         });
       }
-      if (err.username) {
-        setError("username", {
-          type: "manual",
-          message: err.username,
-        });
-      }
+      // if (err.username) {
+      //   setError("username", {
+      //     type: "manual",
+      //     message: err.username,
+      //   });
+      // }
     });
   };
 
@@ -322,7 +322,7 @@ const Register = () => {
               autoComplete="off"
               onSubmit={handleSubmit(onSubmit)}
             >
-              <FormControl fullWidth sx={{ mb: 4 }}>
+              {/* <FormControl fullWidth sx={{ mb: 4 }}>
                 <Controller
                   name="username"
                   control={control}
@@ -344,7 +344,7 @@ const Register = () => {
                     {errors.username.message}
                   </FormHelperText>
                 )}
-              </FormControl>
+              </FormControl> */}
               <FormControl fullWidth sx={{ mb: 4 }}>
                 <Controller
                   name="email"
