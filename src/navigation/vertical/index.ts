@@ -19,70 +19,71 @@ import CalendarBlankOutline from "mdi-material-ui/CalendarBlankOutline";
 import PackageVariantClosed from "mdi-material-ui/PackageVariantClosed";
 import GoogleCirclesExtended from "mdi-material-ui/GoogleCirclesExtended";
 import CheckboxMarkedCircleOutline from "mdi-material-ui/CheckboxMarkedCircleOutline";
+import CreditCardSettingsOutline from "mdi-material-ui/CreditCardSettingsOutline";
 
 // ** Type import
 import { VerticalNavItemsType } from "src/@core/layouts/types";
 
 const navigation = (): VerticalNavItemsType => {
   return [
-    {
-      title: "Dashboards",
-      icon: HomeOutline,
-      // badgeContent: "new",
-      badgeColor: "error",
-      path: "/dashboards/ecommerce",
-      // children: [
-      //   {
-      //     title: 'CRM',
-      //     path: '/dashboards/crm'
-      //   },
-      //   {
-      //     title: 'Analytics',
-      //     path: '/dashboards/analytics'
-      //   },
-      //   {
-      //     title: 'eCommerce',
-      //     path: '/dashboards/ecommerce'
-      //   }
-      // ]
-    },
+    // {
+    //   title: "Dashboards",
+    //   icon: HomeOutline,
+    //   // badgeContent: "new",
+    //   badgeColor: "error",
+    //   path: "/dashboards/ecommerce",
+    //   // children: [
+    //   //   {
+    //   //     title: 'CRM',
+    //   //     path: '/dashboards/crm'
+    //   //   },
+    //   //   {
+    //   //     title: 'Analytics',
+    //   //     path: '/dashboards/analytics'
+    //   //   },
+    //   //   {
+    //   //     title: 'eCommerce',
+    //   //     path: '/dashboards/ecommerce'
+    //   //   }
+    //   // ]
+    // },
     {
       sectionTitle: "Cloud Control Panel",
     },
     {
       title: "Kontrol Paneli",
-      icon: EmailOutline,
+      icon: HomeOutline,
       path: "/dashboards/ecommerce",
     },
     {
-      title: "Sunucularim",
-      icon: EmailOutline,
-      path: "/",
+      title: "Sunucularım",
+      icon: GoogleCirclesExtended,
+      path: "/views/servers",
     },
     {
       title: "Servislerim",
-      icon: EmailOutline,
-      path: "/",
+      icon: FormSelect,
+      path: "/views/services",
     },
     {
-      title: "DNS Kayitlari",
-      icon: EmailOutline,
-      path: "/",
+      title: "DNS Kayıtları",
+      icon: ArchiveOutline,
+      path: "/views/records",
     },
     {
-      title: "Odemeler",
-      icon: EmailOutline,
-      path: "/",
+      title: "Ödemeler",
+      icon: CreditCardSettingsOutline,
+      path: "/views/payments",
     },
     {
       title: "Talepler",
-      icon: EmailOutline,
-      path: "/",
+      icon: MessageOutline,
+      path: "/views/requests",
     },
     {
-      title: "Hesabim",
-      icon: EmailOutline,
-      path: "/",
+      title: "Hesabım",
+      icon: AccountOutline,
+      path: "/views/account",
     },
     {
       sectionTitle: "Apps & Pages",
@@ -279,133 +280,133 @@ const navigation = (): VerticalNavItemsType => {
       title: "Dialog Examples",
       path: "/pages/dialog-examples",
     },
-    {
-      sectionTitle: "User Interface",
-    },
-    {
-      title: "Typography",
-      icon: FormatLetterCase,
-      path: "/ui/typography",
-    },
-    {
-      title: "Icons",
-      path: "/ui/icons",
-      icon: GoogleCirclesExtended,
-    },
-    {
-      title: "Cards",
-      icon: CreditCardOutline,
-      children: [
-        {
-          title: "Basic",
-          path: "/ui/cards/basic",
-        },
-        {
-          title: "Statistics",
-          path: "/ui/cards/statistics",
-        },
-        {
-          title: "Advanced",
-          path: "/ui/cards/advanced",
-        },
-        {
-          title: "Gamification",
-          path: "/ui/cards/gamification",
-        },
-        {
-          title: "Actions",
-          path: "/ui/cards/actions",
-        },
-        {
-          title: "Widgets",
-          path: "/ui/cards/widgets",
-        },
-      ],
-    },
-    {
-      badgeContent: "18",
-      title: "Components",
-      icon: ArchiveOutline,
-      badgeColor: "primary",
-      children: [
-        {
-          title: "Accordion",
-          path: "/components/accordion",
-        },
-        {
-          title: "Alerts",
-          path: "/components/alerts",
-        },
-        {
-          title: "Avatars",
-          path: "/components/avatars",
-        },
-        {
-          title: "Badges",
-          path: "/components/badges",
-        },
-        {
-          title: "Buttons",
-          path: "/components/buttons",
-        },
-        {
-          title: "Button Group",
-          path: "/components/button-group",
-        },
-        {
-          title: "Chips",
-          path: "/components/chips",
-        },
-        {
-          title: "Dialogs",
-          path: "/components/dialogs",
-        },
-        {
-          title: "List",
-          path: "/components/list",
-        },
-        {
-          title: "Menu",
-          path: "/components/menu",
-        },
-        {
-          title: "Pagination",
-          path: "/components/pagination",
-        },
-        {
-          title: "Ratings",
-          path: "/components/ratings",
-        },
-        {
-          title: "Snackbar",
-          path: "/components/snackbar",
-        },
-        {
-          title: "Swiper",
-          path: "/components/swiper",
-        },
-        {
-          title: "Tabs",
-          path: "/components/tabs",
-        },
-        {
-          title: "Timeline",
-          path: "/components/timeline",
-        },
-        {
-          title: "Toasts",
-          path: "/components/toast",
-        },
-        {
-          title: "Tree View",
-          path: "/components/tree-view",
-        },
-        {
-          title: "More",
-          path: "/components/more",
-        },
-      ],
-    },
+    // {
+    //   sectionTitle: "User Interface",
+    // },
+    // {
+    //   title: "Typography",
+    //   icon: FormatLetterCase,
+    //   path: "/ui/typography",
+    // },
+    // {
+    //   title: "Icons",
+    //   path: "/ui/icons",
+    //   icon: GoogleCirclesExtended,
+    // },
+    // {
+    //   title: "Cards",
+    //   icon: CreditCardOutline,
+    //   children: [
+    //     {
+    //       title: "Basic",
+    //       path: "/ui/cards/basic",
+    //     },
+    //     {
+    //       title: "Statistics",
+    //       path: "/ui/cards/statistics",
+    //     },
+    //     {
+    //       title: "Advanced",
+    //       path: "/ui/cards/advanced",
+    //     },
+    //     {
+    //       title: "Gamification",
+    //       path: "/ui/cards/gamification",
+    //     },
+    //     {
+    //       title: "Actions",
+    //       path: "/ui/cards/actions",
+    //     },
+    //     {
+    //       title: "Widgets",
+    //       path: "/ui/cards/widgets",
+    //     },
+    //   ],
+    // },
+    // {
+    //   badgeContent: "18",
+    //   title: "Components",
+    //   icon: ArchiveOutline,
+    //   badgeColor: "primary",
+    //   children: [
+    //     {
+    //       title: "Accordion",
+    //       path: "/components/accordion",
+    //     },
+    //     {
+    //       title: "Alerts",
+    //       path: "/components/alerts",
+    //     },
+    //     {
+    //       title: "Avatars",
+    //       path: "/components/avatars",
+    //     },
+    //     {
+    //       title: "Badges",
+    //       path: "/components/badges",
+    //     },
+    //     {
+    //       title: "Buttons",
+    //       path: "/components/buttons",
+    //     },
+    //     {
+    //       title: "Button Group",
+    //       path: "/components/button-group",
+    //     },
+    //     {
+    //       title: "Chips",
+    //       path: "/components/chips",
+    //     },
+    //     {
+    //       title: "Dialogs",
+    //       path: "/components/dialogs",
+    //     },
+    //     {
+    //       title: "List",
+    //       path: "/components/list",
+    //     },
+    //     {
+    //       title: "Menu",
+    //       path: "/components/menu",
+    //     },
+    //     {
+    //       title: "Pagination",
+    //       path: "/components/pagination",
+    //     },
+    //     {
+    //       title: "Ratings",
+    //       path: "/components/ratings",
+    //     },
+    //     {
+    //       title: "Snackbar",
+    //       path: "/components/snackbar",
+    //     },
+    //     {
+    //       title: "Swiper",
+    //       path: "/components/swiper",
+    //     },
+    //     {
+    //       title: "Tabs",
+    //       path: "/components/tabs",
+    //     },
+    //     {
+    //       title: "Timeline",
+    //       path: "/components/timeline",
+    //     },
+    //     {
+    //       title: "Toasts",
+    //       path: "/components/toast",
+    //     },
+    //     {
+    //       title: "Tree View",
+    //       path: "/components/tree-view",
+    //     },
+    //     {
+    //       title: "More",
+    //       path: "/components/more",
+    //     },
+    //   ],
+    // },
     {
       sectionTitle: "Forms & Tables",
     },
@@ -488,75 +489,75 @@ const navigation = (): VerticalNavItemsType => {
       icon: Table,
       path: "/tables/data-grid",
     },
-    {
-      sectionTitle: "Charts & Misc",
-    },
-    {
-      title: "Charts",
-      icon: ChartDonut,
-      children: [
-        {
-          title: "Apex",
-          path: "/charts/apex-charts",
-        },
-        {
-          title: "Recharts",
-          path: "/charts/recharts",
-        },
-        {
-          title: "ChartJS",
-          path: "/charts/chartjs",
-        },
-      ],
-    },
-    {
-      path: "/acl",
-      action: "read",
-      subject: "acl-page",
-      icon: ShieldOutline,
-      title: "Access Control",
-    },
-    {
-      title: "Others",
-      icon: DotsHorizontal,
-      children: [
-        {
-          title: "Menu Levels",
-          children: [
-            {
-              title: "Menu Level 2.1",
-            },
-            {
-              title: "Menu Level 2.2",
-              children: [
-                {
-                  title: "Menu Level 3.1",
-                },
-                {
-                  title: "Menu Level 3.2",
-                },
-              ],
-            },
-          ],
-        },
-        {
-          title: "Disabled Menu",
-          disabled: true,
-        },
-        {
-          title: "Raise Support",
-          externalLink: true,
-          openInNewTab: true,
-          path: "https://pixinvent.ticksy.com/",
-        },
-        {
-          title: "Documentation",
-          externalLink: true,
-          openInNewTab: true,
-          path: "https://pixinvent.com/demo/materialize-mui-react-nextjs-admin-template/documentation",
-        },
-      ],
-    },
+    // {
+    //   sectionTitle: "Charts & Misc",
+    // },
+    // {
+    //   title: "Charts",
+    //   icon: ChartDonut,
+    //   children: [
+    //     {
+    //       title: "Apex",
+    //       path: "/charts/apex-charts",
+    //     },
+    //     {
+    //       title: "Recharts",
+    //       path: "/charts/recharts",
+    //     },
+    //     {
+    //       title: "ChartJS",
+    //       path: "/charts/chartjs",
+    //     },
+    //   ],
+    // },
+    // {
+    //   path: "/acl",
+    //   action: "read",
+    //   subject: "acl-page",
+    //   icon: ShieldOutline,
+    //   title: "Access Control",
+    // },
+    // {
+    //   title: "Others",
+    //   icon: DotsHorizontal,
+    //   children: [
+    //     {
+    //       title: "Menu Levels",
+    //       children: [
+    //         {
+    //           title: "Menu Level 2.1",
+    //         },
+    //         {
+    //           title: "Menu Level 2.2",
+    //           children: [
+    //             {
+    //               title: "Menu Level 3.1",
+    //             },
+    //             {
+    //               title: "Menu Level 3.2",
+    //             },
+    //           ],
+    //         },
+    //       ],
+    //     },
+    //     {
+    //       title: "Disabled Menu",
+    //       disabled: true,
+    //     },
+    //     {
+    //       title: "Raise Support",
+    //       externalLink: true,
+    //       openInNewTab: true,
+    //       path: "https://pixinvent.ticksy.com/",
+    //     },
+    //     {
+    //       title: "Documentation",
+    //       externalLink: true,
+    //       openInNewTab: true,
+    //       path: "https://pixinvent.com/demo/materialize-mui-react-nextjs-admin-template/documentation",
+    //     },
+    //   ],
+    // },
   ];
 };
 
