@@ -20,6 +20,7 @@ import EcommerceTable from "src/views/dashboards/ecommerce/EcommerceTable";
 import EcommerceActivityTimeline from "src/views/dashboards/ecommerce/EcommerceActivityTimeline";
 import EcommerceSalesOverview from "src/views/dashboards/ecommerce/EcommerceSalesOverview";
 import EcommerceSalesOverviewWithTabs from "src/views/dashboards/ecommerce/EcommerceSalesOverviewWithTabs";
+import CloudBalanceOverview from "src/views/dashboards/ecommerce/CloudBalanceOverview";
 
 const EcommerceDashboard = () => {
   return (
@@ -29,7 +30,10 @@ const EcommerceDashboard = () => {
           <Grid item xs={12} md={6}>
             <EcommerceSalesOverview />
           </Grid>
-          <Grid item xs={12} sm={6} md={3}>
+          <Grid item xs={12} md={6}>
+            <CloudBalanceOverview />
+          </Grid>
+          {/* <Grid item xs={12} sm={6} md={3}>
             <CardStatisticsCharacter
               data={{
                 stats: "8.14k",
@@ -53,7 +57,7 @@ const EcommerceDashboard = () => {
                 src: "/images/cards/card-stats-img-2.png",
               }}
             />
-          </Grid>
+          </Grid> */}
           <Grid item xs={12} md={6}>
             <EcommerceSalesOverviewWithTabs />
           </Grid>

@@ -47,6 +47,44 @@ const navigation = (): VerticalNavItemsType => {
       // ]
     },
     {
+      sectionTitle: "Cloud Control Panel",
+    },
+    {
+      title: "Kontrol Paneli",
+      icon: EmailOutline,
+      path: "/dashboards/ecommerce",
+    },
+    {
+      title: "Sunucularim",
+      icon: EmailOutline,
+      path: "/",
+    },
+    {
+      title: "Servislerim",
+      icon: EmailOutline,
+      path: "/",
+    },
+    {
+      title: "DNS Kayitlari",
+      icon: EmailOutline,
+      path: "/",
+    },
+    {
+      title: "Odemeler",
+      icon: EmailOutline,
+      path: "/",
+    },
+    {
+      title: "Talepler",
+      icon: EmailOutline,
+      path: "/",
+    },
+    {
+      title: "Hesabim",
+      icon: EmailOutline,
+      path: "/",
+    },
+    {
       sectionTitle: "Apps & Pages",
     },
     {

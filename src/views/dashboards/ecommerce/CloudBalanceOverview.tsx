@@ -23,6 +23,12 @@ import { ThemeColor } from "src/@core/layouts/types";
 // ** Custom Components Imports
 import CustomAvatar from "src/@core/components/mui/avatar";
 
+const CURRENCY = {
+  symbol: "₺",
+  name: "Turk Lirasi",
+  shortName: "TRY",
+};
+
 interface SaleDataType {
   stats: string;
   title: string;
@@ -32,22 +38,22 @@ interface SaleDataType {
 
 const salesData: SaleDataType[] = [
   {
-    stats: "10",
+    stats: "100" + CURRENCY.symbol,
     color: "primary",
-    title: "Total Sunucular",
+    title: "Hesap Bakiyesi",
     icon: <AccountOutline />,
   },
   {
     icon: <Poll />,
-    stats: "5",
+    stats: "Odemeniz Yok",
     color: "warning",
-    title: "Aktif Sunucular",
+    title: "Sabit Aylik Odemeler",
   },
   {
     color: "info",
-    stats: "5",
+    stats: "Yok",
     icon: <TrendingUp />,
-    title: "Pasif Sunucular",
+    title: "Kayitli Kredi Karti",
   },
 ];
 
@@ -74,12 +80,12 @@ const renderStats = () => {
   ));
 };
 
-const EcommerceSalesOverview = () => {
+const CloudBalanceOverview = () => {
   return (
     <Card>
       <CardHeader
         sx={{ pb: 3.25 }}
-        title="Varliklarim"
+        title="Bakiye Durumu"
         titleTypographyProps={{ variant: "h6" }}
         action={
           <IconButton aria-label="settings" className="card-more-options">
@@ -107,4 +113,4 @@ const EcommerceSalesOverview = () => {
   );
 };
 
-export default EcommerceSalesOverview;
+export default CloudBalanceOverview;
