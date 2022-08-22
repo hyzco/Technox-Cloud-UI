@@ -31,6 +31,13 @@ export type UserFinanceDataType = {
   expiredServiceID: Object | null;
 };
 
+export type UserServerDataType = {
+  userID: number;
+  totalServer: number;
+  activeServerID: Object | null;
+  deactiveServerID: Object | null;
+};
+
 export type AuthValuesType = {
   loading: boolean;
   setLoading: (value: boolean) => void;
@@ -43,12 +50,13 @@ export type AuthValuesType = {
   register: (params: RegisterParams, errorCallback?: ErrCallbackType) => void;
 };
 
-export type UserFinanceValuesType = {
+export type UserValuesType = {
   loading: boolean;
-  setLoading: (value: boolean) => void;
   isInitialized: boolean;
-  setIsInitialized: (value: boolean) => void;
-  userFinance: UserFinanceDataType | null;
+  userFinance: UserFinanceDataType;
   setUserFinance: (value: UserFinanceDataType | null) => void;
+  userServer: UserServerDataType;
+  setUserServer: (value: UserServerDataType | null) => void;
+
   //sync User Finance - to update finance data
 };

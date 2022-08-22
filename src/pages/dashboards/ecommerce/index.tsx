@@ -18,9 +18,9 @@ import ApexChartWrapper from "src/@core/styles/libs/react-apexcharts";
 // import EcommerceImpressionsOrders from "src/views/dashboards/ecommerce/EcommerceImpressionsOrders";
 import EcommerceTable from "src/views/dashboards/ecommerce/EcommerceTable";
 import EcommerceActivityTimeline from "src/views/dashboards/ecommerce/EcommerceActivityTimeline";
-import EcommerceSalesOverview from "src/views/dashboards/ecommerce/EcommerceSalesOverview";
 import EcommerceSalesOverviewWithTabs from "src/views/dashboards/ecommerce/EcommerceSalesOverviewWithTabs";
 import CloudBalanceOverview from "src/views/dashboards/ecommerce/CloudBalanceOverview";
+import CloudAssetsOverview from "src/views/dashboards/ecommerce/CloudAssetsOverview";
 
 const EcommerceDashboard = () => {
   return (
@@ -28,7 +28,7 @@ const EcommerceDashboard = () => {
       <KeenSliderWrapper>
         <Grid container spacing={6} className="match-height">
           <Grid item xs={12} md={6}>
-            <EcommerceSalesOverview />
+            <CloudAssetsOverview />
           </Grid>
           <Grid item xs={12} md={6}>
             <CloudBalanceOverview />
