@@ -1,5 +1,5 @@
 // ** React Imports
-import { ReactElement } from "react";
+import { ReactElement, useEffect, useState } from "react";
 
 // ** MUI Imports
 import Box from "@mui/material/Box";
@@ -20,8 +20,14 @@ import AccountOutline from "mdi-material-ui/AccountOutline";
 // ** Types
 import { ThemeColor } from "src/@core/layouts/types";
 
+// ** Spinner Import
+import { CircularProgress } from "@mui/material";
+
 // ** Custom Components Imports
 import CustomAvatar from "src/@core/components/mui/avatar";
+
+// ** Custom Data Hook
+import useGetUserFinance from "src/hooks/useGetUser";
 
 const CURRENCY = {
   symbol: "₺",
@@ -38,14 +44,14 @@ interface SaleDataType {
 
 const salesData: SaleDataType[] = [
   {
-    stats: "100" + CURRENCY.symbol,
+    stats: "N/A" + CURRENCY.symbol,
     color: "primary",
     title: "Hesap Bakiyesi",
     icon: <AccountOutline />,
   },
   {
     icon: <Poll />,
-    stats: "Odemeniz Yok",
+    stats: "Yok",
     color: "warning",
     title: "Sabit Aylik Odemeler",
   },
@@ -58,29 +64,65 @@ const salesData: SaleDataType[] = [
 ];
 
 const renderStats = () => {
-  return salesData.map((sale: SaleDataType, index: number) => (
-    <Grid item xs={12} sm={4} key={index}>
-      <Box key={index} sx={{ display: "flex", alignItems: "center" }}>
-        <CustomAvatar
-          skin="light"
-          variant="rounded"
-          color={sale.color}
-          sx={{ mr: 4 }}
-        >
-          {sale.icon}
-        </CustomAvatar>
-        <Box sx={{ display: "flex", flexDirection: "column" }}>
-          <Typography variant="h6" sx={{ fontWeight: 600 }}>
-            {sale.stats}
-          </Typography>
-          <Typography variant="caption">{sale.title}</Typography>
+  const financeData = useGetUserFinance();
+  const [balance, setBalance] = useState<Number | null>(null);
+
+  useEffect(() => {
+    if (financeData.userFinance) {
+      setBalance(financeData.userFinance.balance);
+    }
+  }, [financeData]);
+
+  if (balance && !financeData.loading) {
+    salesData[0].stats = salesData[0].stats.replace("N/A", balance.toString());
+    return salesData.map((sale: SaleDataType, index: number) => (
+      <Grid item xs={12} sm={4} key={index}>
+        <Box key={index} sx={{ display: "flex", alignItems: "center" }}>
+          <CustomAvatar
+            skin="light"
+            variant="rounded"
+            color={sale.color}
+            sx={{ mr: 4 }}
+          >
+            {sale.icon}
+          </CustomAvatar>
+          <Box sx={{ display: "flex", flexDirection: "column" }}>
+            <Typography variant="h6" sx={{ fontWeight: 600 }}>
+              {sale.stats}
+            </Typography>
+            <Typography variant="caption">{sale.title}</Typography>
+          </Box>
         </Box>
+      </Grid>
+    ));
+  } else {
+    return (
+      <Box
+        sx={{
+          display: "flex",
+          alignItems: "center",
+          alignContent: "center",
+          justifyContent: "center",
+          width: "100%",
+        }}
+      >
+        <CircularProgress
+          disableShrink
+          sx={{
+            mt: 6,
+          }}
+        />
       </Box>
-    </Grid>
-  ));
+    );
+  }
 };
 
 const CloudBalanceOverview = () => {
+  // const data = useGetUserFinance();
+  // useEffect(() => {
+  //   console.log(data.userFinance);
+  // }, [data]);
+
   return (
     <Card>
       <CardHeader
