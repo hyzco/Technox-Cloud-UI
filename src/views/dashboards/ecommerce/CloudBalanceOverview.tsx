@@ -12,7 +12,6 @@ import CardContent from "@mui/material/CardContent";
 
 // ** Icons Imports
 import Poll from "mdi-material-ui/Poll";
-import ChevronUp from "mdi-material-ui/ChevronUp";
 import TrendingUp from "mdi-material-ui/TrendingUp";
 import DotsVertical from "mdi-material-ui/DotsVertical";
 import AccountOutline from "mdi-material-ui/AccountOutline";
@@ -27,7 +26,8 @@ import { CircularProgress } from "@mui/material";
 import CustomAvatar from "src/@core/components/mui/avatar";
 
 // ** Custom Data Hook
-import useGetUserFinance from "src/hooks/useGetUser";
+import useGetUser from "src/hooks/useGetUser";
+import { UserFinanceDataType } from "src/context/types";
 
 const CURRENCY = {
   symbol: "₺",
@@ -35,14 +35,14 @@ const CURRENCY = {
   shortName: "TRY",
 };
 
-interface SaleDataType {
+interface BalanceDataType {
   stats: string;
   title: string;
   color: ThemeColor;
   icon: ReactElement;
 }
 
-const salesData: SaleDataType[] = [
+const BalanceOverviewData: BalanceDataType[] = [
   {
     stats: "N/A" + CURRENCY.symbol,
     color: "primary",
@@ -63,19 +63,14 @@ const salesData: SaleDataType[] = [
   },
 ];
 
-const renderStats = () => {
-  const financeData = useGetUserFinance();
-  const [balance, setBalance] = useState<Number | null>(null);
+const renderStats = (userFinance: UserFinanceDataType) => {
+  BalanceOverviewData[0].stats = BalanceOverviewData[0].stats.replace(
+    "N/A",
+    userFinance.balance.toString()
+  );
 
-  useEffect(() => {
-    if (financeData.userFinance) {
-      setBalance(financeData.userFinance.balance);
-    }
-  }, [financeData]);
-
-  if (balance && !financeData.loading) {
-    salesData[0].stats = salesData[0].stats.replace("N/A", balance.toString());
-    return salesData.map((sale: SaleDataType, index: number) => (
+  return BalanceOverviewData.map(
+    (sale: BalanceOverviewDataType, index: number) => (
       <Grid item xs={12} sm={4} key={index}>
         <Box key={index} sx={{ display: "flex", alignItems: "center" }}>
           <CustomAvatar
@@ -94,34 +89,33 @@ const renderStats = () => {
           </Box>
         </Box>
       </Grid>
-    ));
-  } else {
-    return (
-      <Box
+    )
+  );
+};
+
+const renderLoading = () => {
+  return (
+    <Box
+      sx={{
+        display: "flex",
+        alignItems: "center",
+        alignContent: "center",
+        justifyContent: "center",
+        width: "100%",
+      }}
+    >
+      <CircularProgress
+        disableShrink
         sx={{
-          display: "flex",
-          alignItems: "center",
-          alignContent: "center",
-          justifyContent: "center",
-          width: "100%",
+          mt: 6,
         }}
-      >
-        <CircularProgress
-          disableShrink
-          sx={{
-            mt: 6,
-          }}
-        />
-      </Box>
-    );
-  }
+      />
+    </Box>
+  );
 };
 
 const CloudBalanceOverview = () => {
-  // const data = useGetUserFinance();
-  // useEffect(() => {
-  //   console.log(data.userFinance);
-  // }, [data]);
+  const { userFinance, loading } = useGetUser();
 
   return (
     <Card>
@@ -148,7 +142,7 @@ const CloudBalanceOverview = () => {
       />
       <CardContent>
         <Grid container spacing={6}>
-          {renderStats()}
+          {!loading ? renderStats(userFinance) : renderLoading()}
         </Grid>
       </CardContent>
     </Card>

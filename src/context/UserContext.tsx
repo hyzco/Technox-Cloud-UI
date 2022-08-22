@@ -8,7 +8,7 @@ import { useRouter } from "next/router";
 import axios from "axios";
 
 // ** Config
-import userFinanceConfig from "src/configs/user-finance";
+import userFinanceConfig from "src/configs/user";
 
 // ** Types
 import {
@@ -17,32 +17,39 @@ import {
   LoginParams,
   ErrCallbackType,
   UserDataType,
-  UserFinanceValuesType,
+  UserValuesType,
   UserFinanceDataType,
+  UserServerDataType,
 } from "./types";
+
 import backendConfig from "src/configs/backendConfig";
 
 // ** Defaults
-const defaultUser: UserFinanceValuesType = {
+const defaultUser: UserValuesType = {
   loading: true,
-  setLoading: () => Boolean,
   isInitialized: false,
-  setIsInitialized: () => Boolean,
   userFinance: null,
   setUserFinance: () => null,
+  userServer: null,
+  setUserServer: () => null,
 };
 
-const UserFinanceContext = createContext(defaultUser);
+const UserContext = createContext(defaultUser);
 
 type Props = {
   children: ReactNode;
 };
 
-const UserFinanceProvider = ({ children }: Props) => {
+const UserProvider = ({ children }: Props) => {
   // ** States
   const [userFinance, setUserFinance] = useState<UserFinanceDataType | null>(
     defaultUser.userFinance
   );
+
+  const [userServer, setUserServer] = useState<UserServerDataType | null>(
+    defaultUser.userServer
+  );
+
   const [loading, setLoading] = useState<boolean>(defaultUser.loading);
   const [isInitialized, setIsInitialized] = useState<boolean>(
     defaultUser.isInitialized
@@ -54,23 +61,26 @@ const UserFinanceProvider = ({ children }: Props) => {
   const router = useRouter();
 
   useEffect(() => {
-    const initUserFinance = async (): Promise<void> => {
+    const initUser = async (): Promise<void> => {
       setIsInitialized(true);
       try {
         setLoading(true);
         getFinance((err) => {
           console.log(err);
         });
+        getServer((err) => {
+          console.log(err);
+        });
       } catch (e) {
         setLoading(false);
         setError(e);
-        console.log("errorUseEffect userFinanceContext", e);
+        console.log("errorUseEffect initUser", e);
       } finally {
         setLoading(false);
         setIsInitialized(false);
       }
     };
-    initUserFinance();
+    initUser();
   }, []);
 
   const getFinance = (errorCallback?: ErrCallbackType) => {
@@ -91,21 +101,35 @@ const UserFinanceProvider = ({ children }: Props) => {
       });
   };
 
+  const getServer = (errorCallback?: ErrCallbackType) => {
+    axios
+      .get(userFinanceConfig.getServer, {
+        headers: {
+          Authorization: window.localStorage.getItem(
+            userFinanceConfig.storageTokenKeyName
+          )!,
+        },
+      })
+      .then(async (res) => {
+        setUserServer(res.data.userServer);
+      })
+      .catch((err) => {
+        console.log(err);
+        if (errorCallback) errorCallback(err);
+      });
+  };
+
   const values = {
     userFinance,
-    loading,
-    setUserFinance,
-    setLoading,
+    userServer,
     isInitialized,
-    setIsInitialized,
+    setUserFinance,
+    setUserServer,
+    loading,
     error,
   };
 
-  return (
-    <UserFinanceContext.Provider value={values}>
-      {children}
-    </UserFinanceContext.Provider>
-  );
+  return <UserContext.Provider value={values}>{children}</UserContext.Provider>;
 };
 
-export { UserFinanceContext, UserFinanceProvider };
+export { UserContext, UserProvider };

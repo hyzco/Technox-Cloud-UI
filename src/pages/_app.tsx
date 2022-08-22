@@ -47,6 +47,8 @@ import {
   SettingsProvider,
 } from "src/@core/context/settingsContext";
 
+import { UserProvider } from "src/context/UserContext";
+
 // ** Styled Components
 import ReactHotToast from "src/@core/styles/libs/react-hot-toast";
 
@@ -64,7 +66,6 @@ import "react-perfect-scrollbar/dist/css/styles.css";
 
 // ** Global css styles
 import "../../styles/globals.css";
-import { UserFinanceProvider } from "src/context/UserFinanceContext";
 
 // ** Extend App Props with Emotion
 type ExtendedAppProps = AppProps & {
@@ -136,7 +137,7 @@ const App = (props: ExtendedAppProps) => {
         </Head>
 
         <AuthProvider>
-          <UserFinanceProvider>
+          <UserProvider>
             <SettingsProvider
               {...(setConfig ? { pageSettings: setConfig() } : {})}
             >
@@ -165,7 +166,7 @@ const App = (props: ExtendedAppProps) => {
                 }}
               </SettingsConsumer>
             </SettingsProvider>
-          </UserFinanceProvider>
+          </UserProvider>
         </AuthProvider>
       </CacheProvider>
     </Provider>

@@ -1,6 +1,6 @@
 import { useContext } from "react";
-import { UserFinanceContext } from "src/context/UserFinanceContext";
+import { UserContext } from "src/context/UserContext";
 
-const useGetUserFinance = () => useContext(UserFinanceContext);
+const useGetUser = () => useContext(UserContext);
 
-export default useGetUserFinance;
+export default useGetUser;

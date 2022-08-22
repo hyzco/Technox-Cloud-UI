@@ -22,37 +22,55 @@ import { ThemeColor } from "src/@core/layouts/types";
 
 // ** Custom Components Imports
 import CustomAvatar from "src/@core/components/mui/avatar";
+import useGetUser from "src/hooks/useGetUser";
+import { UserServerDataType } from "src/context/types";
+import CircularProgress from "@mui/material/CircularProgress";
 
-interface SaleDataType {
+interface AssetDataType {
   stats: string;
   title: string;
   color: ThemeColor;
   icon: ReactElement;
 }
 
-const salesData: SaleDataType[] = [
+const STATS_ARR = ["[TOTAL_SERVER]", "[ACTIVE_SERVER]", "[DEACTIVE_SERVER]"];
+
+const AssetsOverview: AssetDataType[] = [
   {
-    stats: "10",
+    stats: "[TOTAL_SERVER]",
     color: "primary",
     title: "Total Sunucular",
     icon: <AccountOutline />,
   },
   {
     icon: <Poll />,
-    stats: "5",
+    stats: "[ACTIVE_SERVER]",
     color: "warning",
     title: "Aktif Sunucular",
   },
   {
     color: "info",
-    stats: "5",
+    stats: "[DEACTIVE_SERVER]",
     icon: <TrendingUp />,
     title: "Pasif Sunucular",
   },
 ];
 
-const renderStats = () => {
-  return salesData.map((sale: SaleDataType, index: number) => (
+const renderStats = (userServer: UserServerDataType) => {
+  const userServerData: any = [
+    userServer.totalServer,
+    userServer.activeServerID,
+    userServer.deactiveServerID,
+  ];
+
+  AssetsOverview.forEach((val, i) => {
+    AssetsOverview[i].stats = val.stats.replace(
+      STATS_ARR[i],
+      userServerData[i]
+    );
+  });
+
+  return AssetsOverview.map((sale: AssetDataType, index: number) => (
     <Grid item xs={12} sm={4} key={index}>
       <Box key={index} sx={{ display: "flex", alignItems: "center" }}>
         <CustomAvatar
@@ -74,7 +92,30 @@ const renderStats = () => {
   ));
 };
 
-const EcommerceSalesOverview = () => {
+const renderLoading = () => {
+  return (
+    <Box
+      sx={{
+        display: "flex",
+        alignItems: "center",
+        alignContent: "center",
+        justifyContent: "center",
+        width: "100%",
+      }}
+    >
+      <CircularProgress
+        disableShrink
+        sx={{
+          mt: 6,
+        }}
+      />
+    </Box>
+  );
+};
+
+const CloudAssetsOverview = () => {
+  const { userServer, loading } = useGetUser();
+
   return (
     <Card>
       <CardHeader
@@ -100,11 +141,11 @@ const EcommerceSalesOverview = () => {
       />
       <CardContent>
         <Grid container spacing={6}>
-          {renderStats()}
+          {!loading ? renderStats(userServer) : renderLoading()}
         </Grid>
       </CardContent>
     </Card>
   );
 };
 
-export default EcommerceSalesOverview;
+export default CloudAssetsOverview;
