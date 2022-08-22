@@ -69,7 +69,7 @@ const renderStats = () => {
 
   useEffect(() => {
     if (financeData.userFinance) {
-      setBalance(financeData.userFinance.balance);
+      setBalance(financeData.userFinance?.balance);
     }
   }, [financeData]);
 
