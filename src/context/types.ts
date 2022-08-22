@@ -23,6 +23,14 @@ export type UserDataType = {
   avatar?: string | null;
 };
 
+export type UserFinanceDataType = {
+  userID: number;
+  balance: number;
+  activeServiceID: Object | null;
+  deactiveServiceID: Object | null;
+  expiredServiceID: Object | null;
+};
+
 export type AuthValuesType = {
   loading: boolean;
   setLoading: (value: boolean) => void;
@@ -33,4 +41,14 @@ export type AuthValuesType = {
   setIsInitialized: (value: boolean) => void;
   login: (params: LoginParams, errorCallback?: ErrCallbackType) => void;
   register: (params: RegisterParams, errorCallback?: ErrCallbackType) => void;
+};
+
+export type UserFinanceValuesType = {
+  loading: boolean;
+  setLoading: (value: boolean) => void;
+  isInitialized: boolean;
+  setIsInitialized: (value: boolean) => void;
+  userFinance: UserFinanceDataType | null;
+  setUserFinance: (value: UserFinanceDataType | null) => void;
+  //sync User Finance - to update finance data
 };
