@@ -32,7 +32,7 @@ export type UserFinanceDataType = {
 };
 
 export type UserServerDataType = {
-  userID: number;
+  // userID: number;
   totalServer: number;
   activeServerID: Object | null;
   deactiveServerID: Object | null;
@@ -53,10 +53,18 @@ export type AuthValuesType = {
 export type UserValuesType = {
   loading: boolean;
   isInitialized: boolean;
-  userFinance: UserFinanceDataType;
-  setUserFinance: (value: UserFinanceDataType | null) => void;
-  userServer: UserServerDataType;
+  userFinance: UserFinanceDataType | null;
+  // setUserFinance: (value: UserFinanceDataType | null) => void;
+  userServer: UserServerDataType | null;
   setUserServer: (value: UserServerDataType | null) => void;
 
-  //sync User Finance - to update finance data
+  //sync User Finance function - to update finance data
+};
+
+//Example Type for Context / Custom Hooks
+export type ExampleValueType = {
+  loading: boolean;
+  isInitialized: boolean;
+  exampleHookData: any | null;
+  setExampleHookData: (value: {} | null) => void;
 };

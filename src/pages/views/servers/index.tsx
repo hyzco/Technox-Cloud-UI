@@ -47,7 +47,7 @@ import CustomAvatar from "src/@core/components/mui/avatar";
 import { getInitials } from "src/@core/utils/get-initials";
 
 // ** Actions Imports
-import { fetchData, deleteUser } from "src/store/apps/user";
+import { fetchData } from "src/store/apps/server";
 
 // ** Types Imports
 import { RootState, AppDispatch } from "src/store";
@@ -57,6 +57,8 @@ import { UsersType } from "src/types/apps/userTypes";
 // ** Custom Components Imports
 import TableHeader from "src/views/apps/user/list/TableHeader";
 import AddUserDrawer from "src/views/apps/user/list/AddUserDrawer";
+import useGetUser from "src/hooks/useGetUser";
+import TableBasic from "src/views/table/data-grid/TableBasic";
 
 interface UserRoleType {
   [key: string]: ReactElement;
@@ -146,7 +148,7 @@ const RowOptions = ({ id }: { id: number | string }) => {
   };
 
   const handleDelete = () => {
-    dispatch(deleteUser(id));
+    // dispatch(deleteUser(id));
     handleRowOptionsClose();
   };
 
@@ -191,126 +193,165 @@ const RowOptions = ({ id }: { id: number | string }) => {
   );
 };
 
+// const columns = [
+//   {
+//     flex: 0.2,
+//     minWidth: 230,
+//     field: "fullName",
+//     headerName: "Sunucu Adı",
+//     renderCell: ({ row }: CellType) => {
+//       const { id, fullName, username } = row;
+
+//       return (
+//         <Box sx={{ display: "flex", alignItems: "center" }}>
+//           {renderClient(row)}
+//           <Box
+//             sx={{
+//               display: "flex",
+//               alignItems: "flex-start",
+//               flexDirection: "column",
+//             }}
+//           >
+//             <Link href={`/apps/user/view/${id}`} passHref>
+//               <Typography
+//                 noWrap
+//                 component="a"
+//                 variant="subtitle2"
+//                 sx={{ color: "text.primary", textDecoration: "none" }}
+//               >
+//                 {fullName}
+//               </Typography>
+//             </Link>
+//             <Link href={`/apps/user/view/${id}`} passHref>
+//               <Typography
+//                 noWrap
+//                 component="a"
+//                 variant="caption"
+//                 sx={{ textDecoration: "none" }}
+//               >
+//                 @{username}
+//               </Typography>
+//             </Link>
+//           </Box>
+//         </Box>
+//       );
+//     },
+//   },
+//   {
+//     flex: 0.2,
+//     minWidth: 250,
+//     field: "email",
+//     headerName: "IP Adresi",
+//     renderCell: ({ row }: CellType) => {
+//       return (
+//         <Typography noWrap variant="body2">
+//           {row.email}
+//         </Typography>
+//       );
+//     },
+//   },
+//   {
+//     flex: 0.15,
+//     field: "role",
+//     minWidth: 150,
+//     headerName: "Trafik Kullanımı",
+//     renderCell: ({ row }: CellType) => {
+//       return (
+//         <Box sx={{ display: "flex", alignItems: "center" }}>
+//           {userRoleObj[row.role]}
+//           <Typography
+//             noWrap
+//             sx={{ color: "text.secondary", textTransform: "capitalize" }}
+//           >
+//             {row.role}
+//           </Typography>
+//         </Box>
+//       );
+//     },
+//   },
+//   {
+//     flex: 0.15,
+//     minWidth: 120,
+//     headerName: "Kullanım",
+//     field: "currentPlan",
+//     renderCell: ({ row }: CellType) => {
+//       return (
+//         <Typography
+//           variant="subtitle1"
+//           noWrap
+//           sx={{ textTransform: "capitalize" }}
+//         >
+//           {row.currentPlan}
+//         </Typography>
+//       );
+//     },
+//   },
+//   {
+//     flex: 0.1,
+//     minWidth: 110,
+//     field: "status",
+//     headerName: "Durumu",
+//     renderCell: ({ row }: CellType) => {
+//       return (
+//         <CustomChip
+//           skin="light"
+//           size="small"
+//           label={row.status}
+//           color={userStatusObj[row.status]}
+//           sx={{
+//             textTransform: "capitalize",
+//             "& .MuiChip-label": { lineHeight: "18px" },
+//           }}
+//         />
+//       );
+//     },
+//   },
+//   {
+//     flex: 0.1,
+//     minWidth: 90,
+//     sortable: false,
+//     field: "actions",
+//     headerName: "Yönetim",
+//     renderCell: ({ row }: CellType) => <RowOptions id={row.id} />,
+//   },
+// ];
+
 const columns = [
   {
-    flex: 0.2,
-    minWidth: 230,
-    field: "fullName",
-    headerName: "Sunucu Adı",
-    renderCell: ({ row }: CellType) => {
-      const { id, fullName, username } = row;
-
-      return (
-        <Box sx={{ display: "flex", alignItems: "center" }}>
-          {renderClient(row)}
-          <Box
-            sx={{
-              display: "flex",
-              alignItems: "flex-start",
-              flexDirection: "column",
-            }}
-          >
-            <Link href={`/apps/user/view/${id}`} passHref>
-              <Typography
-                noWrap
-                component="a"
-                variant="subtitle2"
-                sx={{ color: "text.primary", textDecoration: "none" }}
-              >
-                {fullName}
-              </Typography>
-            </Link>
-            <Link href={`/apps/user/view/${id}`} passHref>
-              <Typography
-                noWrap
-                component="a"
-                variant="caption"
-                sx={{ textDecoration: "none" }}
-              >
-                @{username}
-              </Typography>
-            </Link>
-          </Box>
-        </Box>
-      );
-    },
+    flex: 0.1,
+    field: "id",
+    minWidth: 80,
+    headerName: "ID",
   },
   {
-    flex: 0.2,
-    minWidth: 250,
-    field: "email",
-    headerName: "IP Adresi",
-    renderCell: ({ row }: CellType) => {
-      return (
-        <Typography noWrap variant="body2">
-          {row.email}
-        </Typography>
-      );
-    },
+    flex: 0.25,
+    minWidth: 200,
+    field: "name",
+    headerName: "Name",
+  },
+  {
+    flex: 0.25,
+    minWidth: 200,
+    field: "ip",
+    headerName: "IP Address",
+  },
+  {
+    flex: 0.25,
+    minWidth: 230,
+    field: "traffic_usage",
+    headerName: "Traffic Usage",
   },
   {
     flex: 0.15,
-    field: "role",
-    minWidth: 150,
-    headerName: "Trafik Kullanımı",
-    renderCell: ({ row }: CellType) => {
-      return (
-        <Box sx={{ display: "flex", alignItems: "center" }}>
-          {userRoleObj[row.role]}
-          <Typography
-            noWrap
-            sx={{ color: "text.secondary", textTransform: "capitalize" }}
-          >
-            {row.role}
-          </Typography>
-        </Box>
-      );
-    },
+    minWidth: 130,
+    field: "usage",
+    headerName: "Usage",
   },
   {
     flex: 0.15,
     minWidth: 120,
-    headerName: "Kullanım",
-    field: "currentPlan",
-    renderCell: ({ row }: CellType) => {
-      return (
-        <Typography
-          variant="subtitle1"
-          noWrap
-          sx={{ textTransform: "capitalize" }}
-        >
-          {row.currentPlan}
-        </Typography>
-      );
-    },
-  },
-  {
-    flex: 0.1,
-    minWidth: 110,
     field: "status",
-    headerName: "Durumu",
-    renderCell: ({ row }: CellType) => {
-      return (
-        <CustomChip
-          skin="light"
-          size="small"
-          label={row.status}
-          color={userStatusObj[row.status]}
-          sx={{
-            textTransform: "capitalize",
-            "& .MuiChip-label": { lineHeight: "18px" },
-          }}
-        />
-      );
-    },
-  },
-  {
-    flex: 0.1,
-    minWidth: 90,
-    sortable: false,
-    field: "actions",
-    headerName: "Yönetim",
-    renderCell: ({ row }: CellType) => <RowOptions id={row.id} />,
+    headerName: "Status",
   },
 ];
 
@@ -325,17 +366,13 @@ const Servers: React.FC = () => {
 
   // ** Hooks
   const dispatch = useDispatch<AppDispatch>();
-  const store = useSelector((state: RootState) => state.user);
+  const store = useSelector((state: RootState) => state.server);
+
+  // const { userServer, loading } = useGetUser();
 
   useEffect(() => {
-    dispatch(
-      fetchData({
-        role,
-        status,
-        q: value,
-        currentPlan: plan,
-      })
-    );
+    dispatch(fetchData({}));
+    console.log(store);
   }, [dispatch, plan, role, status, value]);
 
   const handleFilter = useCallback((val: string) => {
@@ -442,9 +479,9 @@ const Servers: React.FC = () => {
             </a>
           </Grid>
 
-          <DataGrid
+          {/* <DataGrid
             autoHeight
-            rows={store.data}
+            rows={store.serverList}
             columns={columns}
             checkboxSelection
             pageSize={pageSize}
@@ -452,7 +489,8 @@ const Servers: React.FC = () => {
             rowsPerPageOptions={[10, 25, 50]}
             sx={{ "& .MuiDataGrid-columnHeaders": { borderRadius: 0 } }}
             onPageSizeChange={(newPageSize: number) => setPageSize(newPageSize)}
-          />
+          /> */}
+          <TableBasic columns={columns} rows={store.serverList} />
         </Card>
       </Grid>
 
