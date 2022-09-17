@@ -4,6 +4,7 @@ import Card from "@mui/material/Card";
 import { DataGrid } from "@mui/x-data-grid";
 import CardHeader from "@mui/material/CardHeader";
 import { isNullOrUndefined } from "util";
+import { Typography } from "@mui/material";
 
 // ** Data Import
 // import { rows } from 'src/@fake-db/table/static-data'
@@ -21,8 +22,8 @@ const TableBasic = (props: any) => {
   //     status: "working",
   //   };
   // }
-  if (!rows && !columns) {
-    return <></>;
+  if (rows === undefined || columns === undefined) {
+    return <Typography>No Data.</Typography>;
   }
 
   return (

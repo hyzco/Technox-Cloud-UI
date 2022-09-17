@@ -60,6 +60,8 @@ import AddUserDrawer from "src/views/apps/user/list/AddUserDrawer";
 import useGetUser from "src/hooks/useGetUser";
 import TableBasic from "src/views/table/data-grid/TableBasic";
 
+import DialogCreateServer from "src/views/pages/dialog-examples/DialogCreateServer";
+
 interface UserRoleType {
   [key: string]: ReactElement;
 }
@@ -494,7 +496,9 @@ const Servers: React.FC = () => {
         </Card>
       </Grid>
 
-      <AddUserDrawer open={addUserOpen} toggle={toggleAddUserDrawer} />
+      <DialogCreateServer show={addUserOpen} toggle={toggleAddUserDrawer} />
+
+      {/* <AddUserDrawer open={addUserOpen} toggle={toggleAddUserDrawer} /> */}
     </Grid>
   );
 };
