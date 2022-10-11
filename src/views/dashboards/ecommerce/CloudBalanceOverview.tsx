@@ -74,33 +74,33 @@ const renderStats = (userFinance: UserFinanceDataType | null) => {
         <Typography variant="caption">```</Typography>
       </Box>
     );
-  }
+  } else {
+    BalanceOverviewData[0].stats = BalanceOverviewData[0].stats.replace(
+      "N/A",
+      userFinance.balance.toString()
+    );
 
-  BalanceOverviewData[0].stats = BalanceOverviewData[0].stats.replace(
-    "N/A",
-    userFinance.balance.toString()
-  );
-
-  return BalanceOverviewData.map((sale: BalanceDataType, index: number) => (
-    <Grid item xs={12} sm={4} key={index}>
-      <Box key={index} sx={{ display: "flex", alignItems: "center" }}>
-        <CustomAvatar
-          skin="light"
-          variant="rounded"
-          color={sale.color}
-          sx={{ mr: 4 }}
-        >
-          {sale.icon}
-        </CustomAvatar>
-        <Box sx={{ display: "flex", flexDirection: "column" }}>
-          <Typography variant="h6" sx={{ fontWeight: 600 }}>
-            {sale.stats}
-          </Typography>
-          <Typography variant="caption">{sale.title}</Typography>
+    return BalanceOverviewData.map((sale: BalanceDataType, index: number) => (
+      <Grid item xs={12} sm={4} key={index}>
+        <Box key={index} sx={{ display: "flex", alignItems: "center" }}>
+          <CustomAvatar
+            skin="light"
+            variant="rounded"
+            color={sale.color}
+            sx={{ mr: 4 }}
+          >
+            {sale.icon}
+          </CustomAvatar>
+          <Box sx={{ display: "flex", flexDirection: "column" }}>
+            <Typography variant="h6" sx={{ fontWeight: 600 }}>
+              {sale.stats}
+            </Typography>
+            <Typography variant="caption">{sale.title}</Typography>
+          </Box>
         </Box>
-      </Box>
-    </Grid>
-  ));
+      </Grid>
+    ));
+  }
 };
 
 const renderLoading = () => {
@@ -126,6 +126,10 @@ const renderLoading = () => {
 
 const CloudBalanceOverview = () => {
   const { userFinance, loading } = useGetUser();
+  useEffect(() => {
+    console.log(userFinance);
+    console.log(loading);
+  }, [userFinance, loading]);
 
   return (
     <Card>
