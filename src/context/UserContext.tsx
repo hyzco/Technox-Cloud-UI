@@ -8,7 +8,7 @@ import { useRouter } from "next/router";
 import axios from "axios";
 
 // ** Config
-import userFinanceConfig from "src/configs/user";
+import userConfig from "src/configs/user";
 
 // ** Types
 import {
@@ -29,7 +29,7 @@ const defaultUser: UserValuesType = {
   loading: true,
   isInitialized: false,
   userFinance: null,
-  setUserFinance: () => null,
+  // setUserFinance: () => null,
   userServer: null,
   setUserServer: () => null,
 };
@@ -85,10 +85,10 @@ const UserProvider = ({ children }: Props) => {
 
   const getFinance = (errorCallback?: ErrCallbackType) => {
     axios
-      .get(userFinanceConfig.getFinance, {
+      .get(userConfig.getFinance, {
         headers: {
           Authorization: window.localStorage.getItem(
-            userFinanceConfig.storageTokenKeyName
+            userConfig.storageTokenKeyName
           )!,
         },
       })
@@ -103,10 +103,10 @@ const UserProvider = ({ children }: Props) => {
 
   const getServer = (errorCallback?: ErrCallbackType) => {
     axios
-      .get(userFinanceConfig.getServer, {
+      .get(userConfig.getServer, {
         headers: {
           Authorization: window.localStorage.getItem(
-            userFinanceConfig.storageTokenKeyName
+            userConfig.storageTokenKeyName
           )!,
         },
       })
@@ -123,7 +123,6 @@ const UserProvider = ({ children }: Props) => {
     userFinance,
     userServer,
     isInitialized,
-    setUserFinance,
     setUserServer,
     loading,
     error,

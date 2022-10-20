@@ -25,6 +25,7 @@ import CustomAvatar from "src/@core/components/mui/avatar";
 import useGetUser from "src/hooks/useGetUser";
 import { UserServerDataType } from "src/context/types";
 import CircularProgress from "@mui/material/CircularProgress";
+import { isNullOrUndefined } from "util";
 
 interface AssetDataType {
   stats: string;
@@ -56,7 +57,15 @@ const AssetsOverview: AssetDataType[] = [
   },
 ];
 
-const renderStats = (userServer: UserServerDataType) => {
+const renderStats = (userServer: UserServerDataType | null) => {
+  if (isNullOrUndefined(userServer)) {
+    userServer = {
+      totalServer: 0,
+      activeServerID: {},
+      deactiveServerID: {},
+    };
+  }
+
   const userServerData: any = [
     userServer.totalServer,
     userServer.activeServerID,

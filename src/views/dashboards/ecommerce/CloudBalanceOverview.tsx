@@ -28,6 +28,7 @@ import CustomAvatar from "src/@core/components/mui/avatar";
 // ** Custom Data Hook
 import useGetUser from "src/hooks/useGetUser";
 import { UserFinanceDataType } from "src/context/types";
+import { isNullOrUndefined } from "util";
 
 const CURRENCY = {
   symbol: "₺",
@@ -63,14 +64,23 @@ const BalanceOverviewData: BalanceDataType[] = [
   },
 ];
 
-const renderStats = (userFinance: UserFinanceDataType) => {
-  BalanceOverviewData[0].stats = BalanceOverviewData[0].stats.replace(
-    "N/A",
-    userFinance.balance.toString()
-  );
+const renderStats = (userFinance: UserFinanceDataType | null) => {
+  if (isNullOrUndefined(userFinance)) {
+    return (
+      <Box sx={{ display: "flex", flexDirection: "column" }}>
+        <Typography variant="h6" sx={{ fontWeight: 600 }}>
+          Account balance not found.
+        </Typography>
+        <Typography variant="caption">```</Typography>
+      </Box>
+    );
+  } else {
+    BalanceOverviewData[0].stats = BalanceOverviewData[0].stats.replace(
+      "N/A",
+      userFinance.balance.toString()
+    );
 
-  return BalanceOverviewData.map(
-    (sale: BalanceOverviewDataType, index: number) => (
+    return BalanceOverviewData.map((sale: BalanceDataType, index: number) => (
       <Grid item xs={12} sm={4} key={index}>
         <Box key={index} sx={{ display: "flex", alignItems: "center" }}>
           <CustomAvatar
@@ -89,8 +99,8 @@ const renderStats = (userFinance: UserFinanceDataType) => {
           </Box>
         </Box>
       </Grid>
-    )
-  );
+    ));
+  }
 };
 
 const renderLoading = () => {
@@ -116,6 +126,10 @@ const renderLoading = () => {
 
 const CloudBalanceOverview = () => {
   const { userFinance, loading } = useGetUser();
+  useEffect(() => {
+    console.log(userFinance);
+    console.log(loading);
+  }, [userFinance, loading]);
 
   return (
     <Card>
