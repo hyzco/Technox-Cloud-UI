@@ -158,7 +158,7 @@ const UserDropdown = (props: Props) => {
         <Divider sx={{ mt: 0, mb: 1 }} />
         <MenuItem
           sx={{ p: 0 }}
-          onClick={() => handleDropdownClose("/apps/user/view/12")}
+          onClick={() => handleDropdownClose("/views/account")}
         >
           <Box sx={styles}>
             <AccountOutline sx={{ mr: 2 }} />
@@ -167,7 +167,7 @@ const UserDropdown = (props: Props) => {
         </MenuItem>
         <MenuItem
           sx={{ p: 0 }}
-          onClick={() => handleDropdownClose("/apps/email")}
+          onClick={() => handleDropdownClose("/views/requests/")}
         >
           <Box sx={styles}>
             <EmailOutline sx={{ mr: 2 }} />
@@ -176,7 +176,7 @@ const UserDropdown = (props: Props) => {
         </MenuItem>
         <MenuItem
           sx={{ p: 0 }}
-          onClick={() => handleDropdownClose("/apps/chat")}
+          onClick={() => handleDropdownClose("/views/requests/")}
         >
           <Box sx={styles}>
             <MessageOutline sx={{ mr: 2 }} />
@@ -186,7 +186,7 @@ const UserDropdown = (props: Props) => {
         <Divider />
         <MenuItem
           sx={{ p: 0 }}
-          onClick={() => handleDropdownClose("/pages/account-settings")}
+          onClick={() => handleDropdownClose("/views/account")}
         >
           <Box sx={styles}>
             <CogOutline sx={{ mr: 2 }} />
@@ -195,7 +195,7 @@ const UserDropdown = (props: Props) => {
         </MenuItem>
         <MenuItem
           sx={{ p: 0 }}
-          onClick={() => handleDropdownClose("/pages/pricing")}
+          onClick={() => handleDropdownClose("/views/payments/")}
         >
           <Box sx={styles}>
             <CurrencyUsd sx={{ mr: 2 }} />
@@ -204,7 +204,7 @@ const UserDropdown = (props: Props) => {
         </MenuItem>
         <MenuItem
           sx={{ p: 0 }}
-          onClick={() => handleDropdownClose("/pages/faq")}
+          onClick={() => handleDropdownClose("/views/faq")}
         >
           <Box sx={styles}>
             <HelpCircleOutline sx={{ mr: 2 }} />

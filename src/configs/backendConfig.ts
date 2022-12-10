@@ -7,5 +7,5 @@ const config = {
 export default {
   apiProperties: config,
   // api: `${config.protocol}://${config.server}:${config.port}`,
-  api: "http://185.184.24.212:3000",
+  api: "http://localhost:3000",
 };
