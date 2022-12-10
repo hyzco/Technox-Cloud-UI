@@ -1,56 +1,62 @@
 // ** React Imports
-import { ElementType, ReactNode } from 'react'
+import { ElementType, ReactNode } from "react";
 
 // ** Next Import
-import Link from 'next/link'
+import Link from "next/link";
 
 // ** MUI Imports
-import Box from '@mui/material/Box'
-import List from '@mui/material/List'
-import Button from '@mui/material/Button'
-import Drawer from '@mui/material/Drawer'
-import { styled } from '@mui/material/styles'
-import Typography from '@mui/material/Typography'
-import ListItemIcon from '@mui/material/ListItemIcon'
-import ListItemText from '@mui/material/ListItemText'
-import ListItem, { ListItemProps } from '@mui/material/ListItem'
+import Box from "@mui/material/Box";
+import List from "@mui/material/List";
+import Button from "@mui/material/Button";
+import Drawer from "@mui/material/Drawer";
+import { styled } from "@mui/material/styles";
+import Typography from "@mui/material/Typography";
+import ListItemIcon from "@mui/material/ListItemIcon";
+import ListItemText from "@mui/material/ListItemText";
+import ListItem, { ListItemProps } from "@mui/material/ListItem";
 
 // ** Icons Imports
-import Circle from 'mdi-material-ui/Circle'
-import SendOutline from 'mdi-material-ui/SendOutline'
-import StarOutline from 'mdi-material-ui/StarOutline'
-import EmailOutline from 'mdi-material-ui/EmailOutline'
-import PencilOutline from 'mdi-material-ui/PencilOutline'
-import DeleteOutline from 'mdi-material-ui/DeleteOutline'
-import AlertOctagonOutline from 'mdi-material-ui/AlertOctagonOutline'
+import Circle from "mdi-material-ui/Circle";
+import SendOutline from "mdi-material-ui/SendOutline";
+import StarOutline from "mdi-material-ui/StarOutline";
+import EmailOutline from "mdi-material-ui/EmailOutline";
+import PencilOutline from "mdi-material-ui/PencilOutline";
+import DeleteOutline from "mdi-material-ui/DeleteOutline";
+import AlertOctagonOutline from "mdi-material-ui/AlertOctagonOutline";
 
 // ** Third Party Imports
-import PerfectScrollbar from 'react-perfect-scrollbar'
+import PerfectScrollbar from "react-perfect-scrollbar";
 
 // ** Custom Components Imports
-import CustomBadge from 'src/@core/components/mui/badge'
+import CustomBadge from "src/@core/components/mui/badge";
 
 // ** Types
-import { CustomBadgeProps } from 'src/@core/components/mui/badge/types'
-import { MailFolderType, MailLabelType, MailSidebarType } from 'src/types/apps/emailTypes'
+import { CustomBadgeProps } from "src/@core/components/mui/badge/types";
+import {
+  MailFolderType,
+  MailLabelType,
+  MailSidebarType,
+} from "src/types/apps/emailTypes";
 
 // ** Styled Components
-const ListItemStyled = styled(ListItem)<ListItemProps & { component?: ElementType; to?: string }>(({ theme }) => ({
-  borderLeftWidth: '3px',
-  borderLeftStyle: 'solid',
+const ListItemStyled = styled(ListItem)<
+  ListItemProps & { component?: ElementType; to?: string }
+>(({ theme }) => ({
+  borderLeftWidth: "3px",
+  borderLeftStyle: "solid",
   padding: theme.spacing(0, 5),
-  marginBottom: theme.spacing(2)
-}))
+  marginBottom: theme.spacing(2),
+}));
 
 const ListBadge = styled(CustomBadge)<CustomBadgeProps>(() => ({
-  '& .MuiBadge-badge': {
-    height: '18px',
-    minWidth: '18px',
-    transform: 'none',
-    position: 'relative',
-    transformOrigin: 'none'
-  }
-}))
+  "& .MuiBadge-badge": {
+    height: "18px",
+    minWidth: "18px",
+    transform: "none",
+    position: "relative",
+    transformOrigin: "none",
+  },
+}));
 
 const SidebarLeft = (props: MailSidebarType) => {
   // ** Props
@@ -64,327 +70,448 @@ const SidebarLeft = (props: MailSidebarType) => {
     toggleComposeOpen,
     setMailDetailsOpen,
     handleSelectAllMail,
-    handleLeftSidebarToggle
-  } = props
+    handleLeftSidebarToggle,
+  } = props;
 
   const RenderBadge = (
-    folder: 'inbox' | 'draft' | 'spam',
-    color: 'default' | 'primary' | 'secondary' | 'success' | 'error' | 'warning' | 'info'
+    folder: "inbox" | "draft" | "spam",
+    color:
+      | "default"
+      | "primary"
+      | "secondary"
+      | "success"
+      | "error"
+      | "warning"
+      | "info"
   ) => {
     if (store && store.mailMeta && store.mailMeta[folder] > 0) {
-      return <ListBadge skin='light' color={color} sx={{ ml: 2 }} badgeContent={store.mailMeta[folder]} />
+      return (
+        <ListBadge
+          skin="light"
+          color={color}
+          sx={{ ml: 2 }}
+          badgeContent={store.mailMeta[folder]}
+        />
+      );
     } else {
-      return null
+      return null;
     }
-  }
+  };
 
-  const handleActiveItem = (type: 'folder' | 'label', value: MailFolderType | MailLabelType) => {
+  const handleActiveItem = (
+    type: "folder" | "label",
+    value: MailFolderType | MailLabelType
+  ) => {
     if (store && store.filter[type] !== value) {
-      return false
+      return false;
     } else {
-      return true
+      return true;
     }
-  }
+  };
 
   const handleListItemClick = () => {
-    setMailDetailsOpen(false)
-    setTimeout(() => dispatch(handleSelectAllMail(false)), 50)
-    handleLeftSidebarToggle()
-  }
+    setMailDetailsOpen(false);
+    setTimeout(() => dispatch(handleSelectAllMail(false)), 50);
+    handleLeftSidebarToggle();
+  };
 
   const activeInboxCondition =
-    store && handleActiveItem('folder', 'inbox') && store.filter.folder === 'inbox' && store.filter.label === ''
+    store &&
+    handleActiveItem("folder", "inbox") &&
+    store.filter.folder === "inbox" &&
+    store.filter.label === "";
 
   const ScrollWrapper = ({ children }: { children: ReactNode }) => {
     if (hidden) {
-      return <Box sx={{ height: '100%', overflowY: 'auto', overflowX: 'hidden' }}>{children}</Box>
+      return (
+        <Box sx={{ height: "100%", overflowY: "auto", overflowX: "hidden" }}>
+          {children}
+        </Box>
+      );
     } else {
-      return <PerfectScrollbar options={{ wheelPropagation: false }}>{children}</PerfectScrollbar>
+      return (
+        <PerfectScrollbar options={{ wheelPropagation: false }}>
+          {children}
+        </PerfectScrollbar>
+      );
     }
-  }
+  };
 
   return (
     <Drawer
       open={leftSidebarOpen}
       onClose={handleLeftSidebarToggle}
-      variant={lgAbove ? 'permanent' : 'temporary'}
+      variant={lgAbove ? "permanent" : "temporary"}
       ModalProps={{
         disablePortal: true,
-        keepMounted: true // Better open performance on mobile.
+        keepMounted: true, // Better open performance on mobile.
       }}
       sx={{
         zIndex: 9,
-        display: 'block',
-        position: lgAbove ? 'static' : 'absolute',
-        '& .MuiDrawer-paper': {
-          boxShadow: 'none',
+        display: "block",
+        position: lgAbove ? "static" : "absolute",
+        "& .MuiDrawer-paper": {
+          boxShadow: "none",
           width: leftSidebarWidth,
-          zIndex: lgAbove ? 2 : 'drawer',
-          position: lgAbove ? 'static' : 'absolute'
+          zIndex: lgAbove ? 2 : "drawer",
+          position: lgAbove ? "static" : "absolute",
         },
-        '& .MuiBackdrop-root': {
-          position: 'absolute'
-        }
+        "& .MuiBackdrop-root": {
+          position: "absolute",
+        },
       }}
     >
-      <Box sx={{ p: 5, overflowY: 'hidden' }}>
-        <Button fullWidth variant='contained' onClick={toggleComposeOpen}>
+      <Box sx={{ p: 5, overflowY: "hidden" }}>
+        <Button fullWidth variant="contained" onClick={toggleComposeOpen}>
           Compose
         </Button>
       </Box>
       <ScrollWrapper>
-        <Box sx={{ pt: 1.25, overflowY: 'hidden' }}>
-          <List component='div'>
-            <Link href='/apps/email/inbox' passHref>
+        <Box sx={{ pt: 1.25, overflowY: "hidden" }}>
+          <List component="div">
+            <Link href="/views/requests/inbox" passHref>
               <ListItemStyled
-                component='a'
+                component="a"
                 onClick={handleListItemClick}
                 sx={{
                   pt: 0.5,
-                  borderLeftColor: theme => (activeInboxCondition ? theme.palette.primary.main : 'transparent')
+                  borderLeftColor: (theme) =>
+                    activeInboxCondition
+                      ? theme.palette.primary.main
+                      : "transparent",
                 }}
               >
-                <ListItemIcon sx={{ color: activeInboxCondition ? 'primary.main' : 'text.secondary' }}>
-                  <EmailOutline sx={{ fontSize: '1.25rem' }} />
+                <ListItemIcon
+                  sx={{
+                    color: activeInboxCondition
+                      ? "primary.main"
+                      : "text.secondary",
+                  }}
+                >
+                  <EmailOutline sx={{ fontSize: "1.25rem" }} />
                 </ListItemIcon>
                 <ListItemText
-                  primary='Inbox'
+                  primary="Inbox"
                   primaryTypographyProps={{
                     noWrap: true,
                     sx: {
-                      color: theme => (activeInboxCondition ? theme.palette.primary.main : '')
-                    }
+                      color: (theme) =>
+                        activeInboxCondition ? theme.palette.primary.main : "",
+                    },
                   }}
                 />
-                {RenderBadge('inbox', 'primary')}
+                {RenderBadge("inbox", "primary")}
               </ListItemStyled>
             </Link>
-            <Link href='/apps/email/sent' passHref>
+            <Link href="/views/requests/sent" passHref>
               <ListItemStyled
-                component='a'
+                component="a"
                 onClick={handleListItemClick}
                 sx={{
-                  borderLeftColor: theme =>
-                    handleActiveItem('folder', 'sent') ? theme.palette.primary.main : 'transparent'
+                  borderLeftColor: (theme) =>
+                    handleActiveItem("folder", "sent")
+                      ? theme.palette.primary.main
+                      : "transparent",
                 }}
               >
-                <ListItemIcon sx={{ color: handleActiveItem('folder', 'sent') ? 'primary.main' : 'text.secondary' }}>
-                  <SendOutline sx={{ fontSize: '1.25rem' }} />
-                </ListItemIcon>
-                <ListItemText
-                  primary='Sent'
-                  primaryTypographyProps={{
-                    noWrap: true,
-                    sx: {
-                      color: theme => (handleActiveItem('folder', 'sent') ? theme.palette.primary.main : '')
-                    }
+                <ListItemIcon
+                  sx={{
+                    color: handleActiveItem("folder", "sent")
+                      ? "primary.main"
+                      : "text.secondary",
                   }}
-                />
-              </ListItemStyled>
-            </Link>
-            <Link href='/apps/email/draft' passHref>
-              <ListItemStyled
-                component='a'
-                onClick={handleListItemClick}
-                sx={{
-                  borderLeftColor: theme =>
-                    handleActiveItem('folder', 'draft') ? theme.palette.primary.main : 'transparent'
-                }}
-              >
-                <ListItemIcon sx={{ color: handleActiveItem('folder', 'draft') ? 'primary.main' : 'text.secondary' }}>
-                  <PencilOutline sx={{ fontSize: '1.25rem' }} />
+                >
+                  <SendOutline sx={{ fontSize: "1.25rem" }} />
                 </ListItemIcon>
                 <ListItemText
-                  primary='Draft'
+                  primary="Sent"
                   primaryTypographyProps={{
                     noWrap: true,
                     sx: {
-                      color: theme => (handleActiveItem('folder', 'draft') ? theme.palette.primary.main : '')
-                    }
-                  }}
-                />
-                {RenderBadge('draft', 'warning')}
-              </ListItemStyled>
-            </Link>
-            <Link href='/apps/email/starred' passHref>
-              <ListItemStyled
-                component='a'
-                onClick={handleListItemClick}
-                sx={{
-                  borderLeftColor: theme =>
-                    handleActiveItem('folder', 'starred') ? theme.palette.primary.main : 'transparent'
-                }}
-              >
-                <ListItemIcon sx={{ color: handleActiveItem('folder', 'starred') ? 'primary.main' : 'text.secondary' }}>
-                  <StarOutline sx={{ fontSize: '1.25rem' }} />
-                </ListItemIcon>
-                <ListItemText
-                  primary='Starred'
-                  primaryTypographyProps={{
-                    noWrap: true,
-                    sx: {
-                      color: theme => (handleActiveItem('folder', 'starred') ? theme.palette.primary.main : '')
-                    }
+                      color: (theme) =>
+                        handleActiveItem("folder", "sent")
+                          ? theme.palette.primary.main
+                          : "",
+                    },
                   }}
                 />
               </ListItemStyled>
             </Link>
-            <Link href='/apps/email/spam' passHref>
+            <Link href="/views/requests/draft" passHref>
               <ListItemStyled
-                component='a'
+                component="a"
                 onClick={handleListItemClick}
                 sx={{
-                  borderLeftColor: theme =>
-                    handleActiveItem('folder', 'spam') ? theme.palette.primary.main : 'transparent'
+                  borderLeftColor: (theme) =>
+                    handleActiveItem("folder", "draft")
+                      ? theme.palette.primary.main
+                      : "transparent",
                 }}
               >
-                <ListItemIcon sx={{ color: handleActiveItem('folder', 'spam') ? 'primary.main' : 'text.secondary' }}>
-                  <AlertOctagonOutline sx={{ fontSize: '1.25rem' }} />
+                <ListItemIcon
+                  sx={{
+                    color: handleActiveItem("folder", "draft")
+                      ? "primary.main"
+                      : "text.secondary",
+                  }}
+                >
+                  <PencilOutline sx={{ fontSize: "1.25rem" }} />
                 </ListItemIcon>
                 <ListItemText
-                  primary='Spam'
+                  primary="Draft"
                   primaryTypographyProps={{
                     noWrap: true,
                     sx: {
-                      color: theme => (handleActiveItem('folder', 'spam') ? theme.palette.primary.main : '')
-                    }
+                      color: (theme) =>
+                        handleActiveItem("folder", "draft")
+                          ? theme.palette.primary.main
+                          : "",
+                    },
                   }}
                 />
-                {RenderBadge('spam', 'error')}
+                {RenderBadge("draft", "warning")}
               </ListItemStyled>
             </Link>
-            <Link href='/apps/email/trash' passHref>
+            <Link href="/views/requests/starred" passHref>
               <ListItemStyled
-                component='a'
+                component="a"
                 onClick={handleListItemClick}
                 sx={{
-                  borderLeftColor: theme =>
-                    handleActiveItem('folder', 'trash') ? theme.palette.primary.main : 'transparent'
+                  borderLeftColor: (theme) =>
+                    handleActiveItem("folder", "starred")
+                      ? theme.palette.primary.main
+                      : "transparent",
                 }}
               >
-                <ListItemIcon sx={{ color: handleActiveItem('folder', 'trash') ? 'primary.main' : 'text.secondary' }}>
-                  <DeleteOutline sx={{ fontSize: '1.25rem' }} />
+                <ListItemIcon
+                  sx={{
+                    color: handleActiveItem("folder", "starred")
+                      ? "primary.main"
+                      : "text.secondary",
+                  }}
+                >
+                  <StarOutline sx={{ fontSize: "1.25rem" }} />
                 </ListItemIcon>
                 <ListItemText
-                  primary='Trash'
+                  primary="Starred"
                   primaryTypographyProps={{
                     noWrap: true,
                     sx: {
-                      color: theme => (handleActiveItem('folder', 'trash') ? theme.palette.primary.main : '')
-                    }
+                      color: (theme) =>
+                        handleActiveItem("folder", "starred")
+                          ? theme.palette.primary.main
+                          : "",
+                    },
+                  }}
+                />
+              </ListItemStyled>
+            </Link>
+            <Link href="/views/requests/spam" passHref>
+              <ListItemStyled
+                component="a"
+                onClick={handleListItemClick}
+                sx={{
+                  borderLeftColor: (theme) =>
+                    handleActiveItem("folder", "spam")
+                      ? theme.palette.primary.main
+                      : "transparent",
+                }}
+              >
+                <ListItemIcon
+                  sx={{
+                    color: handleActiveItem("folder", "spam")
+                      ? "primary.main"
+                      : "text.secondary",
+                  }}
+                >
+                  <AlertOctagonOutline sx={{ fontSize: "1.25rem" }} />
+                </ListItemIcon>
+                <ListItemText
+                  primary="Spam"
+                  primaryTypographyProps={{
+                    noWrap: true,
+                    sx: {
+                      color: (theme) =>
+                        handleActiveItem("folder", "spam")
+                          ? theme.palette.primary.main
+                          : "",
+                    },
+                  }}
+                />
+                {RenderBadge("spam", "error")}
+              </ListItemStyled>
+            </Link>
+            <Link href="/views/requests/trash" passHref>
+              <ListItemStyled
+                component="a"
+                onClick={handleListItemClick}
+                sx={{
+                  borderLeftColor: (theme) =>
+                    handleActiveItem("folder", "trash")
+                      ? theme.palette.primary.main
+                      : "transparent",
+                }}
+              >
+                <ListItemIcon
+                  sx={{
+                    color: handleActiveItem("folder", "trash")
+                      ? "primary.main"
+                      : "text.secondary",
+                  }}
+                >
+                  <DeleteOutline sx={{ fontSize: "1.25rem" }} />
+                </ListItemIcon>
+                <ListItemText
+                  primary="Trash"
+                  primaryTypographyProps={{
+                    noWrap: true,
+                    sx: {
+                      color: (theme) =>
+                        handleActiveItem("folder", "trash")
+                          ? theme.palette.primary.main
+                          : "",
+                    },
                   }}
                 />
               </ListItemStyled>
             </Link>
           </List>
           <Typography
-            component='h6'
-            variant='caption'
+            component="h6"
+            variant="caption"
             sx={{
               mx: 6,
               mb: 0,
               mt: 3.5,
-              lineHeight: '.95rem',
-              color: 'text.disabled',
-              letterSpacing: '0.4px',
-              textTransform: 'uppercase'
+              lineHeight: ".95rem",
+              color: "text.disabled",
+              letterSpacing: "0.4px",
+              textTransform: "uppercase",
             }}
           >
             Labels
           </Typography>
-          <List component='div' sx={{ pt: 1 }}>
-            <Link href='/apps/email/label/personal' passHref>
+          <List component="div" sx={{ pt: 1 }}>
+            <Link href="/views/requests/label/personal" passHref>
               <ListItemStyled
-                component='a'
+                component="a"
                 onClick={handleListItemClick}
                 sx={{
                   mb: 1,
-                  borderLeftColor: theme =>
-                    handleActiveItem('label', 'personal') ? theme.palette.primary.main : 'transparent'
+                  borderLeftColor: (theme) =>
+                    handleActiveItem("label", "personal")
+                      ? theme.palette.primary.main
+                      : "transparent",
                 }}
               >
                 <ListItemIcon>
-                  <Circle sx={{ mr: 1, fontSize: '0.75rem', color: 'success.main' }} />
+                  <Circle
+                    sx={{ mr: 1, fontSize: "0.75rem", color: "success.main" }}
+                  />
                 </ListItemIcon>
                 <ListItemText
-                  primary='Personal'
+                  primary="Personal"
                   primaryTypographyProps={{
                     noWrap: true,
                     sx: {
-                      color: theme => (handleActiveItem('label', 'personal') ? theme.palette.primary.main : '')
-                    }
+                      color: (theme) =>
+                        handleActiveItem("label", "personal")
+                          ? theme.palette.primary.main
+                          : "",
+                    },
                   }}
                 />
               </ListItemStyled>
             </Link>
-            <Link href='/apps/email/label/company' passHref>
+            <Link href="/views/requests/label/company" passHref>
               <ListItemStyled
-                component='a'
+                component="a"
                 onClick={handleListItemClick}
                 sx={{
                   mb: 1,
-                  borderLeftColor: theme =>
-                    handleActiveItem('label', 'company') ? theme.palette.primary.main : 'transparent'
+                  borderLeftColor: (theme) =>
+                    handleActiveItem("label", "company")
+                      ? theme.palette.primary.main
+                      : "transparent",
                 }}
               >
                 <ListItemIcon>
-                  <Circle sx={{ mr: 1, fontSize: '0.75rem', color: 'primary.main' }} />
+                  <Circle
+                    sx={{ mr: 1, fontSize: "0.75rem", color: "primary.main" }}
+                  />
                 </ListItemIcon>
                 <ListItemText
-                  primary='Company'
+                  primary="Company"
                   primaryTypographyProps={{
                     noWrap: true,
                     sx: {
-                      color: theme => (handleActiveItem('label', 'company') ? theme.palette.primary.main : '')
-                    }
+                      color: (theme) =>
+                        handleActiveItem("label", "company")
+                          ? theme.palette.primary.main
+                          : "",
+                    },
                   }}
                 />
               </ListItemStyled>
             </Link>
-            <Link href='/apps/email/label/important' passHref>
+            <Link href="/views/requests/label/important" passHref>
               <ListItemStyled
-                component='a'
+                component="a"
                 onClick={handleListItemClick}
                 sx={{
                   mb: 1,
-                  borderLeftColor: theme =>
-                    handleActiveItem('label', 'important') ? theme.palette.primary.main : 'transparent'
+                  borderLeftColor: (theme) =>
+                    handleActiveItem("label", "important")
+                      ? theme.palette.primary.main
+                      : "transparent",
                 }}
               >
                 <ListItemIcon>
-                  <Circle sx={{ mr: 1, fontSize: '0.75rem', color: 'warning.main' }} />
+                  <Circle
+                    sx={{ mr: 1, fontSize: "0.75rem", color: "warning.main" }}
+                  />
                 </ListItemIcon>
                 <ListItemText
-                  primary='Important'
+                  primary="Important"
                   primaryTypographyProps={{
                     noWrap: true,
                     sx: {
-                      color: theme => (handleActiveItem('label', 'important') ? theme.palette.primary.main : '')
-                    }
+                      color: (theme) =>
+                        handleActiveItem("label", "important")
+                          ? theme.palette.primary.main
+                          : "",
+                    },
                   }}
                 />
               </ListItemStyled>
             </Link>
-            <Link href='/apps/email/label/private' passHref>
+            <Link href="/views/requests/label/private" passHref>
               <ListItemStyled
-                component='a'
+                component="a"
                 onClick={handleListItemClick}
                 sx={{
                   mb: 1,
-                  borderLeftColor: theme =>
-                    handleActiveItem('label', 'private') ? theme.palette.primary.main : 'transparent'
+                  borderLeftColor: (theme) =>
+                    handleActiveItem("label", "private")
+                      ? theme.palette.primary.main
+                      : "transparent",
                 }}
               >
                 <ListItemIcon>
-                  <Circle sx={{ mr: 1, fontSize: '0.75rem', color: 'error.main' }} />
+                  <Circle
+                    sx={{ mr: 1, fontSize: "0.75rem", color: "error.main" }}
+                  />
                 </ListItemIcon>
                 <ListItemText
-                  primary='Private'
+                  primary="Private"
                   primaryTypographyProps={{
                     noWrap: true,
                     sx: {
-                      color: theme => (handleActiveItem('label', 'private') ? theme.palette.primary.main : '')
-                    }
+                      color: (theme) =>
+                        handleActiveItem("label", "private")
+                          ? theme.palette.primary.main
+                          : "",
+                    },
                   }}
                 />
               </ListItemStyled>
@@ -393,7 +520,7 @@ const SidebarLeft = (props: MailSidebarType) => {
         </Box>
       </ScrollWrapper>
     </Drawer>
-  )
-}
+  );
+};
 
-export default SidebarLeft
+export default SidebarLeft;
