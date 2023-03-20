@@ -18,6 +18,7 @@ import {
   ErrCallbackType,
   UserDataType,
 } from "./types";
+
 import backendConfig from "src/configs/backendConfig";
 
 // ** Defaults
