@@ -8,5 +8,6 @@ const api = config.protocol + "://" + config.server + ":" + config.port;
 
 export default {
   apiProperties: config,
-  api: api,
+  // api: `${config.protocol}://${config.server}:${config.port}`,
+  api: "http://localhost:3000",
 };
