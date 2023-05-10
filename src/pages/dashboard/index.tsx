@@ -1,21 +1,11 @@
 // ** MUI Imports
 import Grid from "@mui/material/Grid";
 
-// ** Custom Components Imports
-import CardStatisticsCharacter from "src/@core/components/card-statistics/card-stats-with-image";
-
 // ** Styled Component Import
 import KeenSliderWrapper from "src/@core/styles/libs/keen-slider";
 import ApexChartWrapper from "src/@core/styles/libs/react-apexcharts";
 
 // ** Demo Components Imports
-// import EcommerceTotalVisits from "src/views/dashboards/ecommerce/EcommerceTotalVisits";
-// import EcommerceVisitsByDay from "src/views/dashboards/ecommerce/EcommerceVisitsByDay";
-// import EcommerceLiveVisitors from "src/views/dashboards/ecommerce/EcommerceLiveVisitors";
-// import EcommerceWeeklySalesBg from "src/views/dashboards/ecommerce/EcommerceWeeklySalesBg";
-// import EcommerceSalesThisMonth from "src/views/dashboards/ecommerce/EcommerceSalesThisMonth";
-// import EcommerceMarketingSales from "src/views/dashboards/ecommerce/EcommerceMarketingSales";
-// import EcommerceImpressionsOrders from "src/views/dashboards/ecommerce/EcommerceImpressionsOrders";
 import EcommerceTable from "src/views/dashboards/ecommerce/EcommerceTable";
 import EcommerceActivityTimeline from "src/views/dashboards/ecommerce/EcommerceActivityTimeline";
 import EcommerceSalesOverviewWithTabs from "src/views/dashboards/ecommerce/EcommerceSalesOverviewWithTabs";
