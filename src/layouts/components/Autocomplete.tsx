@@ -98,7 +98,7 @@ const defaultSuggestionsData: DefaultSuggestionsType[] = [
       },
       {
         suggestion: 'eCommerce',
-        link: '/dashboards/ecommerce/',
+        link: '/dashboard/',
         icon: <CartOutline fontSize='small' sx={{ mr: 2.5, color: 'text.primary' }} />
       },
       {

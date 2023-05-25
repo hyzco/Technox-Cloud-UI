@@ -56,6 +56,39 @@ const TabPackages = () => {
         traffic: "7000GB Bandwith",
       },
     },
+    {
+      id: 3,
+      title: "Package 3",
+      price: 150,
+      description: {
+        cpu: "16 Core vCPU",
+        memory: "8GB Memory",
+        storage: "100GB SSD Disk",
+        traffic: "7000GB Bandwith",
+      },
+    },
+    {
+      id: 3,
+      title: "Package 3",
+      price: 150,
+      description: {
+        cpu: "16 Core vCPU",
+        memory: "8GB Memory",
+        storage: "100GB SSD Disk",
+        traffic: "7000GB Bandwith",
+      },
+    },
+    {
+      id: 3,
+      title: "Package 3",
+      price: 150,
+      description: {
+        cpu: "16 Core vCPU",
+        memory: "8GB Memory",
+        storage: "100GB SSD Disk",
+        traffic: "7000GB Bandwith",
+      },
+    },
   ];
 
   const onSelectPackage = (selectedPackage: number) => {
@@ -65,7 +98,7 @@ const TabPackages = () => {
   const renderPackageCards = () => {
     return fakeCardData.map((val: any, _index: number) => {
       return (
-        <Grid item xs={4}>
+        <Grid item xs={3} md={4} xl={6}>
           <PackagesCard key={_index} data={val} onSelect={onSelectPackage} />
         </Grid>
       );

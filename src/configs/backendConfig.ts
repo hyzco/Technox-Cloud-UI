@@ -9,5 +9,5 @@ const api = config.protocol + "://" + config.server + ":" + config.port;
 export default {
   apiProperties: config,
   // api: `${config.protocol}://${config.server}:${config.port}`,
-  api: "https://backend.theycloud.com",
+  api: "http://localhost:3000",
 };
