@@ -36,7 +36,7 @@ import DialogTabPackages from "src/views/pages/dialog-examples/create-app-tabs/D
 import DialogTabDetails from "src/views/pages/dialog-examples/create-app-tabs/DialogTabDetails";
 import DialogTabBilling from "src/views/pages/dialog-examples/create-app-tabs/DialogTabBilling";
 import DialogTabDatabase from "src/views/pages/dialog-examples/create-app-tabs/DialogTabDatabase";
-import DialogTabFramework from "src/views/pages/dialog-examples/create-app-tabs/DialogTabFramework";
+import DialogTabFramework from "src/views/pages/dialog-examples/create-app-tabs/DialogTabApplication";
 
 interface TabLabelProps {
   title: string;

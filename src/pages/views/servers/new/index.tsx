@@ -1,5 +1,14 @@
 // ** React Imports
-import { Ref, useState, forwardRef, ReactElement, useEffect } from "react";
+import {
+  Ref,
+  useState,
+  forwardRef,
+  ReactElement,
+  useEffect,
+  useReducer,
+  ReducerWithoutAction,
+  Reducer,
+} from "react";
 
 // ** MUI Imports
 import Box from "@mui/material/Box";
@@ -32,7 +41,9 @@ import DialogTabPackages from "src/views/pages/dialog-examples/create-app-tabs/D
 import DialogTabDetails from "src/views/pages/dialog-examples/create-app-tabs/DialogTabDetails";
 import DialogTabBilling from "src/views/pages/dialog-examples/create-app-tabs/DialogTabBilling";
 import DialogTabDatabase from "src/views/pages/dialog-examples/create-app-tabs/DialogTabDatabase";
-import DialogTabFramework from "src/views/pages/dialog-examples/create-app-tabs/DialogTabFramework";
+import DialogTabApplication from "src/views/pages/dialog-examples/create-app-tabs/DialogTabApplication";
+import DialogTabCustomScript from "src/views/pages/dialog-examples/create-app-tabs/DialogTabCustomScript";
+import { AccountSettingsOutline } from "mdi-material-ui";
 
 interface TabLabelProps {
   title: string;
@@ -81,11 +92,58 @@ const TabLabel = (props: TabLabelProps) => {
 
 const tabsArr = [
   "detailsTab",
-  "frameworkTab",
+  "applicationTab",
   "DatabaseTab",
+  "customScriptTab",
   "paymentTab",
   "submitTab",
 ];
+
+interface IServerDetails {
+  osName: string;
+  osVersion: string;
+}
+interface IServerState {
+  details: IServerDetails;
+}
+
+enum IServerActionEnum {
+  SETOS = "SET_OS",
+}
+
+interface IAction {
+  type: IServerActionEnum;
+  payload?: {
+    osName: string;
+    osVersion: string;
+  };
+}
+
+const initialState: IServerState = {
+  details: {
+    osName: "",
+    osVersion: "",
+  },
+};
+
+const serverReducer: Reducer<IServerState, IAction> = (
+  state: IServerState,
+  action: IAction
+) => {
+  switch (action.type) {
+    case "SET_OS":
+      return {
+        ...state,
+        details: {
+          ...state.details,
+          osName: action.payload?.osName || "",
+          osVersion: action.payload?.osVersion || "",
+        },
+      };
+    default:
+      return state;
+  }
+};
 
 const CreateServerPanel = () => {
   const [activeTab, setActiveTab] = useState<string>("packagesTab");
@@ -98,6 +156,12 @@ const CreateServerPanel = () => {
 
   const NextArrow = direction === "ltr" ? ArrowRight : ArrowLeft;
   const PreviousArrow = direction === "ltr" ? ArrowLeft : ArrowRight;
+
+  const [state, dispatch] = useReducer(serverReducer, initialState);
+
+  useEffect(() => {
+    console.log(state);
+  }, [state]);
 
   const renderTabFooter = () => {
     const prevTab = tabsArr[tabsArr.indexOf(activeTab) - 1];
@@ -210,13 +274,13 @@ const CreateServerPanel = () => {
             />
             <Tab
               disableRipple
-              value="frameworkTab"
+              value="applicationTab"
               label={
                 <TabLabel
-                  title="Frameworks"
+                  title="Applications"
                   icon={<StarOutline />}
-                  subtitle="Select Framework"
-                  active={activeTab === "frameworkTab"}
+                  subtitle="Select Application"
+                  active={activeTab === "applicationTab"}
                 />
               }
             />
@@ -228,6 +292,18 @@ const CreateServerPanel = () => {
                   title="Database"
                   active={activeTab === "DatabaseTab"}
                   subtitle="Select Database"
+                  icon={<ChartDonut />}
+                />
+              }
+            />
+            <Tab
+              disableRipple
+              value="customScriptTab"
+              label={
+                <TabLabel
+                  title="Custom Script"
+                  active={activeTab === "customScriptTab"}
+                  subtitle="Custom script settings"
                   icon={<ChartDonut />}
                 />
               }
@@ -262,15 +338,24 @@ const CreateServerPanel = () => {
             {renderTabFooter()}
           </TabPanel>
           <TabPanel value="detailsTab" sx={{ flexGrow: 1 }}>
-            <DialogTabDetails />
+            <DialogTabDetails
+              callback={(details: IServerDetails) => {
+                console.log(details);
+                dispatch({ type: IServerActionEnum.SETOS, payload: details });
+              }}
+            />
             {renderTabFooter()}
           </TabPanel>
-          <TabPanel value="frameworkTab" sx={{ flexGrow: 1 }}>
-            <DialogTabFramework />
+          <TabPanel value="applicationTab" sx={{ flexGrow: 1 }}>
+            <DialogTabApplication />
             {renderTabFooter()}
           </TabPanel>
           <TabPanel value="DatabaseTab" sx={{ flexGrow: 1 }}>
             <DialogTabDatabase />
+            {renderTabFooter()}
+          </TabPanel>
+          <TabPanel value="customScriptTab" sx={{ flexGrow: 1 }}>
+            <DialogTabCustomScript />
             {renderTabFooter()}
           </TabPanel>
           <TabPanel value="paymentTab" sx={{ flexGrow: 1 }}>

@@ -57,7 +57,7 @@ type ThemeConfig = {
 
 const themeConfig: ThemeConfig = {
   // ** Layout Configs
-  templateName: "TechnoxCloud" /* App Name */,
+  templateName: "TheyCloud" /* App Name */,
   layout: "vertical" /* vertical | horizontal */,
   mode: "light" /* light | dark */,
   direction: "ltr" /* ltr | rtl */,

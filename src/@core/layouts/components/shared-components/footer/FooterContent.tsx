@@ -24,8 +24,8 @@ const FooterContent = () => {
           ❤️
         </Box>
         {` by `}
-        <Link target="_blank" href="https://github.com/Eddith">
-          TecnoxCloud
+        <Link target="_blank" href="https://github.com/hyzco">
+          TheyCloud
         </Link>
       </Typography>
       {/* {hidden ? null : (

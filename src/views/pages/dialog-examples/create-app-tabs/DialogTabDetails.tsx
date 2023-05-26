@@ -25,6 +25,9 @@ import Grid from "@mui/material/Grid";
 import NativeSelect from "@mui/material/NativeSelect";
 import InputLabel from "@mui/material/InputLabel";
 import { Key } from "mdi-material-ui";
+import React from "react";
+import { ThemeColor } from "src/@core/layouts/types";
+import { useTheme } from "@mui/material/styles";
 
 interface renderOsProps {
   osName: string;
@@ -66,42 +69,99 @@ const osList = [
   },
 ];
 
-const TabDetails = () => {
-  const [value, setValue] = useState<string>("");
+interface IDetailsProps {
+  callback: Function;
+}
 
-  const handleChange = (event: ChangeEvent<HTMLInputElement>) => {
-    setValue(event.target.value);
-  };
+//TODO : radio button issue
 
-  const OperationSystems = (props: renderOsProps) => {
+const TabDetails = React.memo((propsDetails: IDetailsProps) => {
+  useEffect(() => {
+    // This effect runs after every render
+    console.log("rendering TabDetails...");
+  });
+
+  const OperationSystems = React.memo((props: renderOsProps) => {
+    const [osVersion, setOsVersion] = useState<string>("");
     let { osName, osVersions, osDesc, osImage } = props;
-    const [osVersion, setOsVersion] = useState<string>(osVersions[0]);
-    const [desc, setOsDesc] = useState<string>("");
+    const [desc, setOsDesc] = useState<string>(osDesc);
+    const [selectedOs, setSelectedOs] = useState<string>("");
 
-    const replaceDesc = (desc: string) => {
-      const replacedDesc = desc.replace("<version>", osVersion);
-      return replacedDesc;
+    const theme = useTheme();
+
+    const handleChangeOS = (event: ChangeEvent<HTMLInputElement>) => {
+      event.preventDefault();
+      console.log(event);
+      setSelectedOs(event.target.value);
     };
-
-    useLayoutEffect(() => {
-      const replacedDesc = replaceDesc(osDesc);
-      setOsDesc(replacedDesc);
-    }, [osVersion]);
 
     const selectOsVersion = (event: ChangeEvent<HTMLSelectElement>) => {
       event.preventDefault();
+      console.log(event.target.value);
       setOsVersion(event.target.value);
     };
 
+    useEffect(() => {
+      // This effect runs after every render
+      console.log("rendering OperationSystems...");
+      return () => {
+        // setSelectedOs("");
+        console.log("unmounting Operation..");
+      };
+    });
+
+    const replaceDesc = (osVersion: string) => {
+      const replacedDesc = osDesc.replace("<version>", osVersion);
+      setOsDesc(replacedDesc);
+      // return replacedDesc;
+    };
+
+    useEffect(() => {
+      if (osDesc.includes("<version>")) {
+        replaceDesc(osVersions[0]);
+      }
+      setSelectedOs("");
+    }, []);
+
+    useLayoutEffect(() => {
+      // setSelectedOs(osName);
+      replaceDesc(osVersion);
+    }, [osVersion]);
+
+    useEffect(() => {
+      if (osVersion && selectedOs) {
+        console.log(osVersion);
+        console.log(selectedOs);
+      }
+    }, [osVersion, selectedOs]);
+
+    const OperatingSystem = React.memo((props: any) => {
+      return (
+        <>
+          {props.osVersions.map((version: string) => {
+            return React.createElement("option", { value: version }, version);
+          })}
+        </>
+      );
+    });
+
     return (
       <Box
-        onClick={() => setValue(osName)}
+        onChange={() => {
+          // setSelectedOs(osName);
+          // setOsVersion(osVersion);
+        }}
         sx={{
           mb: 6,
+          backgroundColor:
+            selectedOs == osName
+              ? theme.palette.background.default
+              : "transparent",
           cursor: "pointer",
           display: "flex",
           alignItems: "center",
-          justifyContent: "space-between",
+          alignSelf: "center",
+          p: "0.500em",
         }}
       >
         <Grid container spacing={3}>
@@ -113,6 +173,7 @@ const TabDetails = () => {
               }}
             >
               <CustomAvatar
+                onClick={() => setSelectedOs(osName)}
                 skin="light"
                 color="info"
                 variant="rounded"
@@ -121,6 +182,7 @@ const TabDetails = () => {
                 <img
                   width="48"
                   height="48"
+                  style={{ background: "white" }}
                   src={osImage}
                   alt={`${osName} ${osVersion} operating system`}
                 />
@@ -153,17 +215,18 @@ const TabDetails = () => {
               </InputLabel>
 
               <NativeSelect
-                defaultValue={osVersion}
+                value={osVersion}
                 inputProps={{
                   name: "osVersion",
                   id: "uncontrolled-native",
                 }}
+                sx={{
+                  width: "100%",
+                }}
                 onChange={selectOsVersion}
                 // sx={{ display: "flex", alignItems: "center" }}
               >
-                {osVersions.map((version) => {
-                  return <option value={version}>{version}</option>;
-                })}
+                <OperatingSystem osVersions={osVersions} />
               </NativeSelect>
             </Box>
           </Grid>
@@ -171,12 +234,12 @@ const TabDetails = () => {
 
         <Radio
           value={osName}
-          onChange={handleChange}
-          checked={value === osName}
+          onChange={handleChangeOS}
+          checked={selectedOs === osName}
         />
       </Box>
     );
-  };
+  });
 
   const NetworkDetails = () => {
     const maxAllowedIpv4: number = 16;
@@ -212,8 +275,14 @@ const TabDetails = () => {
                 name: "ipQnty",
                 id: "uncontrolled-native",
               }}
-
-              // sx={{ display: "flex", alignItems: "center" }}
+              sx={
+                {
+                  // display: "flex",
+                  // alignItems: "center",
+                  // width: "100%",
+                  // height: "auto",
+                }
+              }
             >
               {renderIpOptions(maxAllowedIpv4).map((option) => {
                 return option;
@@ -288,6 +357,7 @@ const TabDetails = () => {
         {osList.map((os) => {
           return (
             <OperationSystems
+              key={os.osName}
               osName={os.osName}
               osVersions={os.osVersions}
               osDesc={os.osDesc}
@@ -303,6 +373,6 @@ const TabDetails = () => {
       </Box>
     </Box>
   );
-};
+});
 
 export default TabDetails;
