@@ -126,7 +126,7 @@ const LoginPage = () => {
       >
         <Box
           sx={{
-            p: 7,
+            p: 12,
             height: "100%",
             display: "flex",
             alignItems: "center",
@@ -401,10 +401,10 @@ const LoginIllustration = styled("img")(({ theme }) => ({
 const RightWrapper = styled(Box)<BoxProps>(({ theme }) => ({
   width: "100%",
   [theme.breakpoints.up("md")]: {
-    maxWidth: 400,
+    maxWidth: 600,
   },
   [theme.breakpoints.up("lg")]: {
-    maxWidth: 450,
+    maxWidth: 650,
   },
 }));
 
