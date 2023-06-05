@@ -72,11 +72,10 @@ const osList = [
 
 interface IDetailsProps {
   callback: Function;
+  tabFooter: (props: any) => JSX.Element;
 }
 
-//TODO : radio button issue
-
-const TabDetails = React.memo((_propsDetails: IDetailsProps) => {
+const TabDetails = (props: IDetailsProps) => {
   const formHook = useFormHook();
   const [
     handleSubmit,
@@ -88,6 +87,8 @@ const TabDetails = React.memo((_propsDetails: IDetailsProps) => {
     formState,
     trigger,
   ] = formHook;
+
+  const { callback, tabFooter } = props;
 
   const [state, dispatch]: any = useFormReducer({
     reducer: (state: any, action: any) => {
@@ -116,11 +117,7 @@ const TabDetails = React.memo((_propsDetails: IDetailsProps) => {
   }, [state]);
 
   const OperationSystems = (props: renderOsProps) => {
-    // const [osVersion, setOsVersion] = useState<string>("");
     let { osName, osVersions, osDesc, osImage } = props;
-    // const [desc, setOsDesc] = useState<string>(osDesc);
-    // const [selectedOs, setSelectedOs] = useState<string>("");
-    // const [prevOs, setPrevOs] = useState<string>("");
 
     const [ignored, forceUpdate] = React.useReducer((x) => x + 1, 0);
 
@@ -128,55 +125,19 @@ const TabDetails = React.memo((_propsDetails: IDetailsProps) => {
     const cachedOsName = React.useRef("");
     const cachedOsVersion = React.useRef("");
 
-    // useEffect(() => {
-    //   // Compare the current osName with the previous osName
-    //   if (osName !== cachedOsName.current) {
-    //     // Dispatch the action only if they are different
-    //     dispatch({ type: "UPDATE_OS_NAME", osName });
-    //   }
-    //   console.log(osName);
-
-    //   // Update the previous osName ref after each render
-    //   cachedOsName.current = osName;
-    // }, [selectedOs]);
-
-    // useEffect(() => {
-    //   cachedOsName.current = osName;
-    //   cachedDesc.current = osDesc;
-    //   cachedOsVersion.current = osVersions[0];
-
-    //   console.log(cachedOsName);
-    // }, []);
-
     const theme = useTheme();
 
     const handleChangeOS = (event: ChangeEvent<HTMLInputElement>) => {
       event.preventDefault();
       event.stopPropagation();
-      // setSelectedOs(event.target.value);
-
       dispatch({ type: "UPDATE_OS_NAME", osName: event.target.value });
-
-      // forceUpdate();
     };
 
     const selectOsVersion = (event: ChangeEvent<HTMLSelectElement>) => {
       event.preventDefault();
-      // if (cachedOsName.current != osName) {
-      // cachedOsVersion.current = "";
-      // } else {
       cachedOsVersion.current = event.target.value;
       cachedDesc.current = replaceDesc(event.target.value);
-      // dispatch({ type: "UPDATE_OS_VERSION", osVersion: event.target.value });
-      console.log(cachedOsVersion.current);
-      console.log(cachedDesc.current);
-      // dispatch({
-      //   type: "UPDATE_OS_DESC",
-      //   osDesc: replaceDesc(event.target.value),
-      // });
       forceUpdate();
-      // }
-      // setOsVersion(event.target.value);
     };
 
     useEffect(() => {
@@ -205,14 +166,6 @@ const TabDetails = React.memo((_propsDetails: IDetailsProps) => {
       return replacedDesc;
     };
 
-    useEffect(() => {
-      if (osDesc.includes("<version>")) {
-        const replacedDesc = replaceDesc(osVersions[0]);
-        cachedDesc.current = replacedDesc;
-      }
-      // forceUpdate();
-    }, []);
-
     const OsVersionOptions = useMemo(
       () => (props: any) => {
         return (
@@ -229,7 +182,6 @@ const TabDetails = React.memo((_propsDetails: IDetailsProps) => {
 
     const OsDetails = useMemo(
       () => () => {
-        console.log("rendered... OS DETAILS");
         return (
           <Box>
             <Typography sx={{ color: "text.secondary" }}>{osName}</Typography>
@@ -357,8 +309,6 @@ const TabDetails = React.memo((_propsDetails: IDetailsProps) => {
           />
         </Box>
       );
-
-      return <></>;
     };
 
     return <RenderBody />;
@@ -463,22 +413,26 @@ const TabDetails = React.memo((_propsDetails: IDetailsProps) => {
   };
 
   return (
-    <Box>
-      <Typography variant="h6" sx={{ mb: 4 }}>
-        Virtual Machine details
-      </Typography>
-      <FormWrapperHook
-        name={"FORM TO DO SMTH"}
-        formHook={formHook}
-        fields={["vmName", "rootPw", "osName", "osVersion"]}
-      >
+    <FormWrapperHook
+      name={"serverDetailsForm"}
+      formHook={formHook}
+      fields={["vmName", "rootPw", "osName", "osVersion"]}
+      onSubmit={(data) => {
+        console.log("submitted");
+        callback(data);
+      }}
+    >
+      <Box>
+        <Typography variant="h6" sx={{ mb: 4 }}>
+          Virtual Machine details
+        </Typography>
         <Box sx={{ mb: 8 }}>
           <TextField
             name="vmName"
             sx={{ mb: 4 }}
             label="Virtual machine name"
             placeholder=""
-            aria-details="form-input"
+            {...register("vmName")}
           />
 
           <Typography variant="h6" sx={{ mb: 4 }}>
@@ -492,7 +446,7 @@ const TabDetails = React.memo((_propsDetails: IDetailsProps) => {
                 sx={{ mb: 4 }}
                 label="Root Password"
                 placeholder=""
-                aria-details="form-input"
+                {...register("rootPw")}
               />
             </Grid>
             {/* <Grid item xs={8} sm={3}>
@@ -513,9 +467,10 @@ const TabDetails = React.memo((_propsDetails: IDetailsProps) => {
           </Typography> */}
           {/* <NetworkDetails></NetworkDetails> */}
         </Box>
-      </FormWrapperHook>
-    </Box>
+        {tabFooter && tabFooter({ enableDefaultOnClick: false })}
+      </Box>
+    </FormWrapperHook>
   );
-});
+};
 
 export default TabDetails;

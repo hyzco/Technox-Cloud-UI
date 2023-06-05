@@ -102,43 +102,65 @@ const tabsArr = [
 interface IServerDetails {
   osName: string;
   osVersion: string;
+  vmName: string;
+  rootPw: string;
 }
 interface IServerState {
-  details: IServerDetails;
+  vmApp: string;
+  vmPackage: number;
+  vmDetails: IServerDetails;
 }
 
 enum IServerActionEnum {
-  SETOS = "SET_OS",
+  SET_VM_PACKAGE = "SET_VM_PACKAGE",
+  SET_VM_DETAILS = "SET_VM_DETAILS",
+  SET_APP = "SET_APP",
 }
 
 interface IAction {
   type: IServerActionEnum;
-  payload?: {
-    osName: string;
-    osVersion: string;
-  };
+  payload?: IServerState | any;
 }
 
 const initialState: IServerState = {
-  details: {
+  vmApp: "",
+  vmPackage: 0,
+  vmDetails: {
     osName: "",
     osVersion: "",
+    vmName: "",
+    rootPw: "",
   },
 };
 
 const serverReducer: Reducer<IServerState, IAction> = (
-  state: IServerState,
+  state: IServerState | any,
   action: IAction
 ) => {
   switch (action.type) {
-    case "SET_OS":
+    case IServerActionEnum.SET_VM_DETAILS:
+      console.log("SET_VM_DETAILS");
       return {
         ...state,
-        details: {
-          ...state.details,
-          osName: action.payload?.osName || "",
-          osVersion: action.payload?.osVersion || "",
+        vmDetails: {
+          ...state.vmDetails,
+          osName: action.payload?.vmDetails.osName || "",
+          osVersion: action.payload?.vmDetails.osVersion || "",
+          vmName: action.payload?.vmDetails.vmName || "",
+          rootPw: action.payload?.vmDetails.rootPw || "",
         },
+      };
+    case IServerActionEnum.SET_VM_PACKAGE:
+      console.log("SET_VM_PACKAGE");
+      return {
+        ...state,
+        vmPackage: action.payload?.vmPackage || "",
+      };
+    case IServerActionEnum.SET_APP:
+      console.log("SET_VM_APP");
+      return {
+        ...state,
+        vmApp: action.payload?.vmApp || "",
       };
     default:
       return state;
@@ -160,12 +182,33 @@ const CreateServerPanel = () => {
   const [state, dispatch] = useReducer(serverReducer, initialState);
 
   useEffect(() => {
+    console.log("state refreshed:");
     console.log(state);
   }, [state]);
 
-  const renderTabFooter = () => {
-    const prevTab = tabsArr[tabsArr.indexOf(activeTab) - 1];
-    const nextTab = tabsArr[tabsArr.indexOf(activeTab) + 1];
+  const prevTab = tabsArr[tabsArr.indexOf(activeTab) - 1];
+  const nextTab = tabsArr[tabsArr.indexOf(activeTab) + 1];
+
+  const footerNextButtonOnSubmit = () => {
+    if (activeTab !== "submitTab") {
+      setActiveTab(nextTab);
+    } else {
+      // handleClose();
+    }
+  };
+
+  const renderTabFooter = (props: {
+    enableDefaultOnClick: boolean;
+    onClick?: () => void;
+  }) => {
+    const onClick = () => {
+      if (props.onClick !== undefined) {
+        console.log("here");
+        props.onClick();
+      } else {
+        return () => {};
+      }
+    };
 
     return (
       <Box
@@ -186,15 +229,12 @@ const CreateServerPanel = () => {
           Previous
         </Button>
         <Button
+          type="submit"
           variant="contained"
           endIcon={activeTab === "submitTab" ? <Check /> : <NextArrow />}
           color={activeTab === "submitTab" ? "success" : "primary"}
           onClick={() => {
-            if (activeTab !== "submitTab") {
-              setActiveTab(nextTab);
-            } else {
-              // handleClose();
-            }
+            props.enableDefaultOnClick ? footerNextButtonOnSubmit() : onClick();
           }}
         >
           {activeTab === "submitTab" ? "Submit" : "Next"}
@@ -334,33 +374,55 @@ const CreateServerPanel = () => {
             />
           </TabList>
           <TabPanel value="packagesTab" sx={{ flexGrow: 1 }}>
-            <DialogTabPackages />
-            {renderTabFooter()}
+            <DialogTabPackages
+              callback={(packageNum: number) => {
+                dispatch({
+                  type: IServerActionEnum.SET_VM_PACKAGE,
+                  payload: { vmPackage: packageNum },
+                });
+
+                footerNextButtonOnSubmit();
+              }}
+              tabFooter={renderTabFooter}
+            />
           </TabPanel>
           <TabPanel value="detailsTab" sx={{ flexGrow: 1 }}>
             <DialogTabDetails
               callback={(details: IServerDetails) => {
-                console.log(details);
-                dispatch({ type: IServerActionEnum.SETOS, payload: details });
+                dispatch({
+                  type: IServerActionEnum.SET_VM_DETAILS,
+                  payload: { vmDetails: details },
+                });
+
+                footerNextButtonOnSubmit();
               }}
+              tabFooter={renderTabFooter}
             />
-            {renderTabFooter()}
           </TabPanel>
           <TabPanel value="applicationTab" sx={{ flexGrow: 1 }}>
-            <DialogTabApplication />
-            {renderTabFooter()}
+            <DialogTabApplication
+              callback={(appName: string) => {
+                dispatch({
+                  type: IServerActionEnum.SET_APP,
+                  payload: { vmApp: appName },
+                });
+
+                footerNextButtonOnSubmit();
+              }}
+              tabFooter={renderTabFooter}
+            />
           </TabPanel>
           <TabPanel value="DatabaseTab" sx={{ flexGrow: 1 }}>
             <DialogTabDatabase />
-            {renderTabFooter()}
+            {renderTabFooter({ enableDefaultOnClick: true })}
           </TabPanel>
           <TabPanel value="customScriptTab" sx={{ flexGrow: 1 }}>
             <DialogTabCustomScript />
-            {renderTabFooter()}
+            {renderTabFooter({ enableDefaultOnClick: true })}
           </TabPanel>
           <TabPanel value="paymentTab" sx={{ flexGrow: 1 }}>
             <DialogTabBilling />
-            {renderTabFooter()}
+            {renderTabFooter({ enableDefaultOnClick: true })}
           </TabPanel>
           <TabPanel value="submitTab" sx={{ flexGrow: 1 }}>
             <Box sx={{ textAlign: "center" }}>
@@ -376,7 +438,7 @@ const CreateServerPanel = () => {
                 />
               </Box>
             </Box>
-            {renderTabFooter()}
+            {renderTabFooter({ enableDefaultOnClick: true })}
           </TabPanel>
         </TabContext>
       </Box>

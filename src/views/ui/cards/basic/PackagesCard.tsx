@@ -28,11 +28,16 @@ const generateDescription = (values: any) => {
 const PackagesCard = (props: {
   data: IPackagesCardData;
   onSelect: (selectedPackage: any) => void;
+  selected: boolean;
 }) => {
   const descriptionValues = Object.values(props.data.description);
   return (
     <Card>
-      <CardContent sx={{ p: (theme) => `${theme.spacing(4, 5)} !important` }}>
+      <CardContent
+        sx={{
+          p: (theme) => `${theme.spacing(4, 5)} !important`,
+        }}
+      >
         <Typography variant="h6" sx={{ mb: 2 }}>
           {props.data.title}
         </Typography>
@@ -42,13 +47,14 @@ const PackagesCard = (props: {
       <Button
         size="medium"
         variant="contained"
+        color={props.selected ? "secondary" : "primary"}
         sx={{ width: "100%", borderTopLeftRadius: 0, borderTopRightRadius: 0 }}
         onClick={() => {
           props.onSelect(props.data.id);
           // setPackage(props.data.id);
         }}
       >
-        Select Package
+        {props.selected ? "Selected" : "Select"}
       </Button>
     </Card>
   );

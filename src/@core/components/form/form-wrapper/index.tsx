@@ -6,14 +6,11 @@ import { Controller, useForm } from "react-hook-form";
 import { FormInputText } from "../input";
 import { FormInputController } from "../input-controller";
 
-interface IFormProps {
-  name: string;
-  children: ReactNode | ReactNode[];
-  formHook: Array<any>;
-  fields: Array<string>;
+interface IFormHookProps {
+  defaultValues?: {};
 }
 
-export const useFormHook = () => {
+export const useFormHook = (props?: IFormHookProps) => {
   const {
     handleSubmit,
     reset,
@@ -23,7 +20,7 @@ export const useFormHook = () => {
     setValue,
     formState,
     trigger,
-  } = useForm();
+  } = useForm({ defaultValues: props && props.defaultValues && {} });
 
   const [contextValue, setContextValue] = useState<any>({});
 
@@ -45,8 +42,17 @@ export const useFormHook = () => {
   ];
 };
 
+interface IFormProps {
+  name: string;
+  children: ReactNode | ReactNode[];
+  formHook: Array<any>;
+  fields: Array<string>;
+  onSubmit: React.FormEventHandler<HTMLFormElement> | undefined;
+  disableClear?: boolean;
+}
+
 export const FormWrapperHook = (props: IFormProps) => {
-  const { name, children, formHook, fields } = props;
+  const { name, children, formHook, fields, onSubmit, disableClear } = props;
 
   const [
     handleSubmit,
@@ -57,7 +63,7 @@ export const FormWrapperHook = (props: IFormProps) => {
     setContextValue,
   ] = formHook;
 
-  const onSubmit = (data: any) => console.log(data);
+  const onSubmitDefault = (data: any) => console.log(data);
 
   useEffect(() => {
     // console.log(contextValue);
@@ -74,33 +80,33 @@ export const FormWrapperHook = (props: IFormProps) => {
   }) => ( WHATEVER_INPUT_WE_WANT )} */
   }
 
-  const renderChildren = (children: ReactNode): ReactNode => {
-    return React.Children.map(children, (child: ReactNode) => {
-      if (React.isValidElement(child)) {
-        if (child.props.children) {
-          return React.cloneElement(child, {
-            ...child.props, // Include all existing props
-            children: renderChildren(
-              child.props.children
-            ) as React.ReactElement<any>[],
-          });
-        }
+  // const renderChildren = (children: ReactNode): ReactNode => {
+  // return React.Children.map(children, (child: ReactNode) => {
+  //   if (React.isValidElement(child)) {
+  //     if (child.props.children) {
+  //       return React.cloneElement(child, {
+  //         ...child.props, // Include all existing props
+  //         children: renderChildren(
+  //           child.props.children
+  //         ) as React.ReactElement<any>[],
+  //       });
+  //     }
 
-        const ChildComponent = child.type as React.FunctionComponent<any>;
-        // console.log(child.props);
-        if (child.props["aria-details"] === "form-input") {
-          console.log("yes");
+  //     // const ChildComponent = child.type as React.FunctionComponent<any>;
+  //     // // console.log(child.props);
+  //     // if (child.props["aria-details"] === "form-input") {
+  //     //   console.log("yes");
 
-          return (
-            <FormInputController name={child.props.name} control={control}>
-              <ChildComponent {...child.props} />
-            </FormInputController>
-          );
-        }
-      }
-      return child;
-    });
-  };
+  //     //   return (
+  //     //     <FormInputController name={child.props.name} control={control}>
+  //     //       <ChildComponent {...child.props} />
+  //     //     </FormInputController>
+  //     //   );
+  //     // }
+  //   }
+  //   return child;
+  // });
+  // };
 
   const prepareFieldsWithEmptyData = (inputFields: Array<string>) => {
     const fieldsObj: any = {};
@@ -112,15 +118,24 @@ export const FormWrapperHook = (props: IFormProps) => {
 
   if (contextValue.register) {
     return (
-      <form onSubmit={handleSubmit(onSubmit)} style={{ display: "block" }}>
-        {renderChildren(props.children)}
-        <Button type="submit">Submit</Button>
-        <Button
-          onClick={() => reset(prepareFieldsWithEmptyData(fields))}
-          variant={"outlined"}
-        >
-          Reset
-        </Button>
+      <form
+        onSubmit={
+          onSubmit ? handleSubmit(onSubmit) : handleSubmit(onSubmitDefault)
+        }
+        style={{ display: "block" }}
+      >
+        {!disableClear && (
+          <Button
+            onClick={() => reset(prepareFieldsWithEmptyData(fields))}
+            variant={"outlined"}
+            sx={{
+              float: "right",
+            }}
+          >
+            Clear
+          </Button>
+        )}
+        {props.children}
       </form>
     );
   }

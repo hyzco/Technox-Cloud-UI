@@ -1,5 +1,5 @@
 // ** React Imports
-import { useState, ChangeEvent } from "react";
+import { useState, ChangeEvent, useEffect } from "react";
 
 // ** MUI Imports
 import Box from "@mui/material/Box";
@@ -89,18 +89,30 @@ const APP_CATALOG = [
   },
 ];
 
-const TabApplication = () => {
-  const [value, setValue] = useState<string>("react");
+interface IAppProps {
+  callback: Function;
+  tabFooter: (props: any) => JSX.Element;
+}
 
-  const handleChange = (event: ChangeEvent<HTMLInputElement>) => {
-    setValue(event.target.value);
-  };
+const TabApplication = (props: IAppProps) => {
+  const [fullAppName, setFullAppName] = useState<string>("");
+
+  const { callback, tabFooter } = props;
 
   const renderApps = (props: ICatalogApp) => {
+    const handleChange = () => {
+      console.log("triggered");
+      setFullAppName(props.appName + " " + props.appVersion);
+    };
+
+    useEffect(() => {
+      console.log(fullAppName);
+    }, [fullAppName]);
+
     return (
       <Grid item xs={2} sm={6} xl={4}>
         <Box
-          onClick={() => setValue("react")}
+          onClick={() => handleChange()}
           sx={{
             mb: 6,
             cursor: "pointer",
@@ -163,6 +175,12 @@ const TabApplication = () => {
           })}
         </Grid>
       </Box>
+      {tabFooter({
+        enableDefaultOnClick: false,
+        onClick: () => {
+          callback(fullAppName);
+        },
+      })}
     </Box>
   );
 };
