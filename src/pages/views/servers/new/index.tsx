@@ -105,16 +105,29 @@ interface IServerDetails {
   vmName: string;
   rootPw: string;
 }
+
+interface IDbDetails {
+  dbEngine: string;
+  account: {
+    dbName: string;
+    dbUser: string;
+    dbPw: string;
+    dbRootPw: string;
+  };
+}
+
 interface IServerState {
   vmApp: string;
   vmPackage: number;
   vmDetails: IServerDetails;
+  dbDetails: IDbDetails;
 }
 
 enum IServerActionEnum {
   SET_VM_PACKAGE = "SET_VM_PACKAGE",
   SET_VM_DETAILS = "SET_VM_DETAILS",
   SET_APP = "SET_APP",
+  SET_DB_DETAILS = "SET_DB_DETAILS",
 }
 
 interface IAction {
@@ -131,6 +144,15 @@ const initialState: IServerState = {
     vmName: "",
     rootPw: "",
   },
+  dbDetails: {
+    dbEngine: "",
+    account: {
+      dbName: "",
+      dbUser: "",
+      dbPw: "",
+      dbRootPw: "",
+    },
+  },
 };
 
 const serverReducer: Reducer<IServerState, IAction> = (
@@ -144,10 +166,10 @@ const serverReducer: Reducer<IServerState, IAction> = (
         ...state,
         vmDetails: {
           ...state.vmDetails,
-          osName: action.payload?.vmDetails.osName || "",
-          osVersion: action.payload?.vmDetails.osVersion || "",
-          vmName: action.payload?.vmDetails.vmName || "",
-          rootPw: action.payload?.vmDetails.rootPw || "",
+          osName: action.payload.vmDetails.osName || "",
+          osVersion: action.payload.vmDetails.osVersion || "",
+          vmName: action.payload.vmDetails.vmName || "",
+          rootPw: action.payload.vmDetails.rootPw || "",
         },
       };
     case IServerActionEnum.SET_VM_PACKAGE:
@@ -161,6 +183,21 @@ const serverReducer: Reducer<IServerState, IAction> = (
       return {
         ...state,
         vmApp: action.payload?.vmApp || "",
+      };
+    case IServerActionEnum.SET_DB_DETAILS:
+      console.log("SET_DB_DETAILS");
+      return {
+        ...state,
+        dbDetails: {
+          ...state.dbDetails,
+          dbEngine: action.payload.dbEngine || "",
+          account: {
+            dbName: action.payload.dbName || "",
+            dbUser: action.payload.dbUser || "",
+            dbPw: action.payload.dbPw || "",
+            dbRootPw: action.payload.dbRootPw || "",
+          },
+        },
       };
     default:
       return state;
@@ -413,8 +450,17 @@ const CreateServerPanel = () => {
             />
           </TabPanel>
           <TabPanel value="DatabaseTab" sx={{ flexGrow: 1 }}>
-            <DialogTabDatabase />
-            {renderTabFooter({ enableDefaultOnClick: true })}
+            <DialogTabDatabase
+              callback={(dbDetails: string) => {
+                dispatch({
+                  type: IServerActionEnum.SET_DB_DETAILS,
+                  payload: { dbDetails: dbDetails },
+                });
+                console.log(dbDetails);
+                footerNextButtonOnSubmit();
+              }}
+              tabFooter={renderTabFooter}
+            />
           </TabPanel>
           <TabPanel value="customScriptTab" sx={{ flexGrow: 1 }}>
             <DialogTabCustomScript />

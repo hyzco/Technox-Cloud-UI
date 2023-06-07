@@ -15,6 +15,7 @@ import Laravel from "mdi-material-ui/Laravel";
 // ** Custom Avatar Component
 import CustomAvatar from "src/@core/components/mui/avatar";
 import Grid from "@mui/material/Grid";
+import useTheme from "@mui/material/styles/useTheme";
 
 interface ICatalogApp {
   appName: string;
@@ -96,6 +97,7 @@ interface IAppProps {
 
 const TabApplication = (props: IAppProps) => {
   const [fullAppName, setFullAppName] = useState<string>("");
+  const theme = useTheme();
 
   const { callback, tabFooter } = props;
 
@@ -115,10 +117,16 @@ const TabApplication = (props: IAppProps) => {
           onClick={() => handleChange()}
           sx={{
             mb: 6,
+            mr: 6,
+            p: 2,
             cursor: "pointer",
             display: "flex",
             alignItems: "center",
             justifyContent: "space-between",
+            backgroundColor:
+              fullAppName == props.appName + " " + props.appVersion
+                ? theme.palette.background.default
+                : "transparent",
           }}
         >
           <Box sx={{ display: "flex", alignItems: "center" }}>

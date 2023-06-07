@@ -417,18 +417,18 @@ const Servers: React.FC = () => {
                   SSH Anahtarlarınız
                 </Button>
               </Grid>
-              <Grid item sm={4} xs={12}>
-                <Button
-                  variant="outlined"
-                  fullWidth
-                  style={{
-                    color: "#007bff",
-                    borderColor: "#007bff",
-                  }}
-                >
-                  ISO Kütüphaneniz
-                </Button>
-              </Grid>
+              {/* <Grid item sm={4} xs={12}>
+                  <Button
+                    variant="outlined"
+                    fullWidth
+                    style={{
+                      color: "#007bff",
+                      borderColor: "#007bff",
+                    }}
+                  >
+                    ISO Kütüphaneniz
+                  </Button>
+                </Grid> */}
               <Grid item sm={4} xs={12}>
                 <Button
                   variant="outlined"

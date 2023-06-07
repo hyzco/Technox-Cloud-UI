@@ -1,5 +1,5 @@
 // ** React Imports
-import { useState, ChangeEvent } from "react";
+import { useState, ChangeEvent, useEffect } from "react";
 
 // ** MUI Imports
 import Box from "@mui/material/Box";
@@ -15,6 +15,12 @@ import Database from "mdi-material-ui/DatabaseOutline";
 // ** Custom Avatar Component
 import CustomAvatar from "src/@core/components/mui/avatar";
 import Grid from "@mui/material/Grid";
+import useFormReducer from "src/@core/hooks/useFormReducer";
+import {
+  FormWrapperHook,
+  useFormHook,
+} from "src/@core/components/form/form-wrapper";
+import useTheme from "@mui/material/styles/useTheme";
 
 interface IDatabase {
   engineName: string;
@@ -60,23 +66,89 @@ const DATABASE_CATALOG = [
   },
 ];
 
-const TabDatabase = () => {
-  const [value, setValue] = useState<string>("firebase");
+interface IDatabaseProps {
+  callback: Function;
+  tabFooter: (props: any) => JSX.Element;
+}
 
-  const handleChange = (event: ChangeEvent<HTMLInputElement>) => {
-    setValue(event.target.value);
+enum REDUCER_ACTIONS {
+  SET_DB_ENGINE = "SET_DB_ENGINE",
+  SET_DB_DETAILS = "SET_DB_DETAILS",
+}
+
+const TabDatabase = (props: IDatabaseProps) => {
+  const [value, setValue] = useState<string>("");
+  const formHook = useFormHook();
+  const theme = useTheme();
+  const [
+    handleSubmit,
+    reset,
+    control,
+    register,
+    getValues,
+    // setValue,
+    formState,
+    trigger,
+  ] = formHook;
+
+  const { callback, tabFooter } = props;
+
+  // const cachedOsName = React.useRef("");
+
+  const [state, dispatch]: any = useFormReducer({
+    reducer: (state: any, action: any) => {
+      switch (action.type) {
+        case REDUCER_ACTIONS.SET_DB_ENGINE:
+          console.log(action);
+          return { ...state, dbEngineName: action.payload.dbEngineName };
+        case REDUCER_ACTIONS.SET_DB_DETAILS:
+          console.log(action);
+          return { ...state, dbEngineName: action.payload.dbEngineName };
+      }
+    },
+    reducerState: {
+      dbEngineName: "",
+      accountDetails: {
+        dbName: "",
+        dbUser: "",
+        dbPw: "",
+        dbRootPw: "",
+      },
+    },
+  });
+
+  useEffect(() => {
+    // console.log(formContext);
+    // This effect runs after every render
+    console.log("rendering TabDetails...");
+    if (state) {
+      // console.log(state);
+    }
+    // console.log(formState());
+  }, [state]);
+
+  const handleChange = (value: any) => {
+    dispatch({
+      type: REDUCER_ACTIONS.SET_DB_ENGINE,
+      payload: { dbEngineName: value },
+    });
   };
 
   const renderDatabase = (props: IDatabase) => {
     return (
       <Box
-        onClick={() => setValue("firebase")}
+        onClick={(e) => handleChange(props.engineName)}
         sx={{
           mb: 6,
+          p: 2,
           cursor: "pointer",
           display: "flex",
           alignItems: "center",
           justifyContent: "space-between",
+          backgroundColor:
+            state.dbEngineName == props.engineName
+              ? theme.palette.background.default
+              : "transparent",
         }}
       >
         <Box sx={{ display: "flex", alignItems: "center" }}>
@@ -104,48 +176,82 @@ const TabDatabase = () => {
           </Box>
         </Box>
         <Radio
-          value="firebase"
-          onChange={handleChange}
-          checked={value === "firebase"}
+          checked={state && state.dbEngineName === props.engineName}
+          name="dbEngineName"
+          {...register("dbEngineName", {
+            value: state.dbEngineName,
+            onchange: handleChange,
+          })}
         />
       </Box>
     );
   };
   return (
-    <Box>
-      <Typography variant="h6" sx={{ mb: 4 }}>
-        Database Settings
-      </Typography>
-      <Grid container spacing={6}>
-        <Grid item xs={8} sm={3}>
-          <TextField sx={{ mb: 4 }} label="Database Name" placeholder="" />
+    <FormWrapperHook
+      name={"serverDatabase"}
+      formHook={formHook}
+      fields={["dbName", "dbUser", "dbPw", "dbRootPw", "dbEngineName"]}
+      onSubmit={(data) => {
+        console.log("submitted");
+        callback(data);
+      }}
+    >
+      <Box>
+        <Typography variant="h6" sx={{ mb: 4 }}>
+          Database Settings
+        </Typography>
+        <Grid container spacing={6}>
+          <Grid item xs={8} sm={3}>
+            <TextField
+              {...register("dbName")}
+              name="dbName"
+              sx={{ mb: 4 }}
+              label="Database Name"
+              placeholder=""
+            />
+          </Grid>
+          <Grid item xs={8} sm={3}>
+            <TextField
+              {...register("dbUser")}
+              name="dbUser"
+              sx={{ mb: 4 }}
+              label="Database User"
+              placeholder=""
+            />
+          </Grid>
+          <Grid item xs={4} sm={3}>
+            <TextField
+              {...register("dbPw")}
+              name="dbPw"
+              sx={{ mb: 4 }}
+              label="Database Password"
+              placeholder=""
+            />
+          </Grid>
         </Grid>
-        <Grid item xs={8} sm={3}>
-          <TextField sx={{ mb: 4 }} label="Database User" placeholder="" />
+        <Grid container spacing={6}>
+          <Grid item xs={4} sm={3}>
+            <TextField
+              {...register("dbRootPw")}
+              name="dbRootPw"
+              sx={{ mb: 4 }}
+              label="Database Root Password"
+              placeholder=""
+            />
+          </Grid>
         </Grid>
-        <Grid item xs={4} sm={3}>
-          <TextField sx={{ mb: 4 }} label="Database Password" placeholder="" />
-        </Grid>
-      </Grid>
-      <Grid container spacing={6}>
-        <Grid item xs={4} sm={3}>
-          <TextField
-            sx={{ mb: 4 }}
-            label="Database Root Password"
-            placeholder=""
-          />
-        </Grid>
-      </Grid>
 
-      <Typography variant="h6" sx={{ mb: 4 }}>
-        Select Database Engine (no selection to skip)
-      </Typography>
-      <Box sx={{ mb: 8 }}>
-        {[...DATABASE_CATALOG].map((databaseEngine: IDatabase) => {
-          return renderDatabase(databaseEngine);
-        })}
+        <Typography variant="h6" sx={{ mb: 4 }}>
+          Select Database Engine (no selection to skip)
+        </Typography>
+        <Box sx={{ mb: 8 }}>
+          {[...DATABASE_CATALOG].map((databaseEngine: IDatabase) => {
+            return renderDatabase(databaseEngine);
+          })}
+        </Box>
+        {tabFooter && tabFooter({ enableDefaultOnClick: false })}
       </Box>
-    </Box>
+    </FormWrapperHook>
   );
 };
 

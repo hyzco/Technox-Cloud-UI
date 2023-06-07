@@ -26,11 +26,11 @@ const navigation = (): VerticalNavItemsType => {
       icon: GoogleCirclesExtended,
       path: "/views/servers",
     },
-    {
-      title: "Servislerim",
-      icon: FormSelect,
-      path: "/views/services",
-    },
+    // {
+    //   title: "Servislerim",
+    //   icon: FormSelect,
+    //   path: "/views/services",
+    // },
     {
       title: "DNS Kayıtları",
       icon: ArchiveOutline,
