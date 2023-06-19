@@ -15,7 +15,7 @@ import Laravel from "mdi-material-ui/Laravel";
 // ** Custom Avatar Component
 import CustomAvatar from "src/@core/components/mui/avatar";
 import Grid from "@mui/material/Grid";
-import useTheme from "@mui/material/styles/useTheme";
+import { useTheme } from "@mui/material/styles";
 
 interface ICatalogApp {
   appName: string;

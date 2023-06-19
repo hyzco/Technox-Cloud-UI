@@ -16,12 +16,11 @@ import Database from "mdi-material-ui/DatabaseOutline";
 import CustomAvatar from "src/@core/components/mui/avatar";
 import Grid from "@mui/material/Grid";
 import useFormReducer from "src/@core/hooks/useFormReducer";
+import { useTheme } from "@mui/material/styles";
 import {
   FormWrapperHook,
   useFormHook,
 } from "src/@core/components/form/form-wrapper";
-import useTheme from "@mui/material/styles/useTheme";
-
 interface IDatabase {
   engineName: string;
   engineVersion: string;

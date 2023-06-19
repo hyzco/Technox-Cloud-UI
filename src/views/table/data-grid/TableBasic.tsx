@@ -11,7 +11,7 @@ import { Typography } from "@mui/material";
 
 const TableBasic = (props: any) => {
   let { rows, columns } = props;
-
+  console.log(props);
   // if (isNullOrUndefined(rows)) {
   //   rows = {
   //     id: "xxxx",

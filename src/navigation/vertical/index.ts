@@ -14,15 +14,12 @@ import { VerticalNavItemsType } from "src/@core/layouts/types";
 const navigation = (): VerticalNavItemsType => {
   return [
     {
-      sectionTitle: "Cloud Control Panel",
-    },
-    {
-      title: "Kontrol Paneli",
+      title: "Home",
       icon: HomeOutline,
-      path: "/dashboards/ecommerce",
+      path: "/dashboard",
     },
     {
-      title: "Sunucularım",
+      title: "My Servers",
       icon: GoogleCirclesExtended,
       path: "/views/servers",
     },
@@ -32,27 +29,27 @@ const navigation = (): VerticalNavItemsType => {
     //   path: "/views/services",
     // },
     {
-      title: "DNS Kayıtları",
+      title: "DNS Records",
       icon: ArchiveOutline,
       path: "/views/records",
     },
     {
-      title: "Ödemeler",
+      title: "Payments",
       icon: CreditCardSettingsOutline,
       path: "/views/payments",
     },
     {
-      title: "Talepler",
+      title: "Support",
       icon: MessageOutline,
       path: "/views/requests",
     },
     {
-      title: "Hesabım",
+      title: "My Account",
       icon: AccountOutline,
       path: "/views/account",
     },
     {
-      title: "Sıkça Sorulan Sorular",
+      title: "F.A.Q.",
       icon: HelpCircleOutline,
       path: "/views/faq",
     },

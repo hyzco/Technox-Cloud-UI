@@ -61,6 +61,7 @@ import useGetUser from "src/hooks/useGetUser";
 import TableBasic from "src/views/table/data-grid/TableBasic";
 
 import DialogCreateServer from "src/views/pages/dialog-examples/DialogCreateServer";
+import { useRouter } from "next/router";
 
 interface UserRoleType {
   [key: string]: ReactElement;
@@ -324,6 +325,28 @@ const columns = [
     field: "id",
     minWidth: 80,
     headerName: "ID",
+    renderCell: (idState: any) => {
+      console.log(idState.row);
+      const router = useRouter();
+
+      return (
+        <Button
+          onClick={() => {
+            router.push(
+              {
+                pathname: `/views/servers/view-server/${idState.row.id}`,
+                query: { ...idState.row },
+              },
+              `/views/servers/view-server/${idState.row.id}`
+            );
+          }}
+
+          // href={`/views/servers/view-server/${idState.row.id}`}
+        >
+          {idState.row.id}
+        </Button>
+      );
+    },
   },
   {
     flex: 0.25,
@@ -334,26 +357,105 @@ const columns = [
   {
     flex: 0.25,
     minWidth: 200,
-    field: "ip",
+    field: "ip_address",
     headerName: "IP Address",
+    valueGetter: (ipState: any) => {
+      if (ipState.value) {
+        return ipState.value;
+      } else {
+        return "Not Set";
+      }
+    },
   },
   {
     flex: 0.25,
     minWidth: 230,
     field: "traffic_usage",
     headerName: "Traffic Usage",
+    valueGetter: () => {
+      return "NoN";
+    },
   },
   {
     flex: 0.15,
     minWidth: 130,
     field: "usage",
     headerName: "Usage",
+    valueGetter: () => {
+      return "NoN";
+    },
   },
   {
     flex: 0.15,
     minWidth: 120,
-    field: "status",
-    headerName: "Status",
+    field: "power_state",
+    headerName: "Power Status",
+    renderCell: (powerState: any) => {
+      console.log(powerState);
+      enum POWER_STATUS {
+        POWERED_OFF = "POWERED_OFF",
+        POWERED_ON = "POWERED_ON",
+      }
+
+      if (powerState.row.power_state === POWER_STATUS.POWERED_ON) {
+        const element = (
+          <Typography
+            variant="body2"
+            sx={{ display: "flex", alignItems: "center" }}
+          >
+            <strong>Running </strong>
+            <Box
+              sx={{
+                marginLeft: 1,
+                width: 14,
+                height: 14,
+                backgroundColor: "green",
+                borderRadius: "50%",
+              }}
+            ></Box>
+          </Typography>
+        );
+        return element;
+      } else if (powerState.row.power_state === POWER_STATUS.POWERED_OFF) {
+        const element = (
+          <Typography
+            variant="body2"
+            sx={{ display: "flex", alignItems: "center" }}
+          >
+            <strong>Stopped </strong>
+            <Box
+              sx={{
+                marginLeft: 1,
+                width: 14,
+                height: 14,
+                backgroundColor: "red",
+                borderRadius: "50%",
+              }}
+            ></Box>
+          </Typography>
+        );
+        return element;
+      } else {
+        const element = (
+          <Typography
+            variant="body2"
+            sx={{ display: "flex", alignItems: "center" }}
+          >
+            <strong>Unknown </strong>
+            <Box
+              sx={{
+                marginLeft: 1,
+                width: 14,
+                height: 14,
+                backgroundColor: "grey",
+                borderRadius: "50%",
+              }}
+            ></Box>
+          </Typography>
+        );
+        return element;
+      }
+    },
   },
 ];
 
@@ -365,17 +467,29 @@ const Servers: React.FC = () => {
   const [status, setStatus] = useState<string>("");
   const [pageSize, setPageSize] = useState<number>(10);
   const [addUserOpen, setAddUserOpen] = useState<boolean>(false);
+  const [listData, setListData] = useState<[]>([]);
 
   // ** Hooks
-  const dispatch = useDispatch<AppDispatch>();
   const store = useSelector((state: RootState) => state.server);
+  const dispatch = useDispatch<AppDispatch>();
 
   // const { userServer, loading } = useGetUser();
 
   useEffect(() => {
-    dispatch(fetchData({}));
-    console.log(store);
-  }, [dispatch, plan, role, status, value]);
+    dispatch(fetchData({})).then((val) => {
+      console.log("here");
+      console.log(val);
+      setListData(val.payload);
+    });
+  }, []);
+
+  //TODO: investivate why store doesn't have data
+  useEffect(() => {
+    if (store && store.serverList) {
+      console.log("store serverList");
+      console.log(store.serverList);
+    }
+  }, [store]);
 
   const handleFilter = useCallback((val: string) => {
     setValue(val);
@@ -395,29 +509,33 @@ const Servers: React.FC = () => {
 
   const toggleAddUserDrawer = () => setAddUserOpen(!addUserOpen);
 
-  return (
-    <Grid container spacing={6}>
-      <Grid item xs={12}>
-        <Card>
-          <CardHeader
-            title="Sunucularım"
-            sx={{ pb: 4, "& .MuiCardHeader-title": { letterSpacing: ".15px" } }}
-          />
-          <CardContent>
-            <Grid container spacing={6}>
-              <Grid item sm={4} xs={12}>
-                <Button
-                  variant="outlined"
-                  fullWidth
-                  style={{
-                    color: "#17a2b8",
-                    borderColor: "#17a2b8",
-                  }}
-                >
-                  SSH Anahtarlarınız
-                </Button>
-              </Grid>
-              {/* <Grid item sm={4} xs={12}>
+  if (listData) {
+    return (
+      <Grid container spacing={6}>
+        <Grid item xs={12}>
+          <Card>
+            <CardHeader
+              title="Manage"
+              sx={{
+                pb: 4,
+                "& .MuiCardHeader-title": { letterSpacing: ".15px" },
+              }}
+            />
+            <CardContent>
+              <Grid container spacing={6}>
+                <Grid item sm={4} xs={12}>
+                  <Button
+                    variant="outlined"
+                    fullWidth
+                    style={{
+                      color: "#17a2b8",
+                      borderColor: "#17a2b8",
+                    }}
+                  >
+                    SSH Keys
+                  </Button>
+                </Grid>
+                {/* <Grid item sm={4} xs={12}>
                   <Button
                     variant="outlined"
                     fullWidth
@@ -429,59 +547,59 @@ const Servers: React.FC = () => {
                     ISO Kütüphaneniz
                   </Button>
                 </Grid> */}
-              <Grid item sm={4} xs={12}>
-                <Button
-                  variant="outlined"
-                  fullWidth
-                  style={{
-                    color: "#28a745",
-                    borderColor: "#28a745",
-                  }}
-                  onClick={toggleAddUserDrawer}
-                >
-                  Yeni Sunucu Oluştur
-                </Button>
+                <Grid item sm={4} xs={12}>
+                  <Button
+                    variant="outlined"
+                    fullWidth
+                    style={{
+                      color: "#28a745",
+                      borderColor: "#28a745",
+                    }}
+                    onClick={toggleAddUserDrawer}
+                  >
+                    Create New Server
+                  </Button>
+                </Grid>
               </Grid>
-            </Grid>
-          </CardContent>
-        </Card>
-      </Grid>
-      <Grid item xs={12}>
-        <Card>
-          <TableHeader value={value} handleFilter={handleFilter} />
-        </Card>
-      </Grid>
-      <Grid item xs={12}>
-        <Card>
-          <Grid
-            sx={{
-              width: "100%",
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "space-between",
-              p: 3,
-            }}
-          >
-            <CardHeader
-              title="Sunucular"
+            </CardContent>
+          </Card>
+        </Grid>
+        <Grid item xs={12}>
+          <Card>
+            <TableHeader value={value} handleFilter={handleFilter} />
+          </Card>
+        </Grid>
+        <Grid item xs={12}>
+          <Card>
+            <Grid
               sx={{
-                pb: 4,
-                "& .MuiCardHeader-title": { letterSpacing: ".15px" },
-              }}
-            />
-            <a
-              href=""
-              style={{
-                letterSpacing: ".15px",
-                fontSize: "20px",
-                color: "#007bff",
+                width: "100%",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "space-between",
+                p: 3,
               }}
             >
-              Kapatılmış Sunucular
-            </a>
-          </Grid>
+              <CardHeader
+                title="Virtual Servers"
+                sx={{
+                  pb: 4,
+                  "& .MuiCardHeader-title": { letterSpacing: ".15px" },
+                }}
+              />
+              <a
+                href=""
+                style={{
+                  letterSpacing: ".15px",
+                  fontSize: "20px",
+                  color: "#007bff",
+                }}
+              >
+                Closed Servers
+              </a>
+            </Grid>
 
-          {/* <DataGrid
+            {/* <DataGrid
             autoHeight
             rows={store.serverList}
             columns={columns}
@@ -492,15 +610,17 @@ const Servers: React.FC = () => {
             sx={{ "& .MuiDataGrid-columnHeaders": { borderRadius: 0 } }}
             onPageSizeChange={(newPageSize: number) => setPageSize(newPageSize)}
           /> */}
-          <TableBasic columns={columns} rows={store.serverList} />
-        </Card>
+            <TableBasic columns={columns} rows={listData} />
+          </Card>
+        </Grid>
+
+        <DialogCreateServer show={addUserOpen} toggle={toggleAddUserDrawer} />
+
+        {/* <AddUserDrawer open={addUserOpen} toggle={toggleAddUserDrawer} /> */}
       </Grid>
-
-      <DialogCreateServer show={addUserOpen} toggle={toggleAddUserDrawer} />
-
-      {/* <AddUserDrawer open={addUserOpen} toggle={toggleAddUserDrawer} /> */}
-    </Grid>
-  );
+    );
+  }
+  return <></>;
 };
 
 export default Servers;
