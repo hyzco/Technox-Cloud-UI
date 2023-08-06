@@ -154,7 +154,15 @@ const ServerView = (props: any) => {
           }}
         >
           <Box
+            onClick={() => {
+              window.open(
+                `https://${data.ip_address}:6080/vnc.html`,
+                "_blank",
+                "noreferrer"
+              );
+            }}
             sx={{
+              cursor: "grabbing",
               display: "flex",
               width: "400px",
               minWidth: "200px",

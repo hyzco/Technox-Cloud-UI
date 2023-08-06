@@ -8,7 +8,7 @@ import ApexChartWrapper from "src/@core/styles/libs/react-apexcharts";
 // ** Demo Components Imports
 import EcommerceTable from "src/views/dashboards/ecommerce/EcommerceTable";
 import EcommerceActivityTimeline from "src/views/dashboards/ecommerce/EcommerceActivityTimeline";
-import EcommerceSalesOverviewWithTabs from "src/views/dashboards/ecommerce/EcommerceSalesOverviewWithTabs";
+import EcommerceSalesOverviewWithTabs from "src/views/dashboards/ecommerce/DashboardServerOverviewWithTabs";
 import CloudBalanceOverview from "src/views/dashboards/ecommerce/CloudBalanceOverview";
 import CloudAssetsOverview from "src/views/dashboards/ecommerce/CloudAssetsOverview";
 
@@ -54,9 +54,9 @@ const EcommerceDashboard = () => {
           <Grid item xs={12} md={6}>
             <EcommerceActivityTimeline />
           </Grid>
-          <Grid item xs={12} md={12} sx={{ order: 3 }}>
+          {/* <Grid item xs={12} md={12} sx={{ order: 3 }}>
             <EcommerceTable />
-          </Grid>
+          </Grid> */}
 
           {/* <Grid item xs={12} sm={6} md={3}>
             <EcommerceImpressionsOrders />

@@ -8,7 +8,7 @@ import ApexChartWrapper from "src/@core/styles/libs/react-apexcharts";
 // ** Demo Components Imports
 import EcommerceTable from "src/views/dashboards/ecommerce/EcommerceTable";
 import EcommerceActivityTimeline from "src/views/dashboards/ecommerce/EcommerceActivityTimeline";
-import EcommerceSalesOverviewWithTabs from "src/views/dashboards/ecommerce/EcommerceSalesOverviewWithTabs";
+import EcommerceSalesOverviewWithTabs from "src/views/dashboards/ecommerce/DashboardServerOverviewWithTabs";
 import CloudBalanceOverview from "src/views/dashboards/ecommerce/CloudBalanceOverview";
 import CloudAssetsOverview from "src/views/dashboards/ecommerce/CloudAssetsOverview";
 import { Card, CardHeader } from "@mui/material";

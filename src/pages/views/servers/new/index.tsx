@@ -44,6 +44,11 @@ import DialogTabDatabase from "src/views/pages/dialog-examples/create-app-tabs/D
 import DialogTabApplication from "src/views/pages/dialog-examples/create-app-tabs/DialogTabApplication";
 import DialogTabCustomScript from "src/views/pages/dialog-examples/create-app-tabs/DialogTabCustomScript";
 import { AccountSettingsOutline } from "mdi-material-ui";
+import useAxiosFunction from "src/@core/hooks/useAxiosFunction";
+import vmApi from "src/@core/apis/vmApi";
+import { HTTP_METHOD } from "src/@core/enums/axios.enum";
+import userConfig from "src/configs/user";
+import { useAuth } from "src/hooks/useAuth";
 
 interface TabLabelProps {
   title: string;
@@ -91,6 +96,7 @@ const TabLabel = (props: TabLabelProps) => {
 };
 
 const tabsArr = [
+  "packagesTab",
   "detailsTab",
   "applicationTab",
   "DatabaseTab",
@@ -206,6 +212,7 @@ const serverReducer: Reducer<IServerState, IAction> = (
 
 const CreateServerPanel = () => {
   const [activeTab, setActiveTab] = useState<string>("packagesTab");
+  const { user, logout } = useAuth();
 
   // ** Hook
   const { settings } = useSettings();
@@ -238,9 +245,43 @@ const CreateServerPanel = () => {
     enableDefaultOnClick: boolean;
     onClick?: () => void;
   }) => {
+    const [response, error, loading, axiosFetch] = useAxiosFunction();
+
+    const storedToken = window.localStorage.getItem(
+      userConfig.storageTokenKeyName
+    )!;
+
+    const requestNewVm = () => {
+      axiosFetch({
+        axiosInstance: vmApi,
+        method: HTTP_METHOD.POST,
+        url: "/server/options/create-vm",
+        requestConfig: {
+          headers: {
+            Authorization: storedToken,
+          },
+        },
+      });
+    };
+
+    useEffect(() => {
+      console.log("response");
+      console.log(response);
+      console.log(error);
+      if (error.includes("401")) {
+        logout();
+      }
+    }, [response, error]);
+
     const onClick = () => {
+      if (activeTab === "submitTab") {
+        //do API call to backend to create VM.
+        //all logic regarding if user has enough money etc will be handled on backend.
+        //TODO:
+        //later make one axios caller and use that instance
+        requestNewVm();
+      }
       if (props.onClick !== undefined) {
-        console.log("here");
         props.onClick();
       } else {
         return () => {};
@@ -260,7 +301,7 @@ const CreateServerPanel = () => {
           variant="outlined"
           color="secondary"
           startIcon={<PreviousArrow />}
-          disabled={activeTab === "detailsTab"}
+          disabled={activeTab === "packagesTab"}
           onClick={() => setActiveTab(prevTab)}
         >
           Previous
@@ -274,7 +315,11 @@ const CreateServerPanel = () => {
             props.enableDefaultOnClick ? footerNextButtonOnSubmit() : onClick();
           }}
         >
-          {activeTab === "submitTab" ? "Submit" : "Next"}
+          {loading
+            ? "Creating..."
+            : activeTab === "submitTab"
+            ? "Submit"
+            : "Next"}
         </Button>
       </Box>
     );
@@ -308,7 +353,7 @@ const CreateServerPanel = () => {
         <TabContext value={activeTab}>
           <TabList
             orientation="vertical"
-            onChange={(e, newValue: string) => setActiveTab(newValue)}
+            // onChange={(e, newValue: string) => setActiveTab(newValue)}
             sx={{
               display: "flex",
               // height: "100%",
@@ -484,7 +529,7 @@ const CreateServerPanel = () => {
                 />
               </Box>
             </Box>
-            {renderTabFooter({ enableDefaultOnClick: true })}
+            {renderTabFooter({ enableDefaultOnClick: false })}
           </TabPanel>
         </TabContext>
       </Box>

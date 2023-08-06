@@ -360,6 +360,7 @@ const columns = [
     field: "ip_address",
     headerName: "IP Address",
     valueGetter: (ipState: any) => {
+      console.log(ipState);
       if (ipState.value) {
         return ipState.value;
       } else {
@@ -467,12 +468,12 @@ const Servers: React.FC = () => {
   const [status, setStatus] = useState<string>("");
   const [pageSize, setPageSize] = useState<number>(10);
   const [addUserOpen, setAddUserOpen] = useState<boolean>(false);
-  const [listData, setListData] = useState<[]>([]);
+  const [listData, setListData] = useState<Array<any>>([]);
 
   // ** Hooks
   const store = useSelector((state: RootState) => state.server);
   const dispatch = useDispatch<AppDispatch>();
-
+  const router = useRouter();
   // const { userServer, loading } = useGetUser();
 
   useEffect(() => {
@@ -509,7 +510,7 @@ const Servers: React.FC = () => {
 
   const toggleAddUserDrawer = () => setAddUserOpen(!addUserOpen);
 
-  if (listData) {
+  if (listData !== undefined && listData.length > 0) {
     return (
       <Grid container spacing={6}>
         <Grid item xs={12}>
@@ -619,8 +620,54 @@ const Servers: React.FC = () => {
         {/* <AddUserDrawer open={addUserOpen} toggle={toggleAddUserDrawer} /> */}
       </Grid>
     );
+  } else {
+    return (
+      <Grid container spacing={6}>
+        <Grid item xs={12}>
+          <Card>
+            <CardContent
+              sx={{
+                pt: 20,
+                textAlign: "center",
+                pb: (theme) => `${theme.spacing(25)} !important`,
+              }}
+            >
+              <Typography
+                variant="h5"
+                sx={{
+                  mb: 2.5,
+                  color: "primary.main",
+                  fontWeight: 600,
+                  fontSize: "1.5rem !important",
+                }}
+              >
+                You don't have any servers.
+              </Typography>
+              <Typography variant="body1" sx={{ mb: 6.5 }}>
+                You can click the button bellow to create a new server.
+              </Typography>
+              <Button
+                variant="outlined"
+                // fullWidth
+                style={
+                  {
+                    // color: "#28a745",
+                    // borderColor: "#28a745",
+                  }
+                }
+                onClick={() => {
+                  router.push(`/views/servers/new`);
+                }}
+              >
+                Create New Server
+              </Button>
+            </CardContent>
+          </Card>
+        </Grid>
+        {/* <DialogCreateServer show={addUserOpen} toggle={toggleAddUserDrawer} /> */}
+      </Grid>
+    );
   }
-  return <></>;
 };
 
 export default Servers;

@@ -32,6 +32,7 @@ export const fetchData = createAsyncThunk(
       },
       params,
     });
+    console.log("USER SERVER:");
     console.log(response.data.userServer);
     return response.data.userServer;
   }
