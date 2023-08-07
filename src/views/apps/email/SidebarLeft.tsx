@@ -17,12 +17,7 @@ import ListItem, { ListItemProps } from "@mui/material/ListItem";
 
 // ** Icons Imports
 import Circle from "mdi-material-ui/Circle";
-import SendOutline from "mdi-material-ui/SendOutline";
-import StarOutline from "mdi-material-ui/StarOutline";
 import EmailOutline from "mdi-material-ui/EmailOutline";
-import PencilOutline from "mdi-material-ui/PencilOutline";
-import DeleteOutline from "mdi-material-ui/DeleteOutline";
-import AlertOctagonOutline from "mdi-material-ui/AlertOctagonOutline";
 
 // ** Third Party Imports
 import PerfectScrollbar from "react-perfect-scrollbar";
@@ -64,12 +59,9 @@ const SidebarLeft = (props: MailSidebarType) => {
     store,
     hidden,
     lgAbove,
-    dispatch,
     leftSidebarOpen,
     leftSidebarWidth,
-    toggleComposeOpen,
     setMailDetailsOpen,
-    handleSelectAllMail,
     handleLeftSidebarToggle,
   } = props;
 
@@ -161,7 +153,7 @@ const SidebarLeft = (props: MailSidebarType) => {
       }}
     >
       <Box sx={{ p: 5, overflowY: "hidden" }}>
-        <Link href="/views/requests/add" passHref>
+        <Link href="/views/requests" passHref>
           <Button fullWidth variant="contained">
             <ListItemText
               primary="Yeni Talep Oluştur"
