@@ -220,13 +220,13 @@ const SidebarLeft = (props: MailSidebarType) => {
       axiosInstance: vmApi,
       method: HTTP_METHOD.POST,
       url: "/support/request",
+      body: {
+        fullName,
+        title,
+        description,
+        department: department ? department : "finance",
+      },
       requestConfig: {
-        data: {
-          fullName,
-          title,
-          description,
-          department: department ? department : "finance",
-        },
         headers: {
           Authorization: storedToken,
         },

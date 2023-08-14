@@ -6,10 +6,13 @@ import Box from "@mui/material/Box";
 import List from "@mui/material/List";
 import Divider from "@mui/material/Divider";
 import Backdrop from "@mui/material/Backdrop";
+import Checkbox from "@mui/material/Checkbox";
+import Avatar from "@mui/material/Avatar";
 import { styled } from "@mui/material/styles";
 import Typography from "@mui/material/Typography";
 import CircularProgress from "@mui/material/CircularProgress";
 import ListItem, { ListItemProps } from "@mui/material/ListItem";
+import MailDetails from "./MailDetails";
 
 // ** Icons Import
 import AlertCircleOutline from "mdi-material-ui/AlertCircleOutline";
@@ -77,7 +80,9 @@ const MailLog = (props: MailListType) => {
       }}
     >
       <Box sx={{ height: "100%", backgroundColor: "background.paper" }}>
-        <Box sx={{ px: 5, py: 3 }}></Box>
+        <Box sx={{ px: 5, py: 3 }}>
+          <Typography variant="h6">Mail Log</Typography>
+        </Box>
         <Divider sx={{ m: 0 }} />
         <Box
           sx={{
@@ -114,19 +119,19 @@ const MailLog = (props: MailListType) => {
                           py: 2.75,
                           backgroundColor: "background.paper",
                         }}
-                        // onClick={() => {
-                        //   setMailDetailsOpen(true);
-                        //   dispatch(getCurrentMail(mail.id));
-                        //   dispatch(
-                        //     updateMail({
-                        //       emailIds: [mail.id],
-                        //       dataToUpdate: { isRead: true },
-                        //     })
-                        //   );
-                        //   setTimeout(() => {
-                        //     dispatch(handleSelectAllMail(false));
-                        //   }, 600);
-                        // }}
+                        onClick={() => {
+                          // setMailDetailsOpen(true);
+                          // dispatch(getCurrentMail(mail.id));
+                          // dispatch(
+                          //   updateMail({
+                          //     emailIds: [mail.id],
+                          //     dataToUpdate: { isRead: true },
+                          //   })
+                          // );
+                          // setTimeout(() => {
+                          //   dispatch(handleSelectAllMail(false));
+                          // }, 600);
+                        }}
                       >
                         <Box
                           sx={{
@@ -137,18 +142,19 @@ const MailLog = (props: MailListType) => {
                             alignItems: "center",
                           }}
                         >
-                          {/* <Checkbox
-                            onClick={(e) => e.stopPropagation()}
-                            // onChange={() => dispatch(handleSelectMail(mail.id))}
-                            checked={
-                              support.selectedMails.includes(support.id) || false
-                            }
-                          /> */}
-                          {/* <Avatar
-                            alt={mail.from.name}
-                            src={mail.from.avatar}
+                          <Checkbox
+                          // onClick={(e) => e.stopPropagation()}
+                          // onChange={() => dispatch(handleSelectMail(mail.id))}
+                          // checked={
+                          //   support.selectedMails.includes(support.id) ||
+                          //   false
+                          // }
+                          />
+                          <Avatar
+                            // alt={mail.from.name}
+                            // src={mail.from.avatar}
                             sx={{ mr: 3.5, width: "2rem", height: "2rem" }}
-                          /> */}
+                          />
                           <Box
                             sx={{
                               display: "flex",
