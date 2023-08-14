@@ -2,11 +2,19 @@ import axios, { AxiosInstance, AxiosRequestConfig } from "axios";
 import { useState, useEffect } from "react";
 import { HTTP_METHOD } from "../enums/axios.enum";
 
-interface IAxiosConfigObj {
+// interface IAxiosConfigObj {
+//   axiosInstance: AxiosInstance;
+//   method: HTTP_METHOD;
+//   url: string;
+//   requestConfig: AxiosRequestConfig;
+//   body?: {};
+// }
+interface IAxiosConfigObj<M extends HTTP_METHOD> {
   axiosInstance: AxiosInstance;
-  method: HTTP_METHOD;
+  method: M;
   url: string;
   requestConfig: AxiosRequestConfig;
+  body?: M extends "POST" ? {} : never; // Set body to {} only if method is 'POST'
 }
 
 const useAxiosFunction = () => {
@@ -34,25 +42,35 @@ const useAxiosFunction = () => {
     }
   };
 
-  const axiosFetch = async (configObj: IAxiosConfigObj) => {
+  const axiosFetch = async (configObj: IAxiosConfigObj<HTTP_METHOD>) => {
     const {
       axiosInstance,
       method,
       url,
       requestConfig = {},
-    }: IAxiosConfigObj = configObj;
+      body,
+    }: IAxiosConfigObj<HTTP_METHOD> = configObj;
 
     try {
       setLoading(true);
       const ctrl = new AbortController();
       setController(ctrl);
 
-      const res = await getMethodInstance(method, axiosInstance)(url, {
-        ...requestConfig,
-        signal: ctrl.signal,
-      });
-      console.log("HERE");
-      setResponse(res.data);
+      if (method === HTTP_METHOD.POST || method === HTTP_METHOD.PUT) {
+        const res = await getMethodInstance(method, axiosInstance)(url, body, {
+          ...requestConfig,
+          signal: ctrl.signal,
+        });
+        console.log("HERE");
+        setResponse(res.data);
+      } else {
+        const res = await getMethodInstance(method, axiosInstance)(url, {
+          ...requestConfig,
+          signal: ctrl.signal,
+        });
+        console.log("HERE");
+        setResponse(res.data);
+      }
     } catch (err: any) {
       // console.log(err.message);
       setError(err);
