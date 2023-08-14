@@ -13,7 +13,7 @@ import PackagesCard, {
 
 interface IPackagesProps {
   callback: Function;
-  tabFooter: (props: any) => JSX.Element;
+  tabFooter?: (props: any) => JSX.Element;
 }
 
 const TabPackages = (props: IPackagesProps) => {
@@ -124,12 +124,13 @@ const TabPackages = (props: IPackagesProps) => {
       <Grid container spacing={3}>
         {renderPackageCards()}
       </Grid>
-      {tabFooter({
-        enableDefaultOnClick: false,
-        onClick: () => {
-          callback(selectedPackage);
-        },
-      })}
+      {tabFooter &&
+        tabFooter({
+          enableDefaultOnClick: false,
+          onClick: () => {
+            callback(selectedPackage);
+          },
+        })}
     </>
   );
 };

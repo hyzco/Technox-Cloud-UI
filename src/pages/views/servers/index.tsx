@@ -60,7 +60,7 @@ import AddUserDrawer from "src/views/apps/user/list/AddUserDrawer";
 import useGetUser from "src/hooks/useGetUser";
 import TableBasic from "src/views/table/data-grid/TableBasic";
 
-import DialogCreateServer from "src/views/pages/dialog-examples/DialogCreateServer";
+// import DialogCreateServer from "src/views/pages/dialog-examples/DialogCreateServer";
 import { useRouter } from "next/router";
 
 interface UserRoleType {
@@ -556,7 +556,9 @@ const Servers: React.FC = () => {
                       color: "#28a745",
                       borderColor: "#28a745",
                     }}
-                    onClick={toggleAddUserDrawer}
+                    onClick={() => {
+                      router.push("servers/new");
+                    }}
                   >
                     Create New Server
                   </Button>
@@ -615,7 +617,7 @@ const Servers: React.FC = () => {
           </Card>
         </Grid>
 
-        <DialogCreateServer show={addUserOpen} toggle={toggleAddUserDrawer} />
+        {/* <DialogCreateServer show={addUserOpen} toggle={toggleAddUserDrawer} /> */}
 
         {/* <AddUserDrawer open={addUserOpen} toggle={toggleAddUserDrawer} /> */}
       </Grid>
