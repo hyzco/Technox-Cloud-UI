@@ -19,7 +19,6 @@ import { MailLayoutType, MailLabelColors } from "src/types/apps/emailTypes";
 // ** Email App Component Imports
 import MailLog from "src/views/apps/email/MailLog";
 import SidebarLeft from "src/views/apps/email/SidebarLeft";
-import ComposePopup from "src/views/apps/email/ComposePopup";
 
 // ** Actions
 import { fetchData } from "src/store/apps/support";
@@ -99,12 +98,12 @@ const EmailAppLayout = ({ folder, label }: MailLayoutType) => {
         handleLeftSidebarToggle={handleLeftSidebarToggle}
       />
       <MailLog supportList={store.supportList} />
-      <ComposePopup
+      {/* <ComposePopup
         mdAbove={mdAbove}
         composeOpen={composeOpen}
         composePopupWidth={composePopupWidth}
         toggleComposeOpen={toggleComposeOpen}
-      />
+      /> */}
     </Box>
   );
 };

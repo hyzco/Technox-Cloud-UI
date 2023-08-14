@@ -150,7 +150,7 @@ const UserDropdown = (props: Props) => {
                 variant="body2"
                 sx={{ fontSize: "0.8rem", color: "text.disabled" }}
               >
-                Admin
+                {user?.role}
               </Typography>
             </Box>
           </Box>

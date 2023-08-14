@@ -1,17 +1,25 @@
 // ** React Imports
-import { ElementType, ReactNode } from "react";
+import { ElementType, ReactNode, useState, useEffect } from "react";
 
 // ** Next Import
 import Link from "next/link";
 
 // ** MUI Imports
 import Box from "@mui/material/Box";
+import Grid from "@mui/material/Grid";
 import List from "@mui/material/List";
 import Button from "@mui/material/Button";
+import Select from "@mui/material/Select";
 import Drawer from "@mui/material/Drawer";
-import { styled } from "@mui/material/styles";
+import TextField from "@mui/material/TextField";
+import { styled, useTheme } from "@mui/material/styles";
 import Typography from "@mui/material/Typography";
+import MenuItem from "@mui/material/MenuItem";
+import InputLabel from "@mui/material/InputLabel";
+import FormControl from "@mui/material/FormControl";
+import MuiDialog from "@mui/material/Dialog";
 import ListItemIcon from "@mui/material/ListItemIcon";
+import useMediaQuery from "@mui/material/useMediaQuery";
 import ListItemText from "@mui/material/ListItemText";
 import ListItem, { ListItemProps } from "@mui/material/ListItem";
 
@@ -24,6 +32,13 @@ import PerfectScrollbar from "react-perfect-scrollbar";
 
 // ** Custom Components Imports
 import CustomBadge from "src/@core/components/mui/badge";
+import useFormReducer from "src/@core/hooks/useFormReducer";
+import {
+  FormWrapperHook,
+  useFormHook,
+} from "src/@core/components/form/form-wrapper";
+import useAxiosFunction from "src/@core/hooks/useAxiosFunction";
+import userConfig from "src/configs/user";
 
 // ** Types
 import { CustomBadgeProps } from "src/@core/components/mui/badge/types";
@@ -32,6 +47,13 @@ import {
   MailLabelType,
   MailSidebarType,
 } from "src/types/apps/emailTypes";
+import vmApi from "src/@core/apis/vmApi";
+import { HTTP_METHOD } from "src/@core/enums/axios.enum";
+import React from "react";
+
+enum REDUCER_ACTIONS {
+  SET_REQUEST_DETAILS = "SET_REQUEST_DETAILS",
+}
 
 // ** Styled Components
 const ListItemStyled = styled(ListItem)<
@@ -53,6 +75,20 @@ const ListBadge = styled(CustomBadge)<CustomBadgeProps>(() => ({
   },
 }));
 
+// ** Styled Dialog component
+const Dialog = styled(MuiDialog)({
+  "& .MuiBackdrop-root": {
+    backdropFilter: "blur(4px)",
+  },
+  "& .MuiDialog-paper": {
+    overflow: "hidden",
+    "&:not(.MuiDialog-paperFullScreen)": {
+      height: "100%",
+      maxHeight: 550,
+    },
+  },
+});
+
 const SidebarLeft = (props: MailSidebarType) => {
   // ** Props
   const {
@@ -64,6 +100,45 @@ const SidebarLeft = (props: MailSidebarType) => {
     setMailDetailsOpen,
     handleLeftSidebarToggle,
   } = props;
+
+  const theme = useTheme();
+  const [openDialog, setOpenDialog] = useState<boolean>(false);
+  const fullScreenDialog = useMediaQuery(theme.breakpoints.down("xs"));
+
+  const [fullName, setFullName] = useState<string>("");
+  const [title, setTitle] = useState<string>("");
+  const [description, setDescription] = useState<string>("");
+  const [department, setDepartment] = useState<string | unknown>("");
+
+  const formHook = useFormHook();
+  const [
+    handleSubmit,
+    reset,
+    control,
+    register,
+    getValues,
+    // setValue,
+    formState,
+    trigger,
+  ] = formHook;
+
+  const [state, dispatch]: any = useFormReducer({
+    reducer: (state: any, action: any) => {
+      switch (action.type) {
+        case REDUCER_ACTIONS.SET_REQUEST_DETAILS:
+          console.log(action);
+          return { ...state, support: action.payload.support };
+      }
+    },
+    reducerState: {
+      support: {
+        fullName: "",
+        title: "",
+        description: "",
+        department: "",
+      },
+    },
+  });
 
   const RenderBadge = (
     folder: "inbox" | "draft" | "spam" | "add" | "all",
@@ -128,6 +203,69 @@ const SidebarLeft = (props: MailSidebarType) => {
     }
   };
 
+  const handleRequestSupport = () => {
+    dispatch({
+      type: REDUCER_ACTIONS.SET_REQUEST_DETAILS,
+      payload: {
+        support: {
+          fullName,
+          title,
+          description,
+          department: department ? department : "finance",
+        },
+      },
+    });
+    setOpenDialog(false);
+    axiosFetch({
+      axiosInstance: vmApi,
+      method: HTTP_METHOD.POST,
+      url: "/support/request",
+      requestConfig: {
+        data: {
+          fullName,
+          title,
+          description,
+          department: department ? department : "finance",
+        },
+        headers: {
+          Authorization: storedToken,
+        },
+      },
+    });
+  };
+
+  const [response, error, loading, axiosFetch] = useAxiosFunction();
+  // const { user } = useAuth();
+
+  const storedToken = window.localStorage.getItem(
+    userConfig.storageTokenKeyName
+  );
+
+  useEffect(() => {
+    console.log("response in getVirtualMachineList");
+    console.log(response);
+    console.log(error);
+  }, [response, error]);
+
+  const onSubmit = async (data: any) => {
+    axiosFetch({
+      axiosInstance: vmApi,
+      method: HTTP_METHOD.POST,
+      url: "/support/request",
+      requestConfig: {
+        data: {
+          fullName,
+          title,
+          description,
+          department: department ? department : "finance",
+        },
+        headers: {
+          Authorization: storedToken,
+        },
+      },
+    });
+  };
+
   return (
     <Drawer
       open={leftSidebarOpen}
@@ -153,18 +291,102 @@ const SidebarLeft = (props: MailSidebarType) => {
       }}
     >
       <Box sx={{ p: 5, overflowY: "hidden" }}>
-        <Link href="/views/requests" passHref>
-          <Button fullWidth variant="contained">
-            <ListItemText
-              primary="Yeni Talep Oluştur"
-              sx={{
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-              }}
-            />
-          </Button>
-        </Link>
+        <Button
+          fullWidth
+          variant="contained"
+          onClick={() => setOpenDialog(true)}
+        >
+          <ListItemText
+            primary="Yeni Talep Oluştur"
+            sx={{
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+            }}
+          />
+        </Button>
+        <Dialog
+          fullWidth
+          open={openDialog}
+          fullScreen={fullScreenDialog}
+          onClose={() => setOpenDialog(false)}
+        >
+          <FormWrapperHook
+            name={"supportDatabase"}
+            disableClear={true}
+            formHook={formHook}
+            fields={["fullName", "title", "description", "department"]}
+            onSubmit={(data) => onSubmit(data)}
+          >
+            <Box sx={{ p: 5, overflowY: "hidden" }}>
+              <Typography variant="h6" gutterBottom>
+                Yeni Talep Oluştur
+              </Typography>
+              <Typography variant="body2" gutterBottom>
+                Talep oluşturmak için lütfen aşağıdaki formu doldurunuz.
+              </Typography>
+              <Box sx={{ mt: 5 }}>
+                <Grid container spacing={8}>
+                  <Grid item xs={12} sm={6}>
+                    <TextField
+                      {...register("fullName")}
+                      fullWidth
+                      label="Ad Soyad"
+                      variant="outlined"
+                      size="medium"
+                      onChange={(e) => setFullName(e.target.value)}
+                    />
+                  </Grid>
+                  <Grid item xs={12} sm={6}>
+                    <TextField
+                      {...register("title")}
+                      fullWidth
+                      label="Başlık"
+                      variant="outlined"
+                      size="medium"
+                      onChange={(e) => setTitle(e.target.value)}
+                    />
+                  </Grid>
+                  <Grid item xs={12} sm={12}>
+                    <FormControl fullWidth>
+                      <InputLabel>Departman</InputLabel>
+                      <Select
+                        {...register("department")}
+                        label="Departman"
+                        defaultValue="finance"
+                        onChange={(e) => setDepartment(e.target.value)}
+                      >
+                        <MenuItem value="finance">Finans</MenuItem>
+                        <MenuItem value="it">IT</MenuItem>
+                        <MenuItem value="corporate">Kurumsal</MenuItem>
+                      </Select>
+                    </FormControl>
+                  </Grid>
+                  <Grid item xs={12} sm={12}>
+                    <TextField
+                      {...register("description")}
+                      rows={6}
+                      multiline
+                      fullWidth
+                      label="Detay"
+                      variant="outlined"
+                      onChange={(e) => setDescription(e.target.value)}
+                    />
+                  </Grid>
+                  <Grid item xs={12} sm={12}>
+                    <Button
+                      fullWidth
+                      variant="contained"
+                      onClick={handleRequestSupport}
+                    >
+                      <ListItemText primary="Talep Oluştur" />
+                    </Button>
+                  </Grid>
+                </Grid>
+              </Box>
+            </Box>
+          </FormWrapperHook>
+        </Dialog>
       </Box>
       <ScrollWrapper>
         <Box sx={{ pt: 1.25, overflowY: "hidden" }}>
