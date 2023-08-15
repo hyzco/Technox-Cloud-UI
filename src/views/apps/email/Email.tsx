@@ -22,6 +22,9 @@ import SidebarLeft from "src/views/apps/email/SidebarLeft";
 
 // ** Actions
 import { fetchData } from "src/store/apps/support";
+import MailDetails from "./MailDetails";
+import select from "src/@core/theme/overrides/select";
+import { useRouter } from "next/router";
 
 // ** Variables
 const labelColors: MailLabelColors = {
@@ -36,6 +39,7 @@ const EmailAppLayout = ({ folder, label }: MailLayoutType) => {
   const [query, setQuery] = useState<string>("");
   const [composeOpen, setComposeOpen] = useState<boolean>(false);
   const [mailDetailsOpen, setMailDetailsOpen] = useState<boolean>(false);
+  const [selectedMail, setSelectedMail] = useState<any>({});
   const [leftSidebarOpen, setLeftSidebarOpen] = useState<boolean>(false);
 
   // ** Hooks
@@ -70,6 +74,17 @@ const EmailAppLayout = ({ folder, label }: MailLayoutType) => {
     }px + ${theme.spacing(6)} * 2)`;
   };
 
+  // const router = useRouter();
+
+  // useEffect(() => {
+  //   console.log(router);
+  //   if (router.asPath.includes("comeback")) {
+  //     console.log("HERE");
+  //     // setSelectedMail(selectedMail);
+  //     // setMailDetailsOpen(true);
+  //   }
+  // }, []);
+
   return (
     <Box
       sx={{
@@ -84,20 +99,54 @@ const EmailAppLayout = ({ folder, label }: MailLayoutType) => {
         }),
       }}
     >
-      <SidebarLeft
-        store={storeEmail}
-        hidden={hidden}
-        lgAbove={lgAbove}
-        dispatch={dispatch}
-        mailDetailsOpen={mailDetailsOpen}
-        leftSidebarOpen={leftSidebarOpen}
-        leftSidebarWidth={leftSidebarWidth}
-        toggleComposeOpen={toggleComposeOpen}
-        setMailDetailsOpen={setMailDetailsOpen}
-        // handleSelectAllMail={handleSelectAllMail}
-        handleLeftSidebarToggle={handleLeftSidebarToggle}
-      />
-      <MailLog supportList={store.supportList} />
+      {!mailDetailsOpen && (
+        <SidebarLeft
+          store={storeEmail}
+          hidden={hidden}
+          lgAbove={lgAbove}
+          dispatch={dispatch}
+          mailDetailsOpen={mailDetailsOpen}
+          leftSidebarOpen={leftSidebarOpen}
+          leftSidebarWidth={leftSidebarWidth}
+          toggleComposeOpen={toggleComposeOpen}
+          setMailDetailsOpen={setMailDetailsOpen}
+          // handleSelectAllMail={handleSelectAllMail}
+          handleLeftSidebarToggle={handleLeftSidebarToggle}
+        />
+      )}
+      {!mailDetailsOpen && (
+        <MailLog
+          supportList={store.supportList}
+          setMailDetailsOpen={setMailDetailsOpen}
+          setSelectedMail={setSelectedMail}
+        />
+      )}
+
+      {mailDetailsOpen && (
+        <Box
+        // sx={{
+        //   flex: 1,
+
+        //   flexDirection: "column",
+        //   alignItems: "center",
+        //   justifyContent: "center",
+        // }}
+        >
+          {selectedMail && (
+            <MailDetails
+              mail={selectedMail}
+              mailDetailsOpen={mailDetailsOpen}
+              setMailDetailsOpen={setMailDetailsOpen}
+              refreshData={() => {
+                // @ts-ignore
+                dispatch(fetchData());
+                // setMailDetailsOpen(true);
+              }}
+            />
+          )}
+        </Box>
+      )}
+
       {/* <ComposePopup
         mdAbove={mdAbove}
         composeOpen={composeOpen}

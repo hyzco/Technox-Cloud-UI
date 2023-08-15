@@ -50,6 +50,7 @@ import {
 import vmApi from "src/@core/apis/vmApi";
 import { HTTP_METHOD } from "src/@core/enums/axios.enum";
 import React from "react";
+import user from "src/configs/user";
 
 enum REDUCER_ACTIONS {
   SET_REQUEST_DETAILS = "SET_REQUEST_DETAILS",
@@ -225,6 +226,8 @@ const SidebarLeft = (props: MailSidebarType) => {
         title,
         description,
         department: department ? department : "finance",
+        sentBy: "user",
+        isParent: 1,
       },
       requestConfig: {
         headers: {
@@ -240,31 +243,6 @@ const SidebarLeft = (props: MailSidebarType) => {
   const storedToken = window.localStorage.getItem(
     userConfig.storageTokenKeyName
   );
-
-  useEffect(() => {
-    console.log("response in getVirtualMachineList");
-    console.log(response);
-    console.log(error);
-  }, [response, error]);
-
-  const onSubmit = async (data: any) => {
-    axiosFetch({
-      axiosInstance: vmApi,
-      method: HTTP_METHOD.POST,
-      url: "/support/request",
-      requestConfig: {
-        data: {
-          fullName,
-          title,
-          description,
-          department: department ? department : "finance",
-        },
-        headers: {
-          Authorization: storedToken,
-        },
-      },
-    });
-  };
 
   return (
     <Drawer
@@ -316,7 +294,7 @@ const SidebarLeft = (props: MailSidebarType) => {
             disableClear={true}
             formHook={formHook}
             fields={["fullName", "title", "description", "department"]}
-            onSubmit={(data) => onSubmit(data)}
+            onSubmit={undefined}
           >
             <Box sx={{ p: 5, overflowY: "hidden" }}>
               <Typography variant="h6" gutterBottom>

@@ -8,7 +8,7 @@ import Divider from "@mui/material/Divider";
 import Backdrop from "@mui/material/Backdrop";
 import Checkbox from "@mui/material/Checkbox";
 import Avatar from "@mui/material/Avatar";
-import { styled } from "@mui/material/styles";
+import { styled, useTheme } from "@mui/material/styles";
 import Typography from "@mui/material/Typography";
 import CircularProgress from "@mui/material/CircularProgress";
 import ListItem, { ListItemProps } from "@mui/material/ListItem";
@@ -22,6 +22,11 @@ import PerfectScrollbar from "react-perfect-scrollbar";
 
 // ** Types
 import { MailListType } from "src/types/apps/emailTypes";
+import { useSettings } from "src/@core/hooks/useSettings";
+import { useDispatch, useSelector } from "react-redux";
+import useMediaQuery from "@mui/material/useMediaQuery";
+import { AppDispatch, RootState } from "src/store";
+import Badge from "@mui/material/Badge";
 
 const MailItem = styled(ListItem)<ListItemProps>(({ theme }) => ({
   zIndex: 1,
@@ -65,10 +70,7 @@ const ScrollWrapper = ({
 
 const MailLog = (props: MailListType) => {
   // ** Props
-  const { supportList } = props;
-
-  // ** State
-  const [refresh, setRefresh] = useState<boolean>(false);
+  const { supportList, setMailDetailsOpen, setSelectedMail } = props;
 
   return (
     <Box
@@ -80,8 +82,13 @@ const MailLog = (props: MailListType) => {
       }}
     >
       <Box sx={{ height: "100%", backgroundColor: "background.paper" }}>
-        <Box sx={{ px: 5, py: 3 }}>
-          <Typography variant="h6">Mail Log</Typography>
+        <Box sx={{ px: 5, py: 3, display: "flex", alignItems: "center" }}>
+          <Typography variant="h6">Support Requests</Typography>
+          <Badge
+            badgeContent={supportList.length}
+            color="primary"
+            sx={{ ml: 6 }}
+          />
         </Box>
         <Divider sx={{ m: 0 }} />
         <Box
@@ -120,7 +127,8 @@ const MailLog = (props: MailListType) => {
                           backgroundColor: "background.paper",
                         }}
                         onClick={() => {
-                          // setMailDetailsOpen(true);
+                          setMailDetailsOpen(true);
+                          setSelectedMail(support);
                           // dispatch(getCurrentMail(mail.id));
                           // dispatch(
                           //   updateMail({
@@ -212,8 +220,8 @@ const MailLog = (props: MailListType) => {
             )}
           </ScrollWrapper>
           <Backdrop
-            open={refresh}
-            onClick={() => setRefresh(false)}
+            open={false}
+            // onClick={() => setRefresh(false)}
             sx={{
               zIndex: 5,
               position: "absolute",
@@ -225,9 +233,6 @@ const MailLog = (props: MailListType) => {
           </Backdrop>
         </Box>
       </Box>
-
-      {/* @ts-ignore */}
-      {/* <MailDetails {...mailDetailsProps} /> */}
     </Box>
   );
 };
