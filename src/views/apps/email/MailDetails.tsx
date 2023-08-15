@@ -1,5 +1,13 @@
 // ** React Imports
-import { Fragment, useState, SyntheticEvent, ReactNode } from "react";
+import {
+  Fragment,
+  useState,
+  SyntheticEvent,
+  ReactNode,
+  useEffect,
+  useMemo,
+  memo,
+} from "react";
 
 // ** MUI Imports
 import List from "@mui/material/List";
@@ -49,6 +57,14 @@ import {
   MailFoldersArrType,
   MailAttachmentType,
 } from "src/types/apps/emailTypes";
+import { useAuth } from "src/hooks/useAuth";
+import TextField from "@mui/material/TextField";
+import React from "react";
+import { useRouter } from "next/router";
+import vmApi from "src/@core/apis/vmApi";
+import { HTTP_METHOD } from "src/@core/enums/axios.enum";
+import useAxiosFunction from "src/@core/hooks/useAxiosFunction";
+import userConfig from "src/configs/user";
 
 const HiddenReplyBack = styled(Box)<BoxProps>(({ theme }) => ({
   height: 11,
@@ -128,23 +144,12 @@ const MailCardMenu = () => {
 
 const MailDetails = (props: MailDetailsType) => {
   // ** Props
-  const {
-    mail,
-    hidden,
-    folders,
-    dispatch,
-    direction,
-    updateMail,
-    foldersObj,
-    labelColors,
-    routeParams,
-    paginateMail,
-    handleStarMail,
-    mailDetailsOpen,
-    handleLabelUpdate,
-    handleFolderUpdate,
-    setMailDetailsOpen,
-  } = props;
+  const { mail, mailDetailsOpen, setMailDetailsOpen } = props;
+  const route = useRouter();
+
+  if (!mail) {
+    route.push("/");
+  }
 
   // ** State
   const [showReplies, setShowReplies] = useState<boolean>(false);
@@ -152,20 +157,19 @@ const MailDetails = (props: MailDetailsType) => {
   const [folderAnchorEl, setFolderAnchorEl] = useState<null | HTMLElement>(
     null
   );
+  const [shouldRender, setShouldRender] = useState<boolean>(true);
+  const [allItems, setAllItems] = useState<any>({});
+
+  useEffect(() => {
+    setAllItems(mail);
+  }, [mail]);
 
   // ** Hook
   const { settings } = useSettings();
-
+  const { user } = useAuth();
   // ** Vars
   const openLabelMenu = Boolean(labelAnchorEl);
   const openFolderMenu = Boolean(folderAnchorEl);
-
-  const handleMoveToTrash = () => {
-    dispatch(
-      updateMail({ emailIds: [mail.id], dataToUpdate: { folder: "trash" } })
-    );
-    setMailDetailsOpen(false);
-  };
 
   const handleLabelMenuClick = (event: SyntheticEvent) => {
     setLabelAnchorEl(event.currentTarget as HTMLElement);
@@ -182,114 +186,328 @@ const MailDetails = (props: MailDetailsType) => {
     setMailDetailsOpen(false);
   };
 
-  const handleReadMail = () => {
-    dispatch(
-      updateMail({ emailIds: [mail.id], dataToUpdate: { isRead: false } })
+  const ScrollWrapper = ({ children }: { children: ReactNode }) => {
+    // const [scrollEnabled, setScrollEnabled] = useState(true);
+
+    // useEffect(() => {
+    //   const handleKeyDown = (event: KeyboardEvent) => {
+    //     if (event.key === "Control") {
+    //       setScrollEnabled(false);
+    //     }
+    //   };
+
+    //   const handleKeyUp = (event: KeyboardEvent) => {
+    //     if (event.key === "Control") {
+    //       setScrollEnabled(true);
+    //     }
+    //   };
+
+    //   window.addEventListener("keydown", handleKeyDown);
+    //   window.addEventListener("keyup", handleKeyUp);
+
+    //   return () => {
+    //     window.removeEventListener("keydown", handleKeyDown);
+    //     window.removeEventListener("keyup", handleKeyUp);
+    //   };
+    // }, []);
+
+    return (
+      <PerfectScrollbar options={{ wheelPropagation: false }}>
+        {children}
+      </PerfectScrollbar>
     );
-    setMailDetailsOpen(false);
   };
-  const renderLabelsMenu = () => {
-    return Object.entries(labelColors).map(([key, value]: string[]) => {
-      return (
-        <MenuItem
-          key={key}
-          sx={{ display: "flex", alignItems: "center" }}
-          onClick={() => {
-            handleLabelUpdate([mail.id], key as MailLabelType);
-            handleLabelMenuClose();
+
+  const renderAllItems = (mail: any) => {
+    const tmpParent = Object.assign({}, mail);
+
+    delete tmpParent.children;
+
+    if (showReplies && mail.children) {
+      const items = [...mail.children, tmpParent];
+      items.sort((a, b) =>
+        new Date(a.createdAt).getTime() > new Date(b.createdAt).getTime()
+          ? 0
+          : 1
+      );
+      const totalItems = items.length - 1;
+      return items.map((child: any, index: number) => {
+        return (
+          <Box
+            sx={{
+              mb: index == totalItems ? 40 : 4,
+              boxShadow: 6,
+              width: "100%",
+              borderRadius: 1,
+              backgroundColor: "background.paper",
+              border: (theme) => `1px solid ${theme.palette.divider}`,
+            }}
+          >
+            <Box sx={{ p: 5 }}>
+              <Box
+                sx={{
+                  display: "flex",
+                  flexWrap: "wrap",
+                  alignItems: "center",
+                  justifyContent: "space-between",
+                }}
+              >
+                <Box sx={{ display: "flex", alignItems: "center" }}>
+                  <Avatar
+                    // alt={reply.me}
+                    // src={reply.from.avatar}
+                    sx={{
+                      width: "2.375rem",
+                      height: "2.375rem",
+                      mr: 3,
+                    }}
+                  />
+                  <Box
+                    sx={{
+                      display: "flex",
+                      flexDirection: "column",
+                    }}
+                  >
+                    <Typography sx={{ color: "text.secondary" }}>
+                      {child.sentBy === "user"
+                        ? user?.name + " " + user?.surname
+                        : "OPERATOR"}
+                    </Typography>
+                    <Typography variant="body2" sx={{ color: "text.disabled" }}>
+                      {child.sentBy === "user" ? user?.email : "OPERATOR EMAIL"}
+                    </Typography>
+                  </Box>
+                </Box>
+                <Box sx={{ display: "flex", alignItems: "center" }}>
+                  <Typography
+                    variant="body2"
+                    sx={{ mr: 1.75, color: "text.disabled" }}
+                  >
+                    {new Date(child.createdAt).toUTCString()}
+                  </Typography>
+                  <IconButton size="small" sx={{ mr: 0.5 }}>
+                    <Attachment fontSize="small" />
+                  </IconButton>
+                  <IconButton size="small">
+                    <DotsVertical fontSize="small" />
+                  </IconButton>
+                </Box>
+              </Box>
+            </Box>
+            <Divider sx={{ m: 0 }} />
+            <Box sx={{ px: 5, py: 0 }}>
+              <Box sx={{ color: "text.secondary" }} />
+            </Box>
+            <Fragment>
+              <Box sx={{ p: 5 }}>
+                <Typography variant="body2">{child.description}</Typography>
+              </Box>
+              <Divider sx={{ m: 0 }} />
+              <Box sx={{ p: 5 }}>
+                <Typography variant="body2">Attachments</Typography>
+                <List>
+                  <ListItem disableGutters>
+                    <ListItemIcon>
+                      {/* <img width="24" height="24" /> */}
+                    </ListItemIcon>
+                    <Typography></Typography>
+                  </ListItem>
+                </List>
+              </Box>
+            </Fragment>
+          </Box>
+        );
+      });
+    }
+  };
+
+  const renderLastItem = () => {
+    let item;
+    console.log("RENDER LAST ITEM");
+
+    if (mail.children.length > 0) {
+      item = mail.children[mail.children.length - 1];
+    } else {
+      item = mail;
+    }
+
+    return (
+      <Box
+        sx={{
+          mb: 4,
+          width: "100%",
+          borderRadius: 1,
+          overflow: "visible",
+          position: "relative",
+          backgroundColor: "background.paper",
+          boxShadow: settings.skin === "bordered" ? 0 : 6,
+          border: (theme) => `1px solid ${theme.palette.divider}`,
+        }}
+      >
+        <Box sx={{ p: 5 }}>
+          <Box
+            sx={{
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "space-between",
+              flexWrap: "wrap",
+            }}
+          >
+            <Box sx={{ display: "flex", alignItems: "center" }}>
+              <Avatar
+                sx={{
+                  width: "2.375rem",
+                  height: "2.375rem",
+                  mr: 3,
+                }}
+              />
+              <Box sx={{ display: "flex", flexDirection: "column" }}>
+                <Typography sx={{ color: "text.secondary" }}>
+                  {user?.name} {user?.surname}
+                </Typography>
+                <Typography variant="body2" sx={{ color: "text.disabled" }}>
+                  {user?.email}
+                </Typography>
+              </Box>
+            </Box>
+            <Box sx={{ display: "flex", alignItems: "center" }}>
+              <Typography
+                variant="body2"
+                sx={{ mr: 1.75, color: "text.disabled" }}
+              >
+                {new Date(item.createdAt).toUTCString()}
+              </Typography>
+              <IconButton size="small" sx={{ mr: 0.5, color: "action.active" }}>
+                <Attachment sx={{ fontSize: "1.25rem" }} />
+              </IconButton>
+              <MailCardMenu />
+            </Box>
+          </Box>
+        </Box>
+        <Divider sx={{ m: 0 }} />
+        <Box sx={{ px: 5, py: 0 }}>
+          <Box sx={{ color: "text.secondary" }} />
+        </Box>
+        <Fragment>
+          <Box sx={{ p: 5 }}>
+            <Typography variant="body2">{item.description}</Typography>
+          </Box>
+          <Divider sx={{ m: 0 }} />
+          <Box sx={{ p: 5 }}>
+            <Typography variant="body2">Attachments</Typography>
+            <List>
+              <ListItem disableGutters>
+                <ListItemIcon>
+                  {/* <img width="24" height="24" /> */}
+                </ListItemIcon>
+                {/* <Typography>AA</Typography> */}
+              </ListItem>
+            </List>
+          </Box>
+        </Fragment>
+      </Box>
+    );
+  };
+
+  const renderSendNewMessage = () => {
+    const [newMessage, setNewMessage] = useState<String>("");
+    const [response, error, loading, axiosFetch] = useAxiosFunction();
+
+    const onSendNewMessage = () => {
+      axiosFetch({
+        axiosInstance: vmApi,
+        method: HTTP_METHOD.POST,
+        url: "/support/request",
+        body: {
+          title: mail.title,
+          description: newMessage,
+          department: mail.departmentName,
+          parentId: mail.id,
+          sentBy: "user",
+        },
+        requestConfig: {
+          headers: {
+            Authorization: storedToken,
+          },
+        },
+      });
+
+      // setMailDetailsOpen(false);
+      // setMailDetailsOpen(true);
+      props.refreshData();
+      setShouldRender(false);
+      setTimeout(() => {
+        setShouldRender(true);
+      }, 0);
+
+      // route.push("/views/requests", {
+      //   query: { comeback: mail.id.toString() },
+      // });
+    };
+
+    // const { user } = useAuth();
+
+    const storedToken = window.localStorage.getItem(
+      userConfig.storageTokenKeyName
+    );
+
+    return (
+      <Box
+        sx={{
+          p: 5,
+          width: "100%",
+          borderRadius: 1,
+          border: "1px solid",
+          borderColor: "divider",
+          backgroundColor: "background.paper",
+          boxShadow: settings.skin === "bordered" ? 0 : 6,
+          position: "absolute",
+          bottom: 0,
+        }}
+      >
+        <Box
+          sx={{
+            display: "flex",
+            alignItems: "center",
+            // borderTop: "1px solid #ccc",
+            padding: "8px",
           }}
         >
-          <Circle sx={{ mr: 2, fontSize: "0.75rem", color: `${value}.main` }} />
-          <Typography sx={{ textTransform: "capitalize" }}>{key}</Typography>
-        </MenuItem>
-      );
-    });
-  };
-
-  const renderFoldersMenu = () => {
-    if (
-      routeParams &&
-      routeParams.folder &&
-      !routeParams.label &&
-      foldersObj[routeParams.folder]
-    ) {
-      return foldersObj[routeParams.folder].map(
-        (folder: MailFoldersArrType) => {
-          return (
-            <MenuItem
-              key={folder.name}
-              sx={{ display: "flex", alignItems: "center" }}
-              onClick={() => {
-                handleFolderUpdate(mail.id, folder.name);
-                handleFolderMenuClose();
-              }}
-            >
-              {folder.icon}
-              <Typography sx={{ textTransform: "capitalize" }}>
-                {folder.name}
-              </Typography>
-            </MenuItem>
-          );
-        }
-      );
-    } else if (routeParams && routeParams.label) {
-      return folders.map((folder: MailFoldersArrType) => {
-        return (
-          <MenuItem
-            key={folder.name}
-            sx={{ display: "flex", alignItems: "center" }}
-            onClick={() => {
-              handleFolderUpdate(mail.id, folder.name);
-              handleFolderMenuClose();
+          <TextField
+            key="newMessage"
+            fullWidth
+            label="Type your message..."
+            variant="outlined"
+            multiline
+            minRows={3}
+            autoFocus={true}
+            value={newMessage}
+            // focused={true}
+            onChange={(e) => {
+              setNewMessage(e.target.value);
             }}
+          />
+          <IconButton
+            color="primary"
+            disabled={false}
+            onClick={onSendNewMessage}
           >
-            {folder.icon}
-            <Typography sx={{ textTransform: "capitalize" }}>
-              {folder.name}
-            </Typography>
-          </MenuItem>
-        );
-      });
-    } else {
-      return foldersObj["inbox"].map((folder: MailFoldersArrType) => {
-        return (
-          <MenuItem
-            key={folder.name}
-            sx={{ display: "flex", alignItems: "center" }}
-            onClick={() => {
-              handleFolderUpdate(mail.id, folder.name);
-              handleFolderMenuClose();
-            }}
-          >
-            {folder.icon}
-            <Typography sx={{ textTransform: "capitalize" }}>
-              {folder.name}
-            </Typography>
-          </MenuItem>
-        );
-      });
-    }
-  };
-
-  const PrevMailIcon = direction === "rtl" ? ChevronRight : ChevronLeft;
-  const NextMailIcon = direction === "rtl" ? ChevronLeft : ChevronRight;
-  const GoBackIcon = PrevMailIcon;
-
-  const ScrollWrapper = ({ children }: { children: ReactNode }) => {
-    if (hidden) {
-      return (
-        <Box sx={{ height: "100%", overflowY: "auto", overflowX: "hidden" }}>
-          {children}
+            <ChevronRight />
+          </IconButton>
         </Box>
-      );
-    } else {
-      return (
-        <PerfectScrollbar options={{ wheelPropagation: false }}>
-          {children}
-        </PerfectScrollbar>
-      );
-    }
+      </Box>
+    );
   };
+
+  useEffect(() => {
+    console.log("SELECTED SUPPORT");
+    console.log(mail);
+  }, [mail]);
+
+  useEffect(() => {
+    console.log("current user");
+    console.log(user);
+  }, [user]);
 
   return (
     <Sidebar
@@ -302,520 +520,214 @@ const MailDetails = (props: MailDetailsType) => {
         setShowReplies(false);
       }}
     >
-      {mail ? (
-        <Fragment>
+      <Fragment>
+        <Box
+          sx={{
+            px: 2.6,
+            py: [2.25, 3],
+            backgroundColor: "background.paper",
+            borderBottom: (theme) => `1px solid ${theme.palette.divider}`,
+          }}
+        >
           <Box
             sx={{
-              px: 2.6,
-              py: [2.25, 3],
-              backgroundColor: "background.paper",
-              borderBottom: (theme) => `1px solid ${theme.palette.divider}`,
+              display: "flex",
+              alignItems: ["flex-start", "center"],
+              justifyContent: "space-between",
             }}
           >
             <Box
               sx={{
                 display: "flex",
-                alignItems: ["flex-start", "center"],
-                justifyContent: "space-between",
+                overflow: "hidden",
+                alignItems: "center",
+                whiteSpace: "nowrap",
+                textOverflow: "ellipsis",
               }}
             >
+              <IconButton
+                sx={{ mr: 3 }}
+                onClick={() => {
+                  // route.push("/views/requests");
+                  setShowReplies(false);
+                  setMailDetailsOpen(false);
+                }}
+              >
+                <ChevronLeft />
+              </IconButton>
               <Box
                 sx={{
                   display: "flex",
                   overflow: "hidden",
-                  alignItems: "center",
                   whiteSpace: "nowrap",
                   textOverflow: "ellipsis",
+                  flexDirection: ["column", "row"],
                 }}
               >
-                <IconButton
-                  sx={{ mr: 3 }}
-                  onClick={() => {
-                    setMailDetailsOpen(false);
-                    setShowReplies(false);
-                  }}
-                >
-                  <GoBackIcon
-                    sx={{ color: "text.primary", fontSize: "1.5rem" }}
+                <Typography noWrap sx={{ mr: 5 }}>
+                  {mail.title}
+                </Typography>
+                <Box sx={{ display: "flex", alignItems: "center" }}>
+                  <CustomChip
+                    key={"label"}
+                    size="small"
+                    skin="light"
+                    label={"label"}
+                    // color={labelColors[label] as ThemeColor}
+                    sx={{
+                      height: 20,
+                      textTransform: "capitalize",
+                      "&:not(:last-of-type)": { mr: 2 },
+                      "& .MuiChip-label": { fontWeight: 500 },
+                    }}
                   />
-                </IconButton>
-                <Box
-                  sx={{
-                    display: "flex",
-                    overflow: "hidden",
-                    whiteSpace: "nowrap",
-                    textOverflow: "ellipsis",
-                    flexDirection: ["column", "row"],
-                  }}
-                >
-                  <Typography noWrap sx={{ mr: 5 }}>
-                    {mail.subject}
-                  </Typography>
-                  <Box sx={{ display: "flex", alignItems: "center" }}>
-                    {mail.labels && mail.labels.length
-                      ? mail.labels.map((label: MailLabelType) => {
-                          return (
-                            <CustomChip
-                              key={label}
-                              size="small"
-                              skin="light"
-                              label={label}
-                              color={labelColors[label] as ThemeColor}
-                              sx={{
-                                height: 20,
-                                textTransform: "capitalize",
-                                "&:not(:last-of-type)": { mr: 2 },
-                                "& .MuiChip-label": { fontWeight: 500 },
-                              }}
-                            />
-                          );
-                        })
-                      : null}
-                  </Box>
                 </Box>
               </Box>
-              <Box sx={{ display: "flex" }}>
-                <IconButton
-                  size="small"
-                  disabled={!mail.hasPreviousMail}
-                  sx={{
-                    color: mail.hasPreviousMail
-                      ? "text.primary"
-                      : "text.secondary",
-                  }}
-                  onClick={() =>
-                    dispatch(
-                      paginateMail({ dir: "previous", emailId: mail.id })
-                    )
-                  }
-                >
-                  <PrevMailIcon />
-                </IconButton>
-                <IconButton
-                  size="small"
-                  disabled={!mail.hasNextMail}
-                  sx={{
-                    color: mail.hasNextMail ? "text.primary" : "text.secondary",
-                  }}
-                  onClick={() =>
-                    dispatch(paginateMail({ dir: "next", emailId: mail.id }))
-                  }
-                >
-                  <NextMailIcon />
-                </IconButton>
-              </Box>
             </Box>
+            <Box sx={{ display: "flex" }}></Box>
           </Box>
+        </Box>
+        <Box
+          sx={{
+            backgroundColor: "background.paper",
+            p: (theme) => theme.spacing(3, 2, 3, 3),
+            borderBottom: (theme) => `1px solid ${theme.palette.divider}`,
+          }}
+        >
           <Box
             sx={{
-              backgroundColor: "background.paper",
-              p: (theme) => theme.spacing(3, 2, 3, 3),
-              borderBottom: (theme) => `1px solid ${theme.palette.divider}`,
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "space-between",
             }}
           >
+            <Box sx={{ display: "flex", alignItems: "center" }}>
+              <IconButton size="small">
+                <DeleteOutline sx={{ mr: 1 }} />
+              </IconButton>
+
+              <IconButton size="small">
+                <EmailOutline sx={{ mr: 1 }} />
+              </IconButton>
+              <IconButton size="small" onClick={handleFolderMenuClick}>
+                <FolderOutline sx={{ mr: 1 }} />
+              </IconButton>
+              <Menu
+                open={openLabelMenu}
+                anchorEl={labelAnchorEl}
+                onClose={handleLabelMenuClose}
+                PaperProps={{ style: { minWidth: "9rem" } }}
+                anchorOrigin={{
+                  vertical: "bottom",
+                  horizontal: "left",
+                }}
+                transformOrigin={{
+                  vertical: "top",
+                  horizontal: "left",
+                }}
+              ></Menu>
+              <IconButton size="small" onClick={handleLabelMenuClick}>
+                <LabelOutline />
+              </IconButton>
+              <Menu
+                open={openFolderMenu}
+                anchorEl={folderAnchorEl}
+                onClose={() => setFolderAnchorEl(null)}
+                PaperProps={{ style: { minWidth: "9rem" } }}
+                anchorOrigin={{
+                  vertical: "bottom",
+                  horizontal: "left",
+                }}
+                transformOrigin={{
+                  vertical: "top",
+                  horizontal: "left",
+                }}
+              ></Menu>
+            </Box>
+            <Box>
+              <IconButton
+                size="small"
+                sx={{
+                  mr: 1,
+                }}
+              >
+                <StarOutline />
+              </IconButton>
+              <IconButton
+                size="small"
+                onClick={() =>
+                  showReplies ? setShowReplies(false) : setShowReplies(true)
+                }
+              >
+                {showReplies ? (
+                  <ArrowCollapseVertical sx={{ mr: 1, fontSize: "1.375rem" }} />
+                ) : (
+                  <ArrowExpandVertical sx={{ mr: 1, fontSize: "1.375rem" }} />
+                )}
+              </IconButton>
+              {/* ) : null} */}
+              <IconButton size="small">
+                <DotsVertical />
+              </IconButton>
+            </Box>
+          </Box>
+        </Box>
+        <Box
+          sx={{
+            height: "calc(100% - 7.75rem)",
+            backgroundColor: (theme) => theme.palette.action.hover,
+          }}
+        >
+          <ScrollWrapper>
             <Box
               sx={{
+                py: 4,
+                px: 5,
+                width: "100%",
                 display: "flex",
                 alignItems: "center",
-                justifyContent: "space-between",
+                flexDirection: "column",
+                justifyContent: "center",
               }}
             >
-              <Box sx={{ display: "flex", alignItems: "center" }}>
-                {routeParams && routeParams.folder !== "trash" ? (
-                  <IconButton size="small" onClick={handleMoveToTrash}>
-                    <DeleteOutline sx={{ mr: 1 }} />
-                  </IconButton>
-                ) : null}
-
-                <IconButton size="small" onClick={handleReadMail}>
-                  <EmailOutline sx={{ mr: 1 }} />
-                </IconButton>
-                <IconButton size="small" onClick={handleFolderMenuClick}>
-                  <FolderOutline sx={{ mr: 1 }} />
-                </IconButton>
-                <Menu
-                  open={openLabelMenu}
-                  anchorEl={labelAnchorEl}
-                  onClose={handleLabelMenuClose}
-                  PaperProps={{ style: { minWidth: "9rem" } }}
-                  anchorOrigin={{
-                    vertical: "bottom",
-                    horizontal: "left",
-                  }}
-                  transformOrigin={{
-                    vertical: "top",
-                    horizontal: "left",
-                  }}
-                >
-                  {renderLabelsMenu()}
-                </Menu>
-                <IconButton size="small" onClick={handleLabelMenuClick}>
-                  <LabelOutline />
-                </IconButton>
-                <Menu
-                  open={openFolderMenu}
-                  anchorEl={folderAnchorEl}
-                  onClose={() => setFolderAnchorEl(null)}
-                  PaperProps={{ style: { minWidth: "9rem" } }}
-                  anchorOrigin={{
-                    vertical: "bottom",
-                    horizontal: "left",
-                  }}
-                  transformOrigin={{
-                    vertical: "top",
-                    horizontal: "left",
-                  }}
-                >
-                  {renderFoldersMenu()}
-                </Menu>
-              </Box>
-              <Box>
-                <IconButton
-                  size="small"
-                  onClick={(e) => handleStarMail(e, mail.id, !mail.isStarred)}
+              {!showReplies && mail.children.length > 0 && (
+                <Typography
+                  onClick={() => setShowReplies(true)}
                   sx={{
-                    mr: 1,
-                    ...(mail.isStarred ? { color: "warning.main" } : {}),
+                    mt: 1,
+                    mb: 5,
+                    color: "text.secondary",
+                    cursor: "pointer",
                   }}
                 >
-                  <StarOutline />
-                </IconButton>
-                {mail.replies.length ? (
-                  <IconButton
-                    size="small"
-                    onClick={() =>
-                      showReplies ? setShowReplies(false) : setShowReplies(true)
-                    }
-                  >
-                    {showReplies ? (
-                      <ArrowCollapseVertical
-                        sx={{ mr: 1, fontSize: "1.375rem" }}
-                      />
-                    ) : (
-                      <ArrowExpandVertical
-                        sx={{ mr: 1, fontSize: "1.375rem" }}
-                      />
-                    )}
-                  </IconButton>
-                ) : null}
-                <IconButton size="small">
-                  <DotsVertical />
-                </IconButton>
-              </Box>
-            </Box>
-          </Box>
-          <Box
-            sx={{
-              height: "calc(100% - 7.75rem)",
-              backgroundColor: (theme) => theme.palette.action.hover,
-            }}
-          >
-            <ScrollWrapper>
-              <Box
-                sx={{
-                  py: 4,
-                  px: 5,
-                  width: "100%",
-                  display: "flex",
-                  alignItems: "center",
-                  flexDirection: "column",
-                  justifyContent: "center",
-                }}
-              >
-                {mail.replies.length && !showReplies ? (
-                  <Typography
-                    onClick={() => setShowReplies(true)}
-                    sx={{
-                      mt: 1,
-                      mb: 5,
-                      color: "text.secondary",
-                      cursor: "pointer",
-                    }}
-                  >
-                    {mail.replies.length} Earlier Messages
-                  </Typography>
-                ) : null}
+                  {mail.children && mail.children.length} Earlier Messages
+                </Typography>
+              )}
 
-                {showReplies
-                  ? mail.replies.map((reply: MailType, index: number) => {
-                      return (
-                        <Box
-                          key={index}
-                          sx={{
-                            mb: 4,
-                            boxShadow: 6,
-                            width: "100%",
-                            borderRadius: 1,
-                            backgroundColor: "background.paper",
-                            border: (theme) =>
-                              `1px solid ${theme.palette.divider}`,
-                          }}
-                        >
-                          <Box sx={{ p: 5 }}>
-                            <Box
-                              sx={{
-                                display: "flex",
-                                flexWrap: "wrap",
-                                alignItems: "center",
-                                justifyContent: "space-between",
-                              }}
-                            >
-                              <Box
-                                sx={{ display: "flex", alignItems: "center" }}
-                              >
-                                <Avatar
-                                  alt={reply.from.name}
-                                  src={reply.from.avatar}
-                                  sx={{
-                                    width: "2.375rem",
-                                    height: "2.375rem",
-                                    mr: 3,
-                                  }}
-                                />
-                                <Box
-                                  sx={{
-                                    display: "flex",
-                                    flexDirection: "column",
-                                  }}
-                                >
-                                  <Typography sx={{ color: "text.secondary" }}>
-                                    {reply.from.name}
-                                  </Typography>
-                                  <Typography
-                                    variant="body2"
-                                    sx={{ color: "text.disabled" }}
-                                  >
-                                    {reply.from.email}
-                                  </Typography>
-                                </Box>
-                              </Box>
-                              <Box
-                                sx={{ display: "flex", alignItems: "center" }}
-                              >
-                                <Typography
-                                  variant="body2"
-                                  sx={{ mr: 1.75, color: "text.disabled" }}
-                                >
-                                  {new Date(reply.time).toDateString()}{" "}
-                                  {new Date(reply.time).toLocaleTimeString(
-                                    "en-US",
-                                    {
-                                      hour: "2-digit",
-                                      minute: "2-digit",
-                                      hour12: true,
-                                    }
-                                  )}
-                                </Typography>
-                                {mail.attachments.length ? (
-                                  <IconButton size="small" sx={{ mr: 0.5 }}>
-                                    <Attachment fontSize="small" />
-                                  </IconButton>
-                                ) : null}
-                                <IconButton size="small">
-                                  <DotsVertical fontSize="small" />
-                                </IconButton>
-                              </Box>
-                            </Box>
-                          </Box>
-                          <Divider sx={{ m: 0 }} />
-                          <Box sx={{ px: 5, py: 0 }}>
-                            <Box
-                              sx={{ color: "text.secondary" }}
-                              dangerouslySetInnerHTML={{
-                                __html: reply.message,
-                              }}
-                            />
-                          </Box>
-                          {reply.attachments.length ? (
-                            <Fragment>
-                              <Divider sx={{ m: 0 }} />
-                              <Box sx={{ p: 5 }}>
-                                <Typography variant="body2">
-                                  Attachments
-                                </Typography>
-                                <List>
-                                  {reply.attachments.map(
-                                    (item: MailAttachmentType) => {
-                                      return (
-                                        <ListItem
-                                          disableGutters
-                                          key={item.fileName}
-                                        >
-                                          <ListItemIcon>
-                                            <img
-                                              src={item.thumbnail}
-                                              alt={item.fileName}
-                                              width="24"
-                                              height="24"
-                                            />
-                                          </ListItemIcon>
-                                          <Typography>
-                                            {item.fileName}
-                                          </Typography>
-                                        </ListItem>
-                                      );
-                                    }
-                                  )}
-                                </List>
-                              </Box>
-                            </Fragment>
-                          ) : null}
-                        </Box>
-                      );
-                    })
-                  : null}
-
-                {mail.replies.length && !showReplies ? (
-                  <Fragment>
-                    <HiddenReplyBack
-                      sx={{ cursor: "pointer" }}
-                      onClick={() => setShowReplies(true)}
-                    />
-                    <HiddenReplyFront
-                      sx={{ cursor: "pointer" }}
-                      onClick={() => setShowReplies(true)}
-                    />
-                  </Fragment>
-                ) : null}
-
-                <Box
-                  sx={{
-                    mb: 4,
-                    width: "100%",
-                    borderRadius: 1,
-                    overflow: "visible",
-                    position: "relative",
-                    backgroundColor: "background.paper",
-                    boxShadow: settings.skin === "bordered" ? 0 : 6,
-                    border: (theme) => `1px solid ${theme.palette.divider}`,
-                  }}
-                >
-                  <Box sx={{ p: 5 }}>
-                    <Box
-                      sx={{
-                        display: "flex",
-                        alignItems: "center",
-                        justifyContent: "space-between",
-                        flexWrap: "wrap",
-                      }}
-                    >
-                      <Box sx={{ display: "flex", alignItems: "center" }}>
-                        <Avatar
-                          alt={mail.from.name}
-                          src={mail.from.avatar}
-                          sx={{ width: "2.375rem", height: "2.375rem", mr: 3 }}
-                        />
-                        <Box sx={{ display: "flex", flexDirection: "column" }}>
-                          <Typography sx={{ color: "text.secondary" }}>
-                            {mail.from.name}
-                          </Typography>
-                          <Typography
-                            variant="body2"
-                            sx={{ color: "text.disabled" }}
-                          >
-                            {mail.from.email}
-                          </Typography>
-                        </Box>
-                      </Box>
-                      <Box sx={{ display: "flex", alignItems: "center" }}>
-                        <Typography
-                          variant="body2"
-                          sx={{ mr: 1.75, color: "text.disabled" }}
-                        >
-                          {new Date(mail.time).toDateString()}{" "}
-                          {new Date(mail.time).toLocaleTimeString("en-US", {
-                            hour: "2-digit",
-                            minute: "2-digit",
-                            hour12: true,
-                          })}
-                        </Typography>
-                        {mail.attachments.length ? (
-                          <IconButton
-                            size="small"
-                            sx={{ mr: 0.5, color: "action.active" }}
-                          >
-                            <Attachment sx={{ fontSize: "1.25rem" }} />
-                          </IconButton>
-                        ) : null}
-                        <MailCardMenu />
-                      </Box>
-                    </Box>
-                  </Box>
-                  <Divider sx={{ m: 0 }} />
-                  <Box sx={{ px: 5, py: 0 }}>
-                    <Box
-                      sx={{ color: "text.secondary" }}
-                      dangerouslySetInnerHTML={{ __html: mail.message }}
-                    />
-                  </Box>
-                  {mail.attachments.length ? (
+              {!showReplies && (
+                <>
+                  {mail.children.length > 0 && (
                     <Fragment>
-                      <Divider sx={{ m: 0 }} />
-                      <Box sx={{ p: 5 }}>
-                        <Typography variant="body2">Attachments</Typography>
-                        <List>
-                          {mail.attachments.map((item: MailAttachmentType) => {
-                            return (
-                              <ListItem disableGutters key={item.fileName}>
-                                <ListItemIcon>
-                                  <img
-                                    src={item.thumbnail}
-                                    alt={item.fileName}
-                                    width="24"
-                                    height="24"
-                                  />
-                                </ListItemIcon>
-                                <Typography>{item.fileName}</Typography>
-                              </ListItem>
-                            );
-                          })}
-                        </List>
-                      </Box>
+                      <HiddenReplyBack
+                        sx={{ cursor: "pointer" }}
+                        onClick={() => setShowReplies(true)}
+                      />
+                      <HiddenReplyFront
+                        sx={{ cursor: "pointer" }}
+                        onClick={() => setShowReplies(true)}
+                      />
                     </Fragment>
-                  ) : null}
-                </Box>
+                  )}
+                  {shouldRender && renderLastItem()}
+                </>
+              )}
 
-                <Box
-                  sx={{
-                    p: 5,
-                    width: "100%",
-                    borderRadius: 1,
-                    border: "1px solid",
-                    borderColor: "divider",
-                    backgroundColor: "background.paper",
-                    boxShadow: settings.skin === "bordered" ? 0 : 6,
-                  }}
-                >
-                  <Typography sx={{ color: "text.secondary" }}>
-                    Click here to{" "}
-                    <Typography
-                      component="span"
-                      sx={{
-                        cursor: "pointer",
-                        color: "primary.main",
-                        fontWeight: "inherit",
-                      }}
-                    >
-                      Reply
-                    </Typography>{" "}
-                    or{" "}
-                    <Typography
-                      component="span"
-                      sx={{
-                        cursor: "pointer",
-                        color: "primary.main",
-                        fontWeight: "inherit",
-                      }}
-                    >
-                      Forward
-                    </Typography>
-                  </Typography>
-                </Box>
-              </Box>
-            </ScrollWrapper>
-          </Box>
-        </Fragment>
-      ) : null}
+              {shouldRender && renderAllItems(allItems)}
+            </Box>
+          </ScrollWrapper>
+          {renderSendNewMessage()}
+        </Box>
+      </Fragment>
     </Sidebar>
   );
 };

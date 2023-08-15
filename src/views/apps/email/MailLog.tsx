@@ -6,10 +6,13 @@ import Box from "@mui/material/Box";
 import List from "@mui/material/List";
 import Divider from "@mui/material/Divider";
 import Backdrop from "@mui/material/Backdrop";
-import { styled } from "@mui/material/styles";
+import Checkbox from "@mui/material/Checkbox";
+import Avatar from "@mui/material/Avatar";
+import { styled, useTheme } from "@mui/material/styles";
 import Typography from "@mui/material/Typography";
 import CircularProgress from "@mui/material/CircularProgress";
 import ListItem, { ListItemProps } from "@mui/material/ListItem";
+import MailDetails from "./MailDetails";
 
 // ** Icons Import
 import AlertCircleOutline from "mdi-material-ui/AlertCircleOutline";
@@ -19,6 +22,11 @@ import PerfectScrollbar from "react-perfect-scrollbar";
 
 // ** Types
 import { MailListType } from "src/types/apps/emailTypes";
+import { useSettings } from "src/@core/hooks/useSettings";
+import { useDispatch, useSelector } from "react-redux";
+import useMediaQuery from "@mui/material/useMediaQuery";
+import { AppDispatch, RootState } from "src/store";
+import Badge from "@mui/material/Badge";
 
 const MailItem = styled(ListItem)<ListItemProps>(({ theme }) => ({
   zIndex: 1,
@@ -62,10 +70,7 @@ const ScrollWrapper = ({
 
 const MailLog = (props: MailListType) => {
   // ** Props
-  const { supportList } = props;
-
-  // ** State
-  const [refresh, setRefresh] = useState<boolean>(false);
+  const { supportList, setMailDetailsOpen, setSelectedMail } = props;
 
   return (
     <Box
@@ -77,7 +82,14 @@ const MailLog = (props: MailListType) => {
       }}
     >
       <Box sx={{ height: "100%", backgroundColor: "background.paper" }}>
-        <Box sx={{ px: 5, py: 3 }}></Box>
+        <Box sx={{ px: 5, py: 3, display: "flex", alignItems: "center" }}>
+          <Typography variant="h6">Support Requests</Typography>
+          <Badge
+            badgeContent={supportList.length}
+            color="primary"
+            sx={{ ml: 6 }}
+          />
+        </Box>
         <Divider sx={{ m: 0 }} />
         <Box
           sx={{
@@ -114,19 +126,20 @@ const MailLog = (props: MailListType) => {
                           py: 2.75,
                           backgroundColor: "background.paper",
                         }}
-                        // onClick={() => {
-                        //   setMailDetailsOpen(true);
-                        //   dispatch(getCurrentMail(mail.id));
-                        //   dispatch(
-                        //     updateMail({
-                        //       emailIds: [mail.id],
-                        //       dataToUpdate: { isRead: true },
-                        //     })
-                        //   );
-                        //   setTimeout(() => {
-                        //     dispatch(handleSelectAllMail(false));
-                        //   }, 600);
-                        // }}
+                        onClick={() => {
+                          setMailDetailsOpen(true);
+                          setSelectedMail(support);
+                          // dispatch(getCurrentMail(mail.id));
+                          // dispatch(
+                          //   updateMail({
+                          //     emailIds: [mail.id],
+                          //     dataToUpdate: { isRead: true },
+                          //   })
+                          // );
+                          // setTimeout(() => {
+                          //   dispatch(handleSelectAllMail(false));
+                          // }, 600);
+                        }}
                       >
                         <Box
                           sx={{
@@ -137,18 +150,19 @@ const MailLog = (props: MailListType) => {
                             alignItems: "center",
                           }}
                         >
-                          {/* <Checkbox
-                            onClick={(e) => e.stopPropagation()}
-                            // onChange={() => dispatch(handleSelectMail(mail.id))}
-                            checked={
-                              support.selectedMails.includes(support.id) || false
-                            }
-                          /> */}
-                          {/* <Avatar
-                            alt={mail.from.name}
-                            src={mail.from.avatar}
+                          <Checkbox
+                          // onClick={(e) => e.stopPropagation()}
+                          // onChange={() => dispatch(handleSelectMail(mail.id))}
+                          // checked={
+                          //   support.selectedMails.includes(support.id) ||
+                          //   false
+                          // }
+                          />
+                          <Avatar
+                            // alt={mail.from.name}
+                            // src={mail.from.avatar}
                             sx={{ mr: 3.5, width: "2rem", height: "2rem" }}
-                          /> */}
+                          />
                           <Box
                             sx={{
                               display: "flex",
@@ -206,8 +220,8 @@ const MailLog = (props: MailListType) => {
             )}
           </ScrollWrapper>
           <Backdrop
-            open={refresh}
-            onClick={() => setRefresh(false)}
+            open={false}
+            // onClick={() => setRefresh(false)}
             sx={{
               zIndex: 5,
               position: "absolute",
@@ -219,9 +233,6 @@ const MailLog = (props: MailListType) => {
           </Backdrop>
         </Box>
       </Box>
-
-      {/* @ts-ignore */}
-      {/* <MailDetails {...mailDetailsProps} /> */}
     </Box>
   );
 };

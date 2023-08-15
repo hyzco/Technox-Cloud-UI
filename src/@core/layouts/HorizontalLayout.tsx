@@ -14,6 +14,9 @@ import themeConfig from "src/configs/themeConfig";
 // ** Type Import
 import { LayoutProps } from "src/@core/layouts/types";
 
+// ** Context
+import { useAuth } from "src/hooks/useAuth";
+
 // ** Components
 import Customizer from "src/@core/components/customizer";
 import Footer from "./components/shared-components/footer";
@@ -69,7 +72,7 @@ const HorizontalLayout = (props: LayoutProps) => {
     horizontalNavMenuContent: userHorizontalNavMenuContent,
   } = props;
 
-  const userData = JSON.parse(localStorage.getItem("userData") || "{}");
+  const { user } = useAuth();
 
   // ** Vars
   const { skin, appBar, navHidden, appBarBlur, contentWidth } = settings;
@@ -185,7 +188,7 @@ const HorizontalLayout = (props: LayoutProps) => {
       </DatePickerWrapper>
 
       {/* Customizer */}
-      {themeConfig.disableCustomizer || hidden ? null : userData.role ===
+      {themeConfig.disableCustomizer || hidden ? null : user?.role ===
         "admin" ? (
         <Customizer />
       ) : null}
