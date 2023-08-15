@@ -120,6 +120,8 @@ export type MailStore = {
 
 export type MailListType = {
   supportList: never[];
+  setMailDetailsOpen: (val: boolean) => void;
+  setSelectedMail: (val: Object) => void;
 };
 
 export type MailLabelColors = {
@@ -165,21 +167,23 @@ export type MailLogType = {
 };
 
 export type MailDetailsType = {
-  mail: MailType;
-  hidden: boolean;
-  dispatch: Dispatch<any>;
-  direction: "ltr" | "rtl";
+  // mail: MailType;
+  // hidden: boolean;
+  // dispatch: Dispatch<any>;
+  // direction: "ltr" | "rtl";
   mailDetailsOpen: boolean;
-  routeParams: RouteParams;
-  labelColors: MailLabelColors;
-  folders: MailFoldersArrType[];
-  foldersObj: MailFoldersObjType;
+  // routeParams: RouteParams;
+  // labelColors: MailLabelColors;
+  // folders: MailFoldersArrType[];
+  // foldersObj: MailFoldersObjType;
   setMailDetailsOpen: (val: boolean) => void;
-  updateMail: (data: UpdateMailParamsType) => void;
-  paginateMail: (data: PaginateMailParamsType) => void;
-  handleStarMail: (e: SyntheticEvent, id: number, value: boolean) => void;
-  handleLabelUpdate: (id: number | number[], label: MailLabelType) => void;
-  handleFolderUpdate: (id: number | number[], folder: MailFolderType) => void;
+  mail: any;
+  refreshData: () => void;
+  // updateMail: (data: UpdateMailParamsType) => void;
+  // paginateMail: (data: PaginateMailParamsType) => void;
+  // handleStarMail: (e: SyntheticEvent, id: number, value: boolean) => void;
+  // handleLabelUpdate: (id: number | number[], label: MailLabelType) => void;
+  // handleFolderUpdate: (id: number | number[], folder: MailFolderType) => void;
 };
 
 export type MailComposeType = {
