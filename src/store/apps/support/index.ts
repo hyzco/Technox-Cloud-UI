@@ -24,6 +24,8 @@ interface Redux {
 export const fetchData = createAsyncThunk(
   "appSupport/fetchData",
   async (params: DataParams) => {
+    console.log("here params");
+    console.log(params);
     const response = await axios.get(supportConfig.getRequest, {
       headers: {
         Authorization: window.localStorage.getItem(
@@ -34,6 +36,22 @@ export const fetchData = createAsyncThunk(
     });
     console.log(response.data.data);
     return response.data.data;
+  }
+);
+
+export const fetchTotalRequest = createAsyncThunk(
+  "appSupport/fetchTotalRequest",
+  async (params: DataParams) => {
+    const response = await axios.get(supportConfig.getTotalRequestCount, {
+      headers: {
+        Authorization: window.localStorage.getItem(
+          supportConfig.storageTokenKeyName
+        )!,
+      },
+      params,
+    });
+    console.log(response.data);
+    return response.data.count;
   }
 );
 
@@ -57,11 +75,15 @@ export const userSupportsSlice = createSlice({
   name: "userSupports",
   initialState: {
     supportList: [],
+    totalRequestCount: 0,
   },
   reducers: {},
   extraReducers: (builder) => {
     builder.addCase(fetchData.fulfilled, (state, action) => {
       state.supportList = action.payload;
+    });
+    builder.addCase(fetchTotalRequest.fulfilled, (state, action) => {
+      state.totalRequestCount = action.payload.count;
     });
   },
 });

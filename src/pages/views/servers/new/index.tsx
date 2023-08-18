@@ -268,7 +268,7 @@ const CreateServerPanel = () => {
       console.log("response");
       console.log(response);
       console.log(error);
-      if (error.includes("401")) {
+      if (error && typeof error === "string" && error.includes("401")) {
         logout();
       }
     }, [response, error]);

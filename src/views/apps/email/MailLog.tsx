@@ -1,5 +1,5 @@
 // ** React Imports
-import { useState, ReactNode } from "react";
+import { useState, ReactNode, useEffect } from "react";
 
 // ** MUI Imports
 import Box from "@mui/material/Box";
@@ -27,6 +27,7 @@ import { useDispatch, useSelector } from "react-redux";
 import useMediaQuery from "@mui/material/useMediaQuery";
 import { AppDispatch, RootState } from "src/store";
 import Badge from "@mui/material/Badge";
+import React from "react";
 
 const MailItem = styled(ListItem)<ListItemProps>(({ theme }) => ({
   zIndex: 1,
@@ -44,33 +45,96 @@ const MailItem = styled(ListItem)<ListItemProps>(({ theme }) => ({
   },
 }));
 
-const ScrollWrapper = ({
-  children,
-  hidden,
-}: {
-  children: ReactNode;
-  hidden: boolean;
-}) => {
-  if (hidden) {
-    return (
-      <Box sx={{ height: "100%", overflowY: "auto", overflowX: "hidden" }}>
-        {children}
-      </Box>
-    );
-  } else {
-    return (
-      <PerfectScrollbar
-        options={{ wheelPropagation: false, suppressScrollX: true }}
-      >
-        {children}
-      </PerfectScrollbar>
-    );
+const ScrollWrapper = React.memo(
+  ({
+    children,
+    hidden,
+    onYReachStart,
+    onYReachEnd,
+    onScrollY,
+    onScrollDown,
+    scrollRef,
+  }: {
+    children: ReactNode;
+    hidden: boolean;
+    onYReachStart: () => void;
+    onYReachEnd: () => void;
+    onScrollY: () => void;
+    onScrollDown: () => void;
+    scrollRef: any;
+  }) => {
+    if (hidden) {
+      return (
+        <Box sx={{ height: "100%", overflowY: "auto", overflowX: "hidden" }}>
+          {children}
+        </Box>
+      );
+    } else {
+      return (
+        <PerfectScrollbar
+          onScrollY={onScrollY}
+          onYReachEnd={onYReachEnd}
+          onYReachStart={onYReachStart}
+          onScrollDown={onScrollDown}
+          containerRef={(ref) => (scrollRef.current = ref)} // Set the container ref
+          options={{
+            // wheelPropagation: true,
+            suppressScrollX: true,
+            // minScrollbarLength: 1500,
+          }}
+        >
+          {children}
+        </PerfectScrollbar>
+      );
+    }
   }
-};
+);
 
-const MailLog = (props: MailListType) => {
+const MailLog = React.memo((props: MailListType) => {
   // ** Props
-  const { supportList, setMailDetailsOpen, setSelectedMail } = props;
+  const {
+    totalMailCount,
+    supportList,
+    setMailDetailsOpen,
+    setSelectedMail,
+    fetchMails,
+    fetchTotalRequestCount,
+    scrollRef,
+  } = props;
+
+  const handleScrollStart = () => {};
+
+  const handleScrollEnd = () => {
+    if (scrollRef.current.scrollTop == scrollRef.current.scrollTopMax) {
+      setTimeout(() => {
+        scrollRef.current.scrollTop = scrollRef.current.scrollTop - 10;
+      }, 3000);
+      fetchMails();
+    }
+  };
+
+  const handleScroll = () => {
+    const scrollContainer = scrollRef.current;
+
+    if (scrollContainer) {
+      const thresholdStart =
+        scrollContainer.scrollHeight - scrollContainer.clientHeight - 80;
+      const thresholdEnd =
+        scrollContainer.scrollHeight - scrollContainer.clientHeight - 40;
+
+      if (
+        scrollContainer.scrollTop >= thresholdStart ||
+        scrollContainer.scrollTop === scrollContainer.scrollTopMax
+      ) {
+        console.log("Scrolled with threshold");
+        fetchMails();
+      }
+    }
+  };
+
+  const onScrollDown = () => {
+    console.log("scrolling down");
+  };
 
   return (
     <Box
@@ -84,11 +148,7 @@ const MailLog = (props: MailListType) => {
       <Box sx={{ height: "100%", backgroundColor: "background.paper" }}>
         <Box sx={{ px: 5, py: 3, display: "flex", alignItems: "center" }}>
           <Typography variant="h6">Support Requests</Typography>
-          <Badge
-            badgeContent={supportList.length}
-            color="primary"
-            sx={{ ml: 6 }}
-          />
+          <Badge badgeContent={totalMailCount} color="primary" sx={{ ml: 6 }} />
         </Box>
         <Divider sx={{ m: 0 }} />
         <Box
@@ -99,13 +159,20 @@ const MailLog = (props: MailListType) => {
             height: "calc(100% - 7rem)",
           }}
         >
-          <ScrollWrapper hidden={true}>
+          <ScrollWrapper
+            hidden={false}
+            onYReachStart={handleScrollStart}
+            onYReachEnd={handleScrollEnd}
+            onScrollY={handleScroll}
+            onScrollDown={onScrollDown}
+            scrollRef={scrollRef}
+          >
             {supportList ? (
               <List sx={{ p: 0 }}>
                 {supportList.map((support: any, index: number) => {
                   return (
                     <Box
-                      key={support.id}
+                      key={index + "SI"}
                       sx={{
                         transition: "all 0.15s ease-in-out",
                         "&:hover": {
@@ -235,6 +302,6 @@ const MailLog = (props: MailListType) => {
       </Box>
     </Box>
   );
-};
+});
 
 export default MailLog;

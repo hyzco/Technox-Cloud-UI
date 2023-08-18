@@ -187,30 +187,6 @@ const MailDetails = (props: MailDetailsType) => {
   };
 
   const ScrollWrapper = ({ children }: { children: ReactNode }) => {
-    // const [scrollEnabled, setScrollEnabled] = useState(true);
-
-    // useEffect(() => {
-    //   const handleKeyDown = (event: KeyboardEvent) => {
-    //     if (event.key === "Control") {
-    //       setScrollEnabled(false);
-    //     }
-    //   };
-
-    //   const handleKeyUp = (event: KeyboardEvent) => {
-    //     if (event.key === "Control") {
-    //       setScrollEnabled(true);
-    //     }
-    //   };
-
-    //   window.addEventListener("keydown", handleKeyDown);
-    //   window.addEventListener("keyup", handleKeyUp);
-
-    //   return () => {
-    //     window.removeEventListener("keydown", handleKeyDown);
-    //     window.removeEventListener("keyup", handleKeyUp);
-    //   };
-    // }, []);
-
     return (
       <PerfectScrollbar options={{ wheelPropagation: false }}>
         {children}

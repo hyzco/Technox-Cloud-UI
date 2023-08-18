@@ -1,5 +1,5 @@
 // ** React Imports
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef, useMemo } from "react";
 
 // ** Redux Imports
 import { useDispatch, useSelector } from "react-redux";
@@ -21,7 +21,7 @@ import MailLog from "src/views/apps/email/MailLog";
 import SidebarLeft from "src/views/apps/email/SidebarLeft";
 
 // ** Actions
-import { fetchData } from "src/store/apps/support";
+import { fetchData, fetchTotalRequest } from "src/store/apps/support";
 import MailDetails from "./MailDetails";
 import select from "src/@core/theme/overrides/select";
 import { useRouter } from "next/router";
@@ -35,12 +35,24 @@ const labelColors: MailLabelColors = {
 };
 
 const EmailAppLayout = ({ folder, label }: MailLayoutType) => {
+  const store = useSelector((state: RootState) => state.support);
+
   // ** States
   const [query, setQuery] = useState<string>("");
   const [composeOpen, setComposeOpen] = useState<boolean>(false);
   const [mailDetailsOpen, setMailDetailsOpen] = useState<boolean>(false);
   const [selectedMail, setSelectedMail] = useState<any>({});
   const [leftSidebarOpen, setLeftSidebarOpen] = useState<boolean>(false);
+
+  const [emails, setEmails] = useState<any>(store.supportList);
+  const [totalEmailCount, setTotalEmailCount] = useState<any>(
+    store.totalRequestCount
+  );
+  const [fetchedEmailCount, setFetchedEmailCount] = useState<number>(0);
+
+  const [offset, setOffset] = useState<number>(0);
+  const limit = 15;
+  // const attemptLimit = 10;
 
   // ** Hooks
   const theme = useTheme();
@@ -50,8 +62,7 @@ const EmailAppLayout = ({ folder, label }: MailLayoutType) => {
   const mdAbove = useMediaQuery(theme.breakpoints.up("md"));
   const smAbove = useMediaQuery(theme.breakpoints.up("sm"));
   const hidden = useMediaQuery(theme.breakpoints.down("lg"));
-  const store = useSelector((state: RootState) => state.support);
-  const storeEmail = useSelector((state: RootState) => state.email);
+  // const store = useSelector((state: RootState) => state.support);
 
   // ** Vars
   const leftSidebarWidth = 260;
@@ -60,8 +71,16 @@ const EmailAppLayout = ({ folder, label }: MailLayoutType) => {
 
   useEffect(() => {
     // @ts-ignore
-    dispatch(fetchData());
+
+    dispatch(fetchTotalRequest({})).then((response) => {
+      setTotalEmailCount(response.payload);
+    });
+    // setOffset(1);
   }, []);
+
+  useEffect(() => {
+    fetchMails();
+  }, [totalEmailCount]);
 
   const toggleComposeOpen = () => setComposeOpen(!composeOpen);
   const handleLeftSidebarToggle = () => setLeftSidebarOpen(!leftSidebarOpen);
@@ -74,16 +93,66 @@ const EmailAppLayout = ({ folder, label }: MailLayoutType) => {
     }px + ${theme.spacing(6)} * 2)`;
   };
 
-  // const router = useRouter();
+  const containerRef = useRef<HTMLDivElement | null>(null);
 
-  // useEffect(() => {
-  //   console.log(router);
-  //   if (router.asPath.includes("comeback")) {
-  //     console.log("HERE");
-  //     // setSelectedMail(selectedMail);
-  //     // setMailDetailsOpen(true);
-  //   }
-  // }, []);
+  const fetchMails = async () => {
+    console.log("Email.length: " + emails.length);
+    console.log("Total Email Count: " + totalEmailCount);
+    if (
+      emails.length < totalEmailCount ||
+      (emails.length === 0 && totalEmailCount === 0) ||
+      fetchedEmailCount < totalEmailCount
+    ) {
+      // Fetch data only if we haven't fetched all possible emails
+      // if (offset <= attemptLimit) {
+      dispatch(
+        fetchData({
+          offset: fetchedEmailCount,
+          limit: limit,
+          isParents: true,
+        })
+      ).then((data: any) => {
+        // Append the fetched data to the existing emails
+        setEmails((prevEmails: any) => {
+          console.log("Prev emails: " + prevEmails.length);
+          console.log("Data payload length: " + data.payload.length);
+          console.log("\n");
+          if (prevEmails.length + data.payload.length <= totalEmailCount) {
+            setFetchedEmailCount(
+              (prevCount) => prevCount + data.payload.length
+            );
+            setOffset(offset + limit);
+
+            const newEmailArr = [...prevEmails, ...data.payload];
+            newEmailArr.sort((a, b) => {
+              if (a.createdAt > b.createdAt) {
+                return 1;
+              } else {
+                return 0;
+              }
+            });
+            return newEmailArr;
+          } else {
+            return prevEmails;
+          }
+        });
+      });
+    } else {
+      console.log("All emails have been fetched.");
+      dispatch(fetchTotalRequest({})).then((response) => {
+        setTotalEmailCount(response.payload);
+      });
+    }
+  };
+
+  const memoizedFetchMails = useMemo(
+    () => fetchMails,
+    [offset, totalEmailCount]
+  );
+
+  if (true) {
+    // return <></>;
+  }
 
   return (
     <Box
@@ -101,7 +170,7 @@ const EmailAppLayout = ({ folder, label }: MailLayoutType) => {
     >
       {!mailDetailsOpen && (
         <SidebarLeft
-          store={storeEmail}
+          store={emails}
           hidden={hidden}
           lgAbove={lgAbove}
           dispatch={dispatch}
@@ -116,9 +185,13 @@ const EmailAppLayout = ({ folder, label }: MailLayoutType) => {
       )}
       {!mailDetailsOpen && (
         <MailLog
-          supportList={store.supportList}
+          totalMailCount={totalEmailCount}
+          supportList={emails}
           setMailDetailsOpen={setMailDetailsOpen}
           setSelectedMail={setSelectedMail}
+          scrollRef={containerRef}
+          fetchMails={memoizedFetchMails}
+          fetchTotalRequestCount={fetchTotalRequest}
         />
       )}
 

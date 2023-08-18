@@ -1,6 +1,7 @@
 // ** Types
 import { Dispatch } from "redux";
 import { ReactElement, SyntheticEvent } from "react";
+import { AsyncThunk } from "@reduxjs/toolkit";
 
 export type MailLabelType = "personal" | "company" | "important" | "private";
 
@@ -119,9 +120,13 @@ export type MailStore = {
 };
 
 export type MailListType = {
+  totalMailCount: number;
   supportList: never[];
   setMailDetailsOpen: (val: boolean) => void;
   setSelectedMail: (val: Object) => void;
+  fetchMails: (init?: boolean) => Promise<void>;
+  fetchTotalRequestCount: any;
+  scrollRef: any;
 };
 
 export type MailLabelColors = {
@@ -133,7 +138,7 @@ export type MailLabelColors = {
 
 export type MailSidebarType = {
   hidden: boolean;
-  store: MailStore;
+  store: any;
   lgAbove: boolean;
   dispatch: Dispatch<any>;
   leftSidebarOpen: boolean;
@@ -143,6 +148,7 @@ export type MailSidebarType = {
   handleLeftSidebarToggle: () => void;
   setMailDetailsOpen: (val: boolean) => void;
   handleSelectAllMail?: (val: boolean) => void;
+  // setTotalEmailCount: any;
 };
 
 export type MailLogType = {

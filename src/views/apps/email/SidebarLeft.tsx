@@ -100,6 +100,7 @@ const SidebarLeft = (props: MailSidebarType) => {
     leftSidebarWidth,
     setMailDetailsOpen,
     handleLeftSidebarToggle,
+    // setTotalEmailCount,
   } = props;
 
   const theme = useTheme();
@@ -234,6 +235,8 @@ const SidebarLeft = (props: MailSidebarType) => {
           Authorization: storedToken,
         },
       },
+    }).finally(() => {
+      // setTotalEmailCount((prevCount: number) => prevCount + 1);
     });
   };
 
