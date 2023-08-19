@@ -1,5 +1,5 @@
 // ** React Imports
-import { useState, ReactNode, useEffect } from "react";
+import { useState, ReactNode, useEffect, useMemo } from "react";
 
 // ** MUI Imports
 import Box from "@mui/material/Box";
@@ -102,14 +102,59 @@ const MailLog = React.memo((props: MailListType) => {
     scrollRef,
   } = props;
 
-  const handleScrollStart = () => {};
+  const delay = (milliseconds: number) => {
+    return new Promise((resolve) => setTimeout(resolve, milliseconds));
+  };
 
-  const handleScrollEnd = () => {
-    if (scrollRef.current.scrollTop == scrollRef.current.scrollTopMax) {
-      setTimeout(() => {
+  let apiCallCount_start = 0;
+  let apiCallInProgress_start = false;
+
+  const handleScrollStart = () => {
+    if (!apiCallInProgress_start) {
+      apiCallInProgress_start = true;
+
+      delay(3000)
+        .then(() => {
+          if (apiCallCount_start < 3) {
+            fetchMails();
+            apiCallCount_start++;
+          }
+        })
+        .finally(() => {
+          apiCallInProgress_start = false;
+          apiCallCount_start = 0;
+        });
+    } else {
+      console.log("You can refresh it in 3 seconds..");
+    }
+  };
+
+  let apiCallCount = 0;
+  let apiCallInProgress = false;
+
+  const handleScrollEnd = async () => {
+    if (scrollRef.current != null) {
+      if (scrollRef.current.scrollTop == scrollRef.current.scrollTopMax) {
         scrollRef.current.scrollTop = scrollRef.current.scrollTop - 10;
-      }, 3000);
-      fetchMails();
+
+        if (!apiCallInProgress) {
+          apiCallInProgress = true;
+
+          delay(3000)
+            .then(() => {
+              if (apiCallCount < 3) {
+                fetchMails();
+                apiCallCount++;
+              }
+            })
+            .finally(() => {
+              apiCallInProgress = false;
+              apiCallCount = 0;
+            });
+        } else {
+          console.log("You can refresh it in 3 seconds..");
+        }
+      }
     }
   };
 
@@ -127,7 +172,7 @@ const MailLog = React.memo((props: MailListType) => {
         scrollContainer.scrollTop === scrollContainer.scrollTopMax
       ) {
         console.log("Scrolled with threshold");
-        fetchMails();
+        // fetchMails();
       }
     }
   };

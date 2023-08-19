@@ -95,6 +95,18 @@ const EmailAppLayout = ({ folder, label }: MailLayoutType) => {
 
   const containerRef = useRef<HTMLDivElement | null>(null);
 
+  const removeDuplicates = (array: any, key: any) => {
+    const seen = new Set();
+    return array.filter((item: any) => {
+      const value = key ? item[key] : item;
+      if (!seen.has(value)) {
+        seen.add(value);
+        return true;
+      }
+      return false;
+    });
+  };
+
   const fetchMails = async () => {
     console.log("Email.length: " + emails.length);
     console.log("Total Email Count: " + totalEmailCount);
@@ -103,6 +115,7 @@ const EmailAppLayout = ({ folder, label }: MailLayoutType) => {
       (emails.length === 0 && totalEmailCount === 0) ||
       fetchedEmailCount < totalEmailCount
     ) {
+      console.log("here");
       // Fetch data only if we haven't fetched all possible emails
       // if (offset <= attemptLimit) {
       dispatch(
@@ -117,7 +130,10 @@ const EmailAppLayout = ({ folder, label }: MailLayoutType) => {
           console.log("Prev emails: " + prevEmails.length);
           console.log("Data payload length: " + data.payload.length);
           console.log("\n");
-          if (prevEmails.length + data.payload.length <= totalEmailCount) {
+          if (
+            prevEmails.length < totalEmailCount ||
+            prevEmails.length < data.payload.length
+          ) {
             setFetchedEmailCount(
               (prevCount) => prevCount + data.payload.length
             );
@@ -131,9 +147,19 @@ const EmailAppLayout = ({ folder, label }: MailLayoutType) => {
                 return 0;
               }
             });
+
+            // newEmailArr.reduce((a, b) => (a.id == b.id ? 0 : 1));
             return newEmailArr;
+            // return removeDuplicates(newEmailArr, "id");
           } else {
+            // console.log(prevEmails.length);
+            // if (prevEmails.length > 0) {
+            // prevEmails.reduce((a: any, b: any) => (a.id == b.id ? 0 : 1));
+            // return prevEmails;
+            // return removeDuplicates(prevEmails, "id");
+            // } else {
             return prevEmails;
+            // }
           }
         });
       });

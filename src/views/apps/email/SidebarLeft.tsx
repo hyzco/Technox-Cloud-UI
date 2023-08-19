@@ -142,52 +142,52 @@ const SidebarLeft = (props: MailSidebarType) => {
     },
   });
 
-  const RenderBadge = (
-    folder: "inbox" | "draft" | "spam" | "add" | "all",
-    color:
-      | "default"
-      | "primary"
-      | "secondary"
-      | "success"
-      | "error"
-      | "warning"
-      | "info"
-  ) => {
-    if (store && store.mailMeta && store.mailMeta[folder] > 0) {
-      return (
-        <ListBadge
-          skin="light"
-          color={color}
-          sx={{ ml: 2 }}
-          badgeContent={store.mailMeta[folder]}
-        />
-      );
-    } else {
-      return null;
-    }
-  };
+  // const RenderBadge = (
+  //   folder: "inbox" | "draft" | "spam" | "add" | "all",
+  //   color:
+  //     | "default"
+  //     | "primary"
+  //     | "secondary"
+  //     | "success"
+  //     | "error"
+  //     | "warning"
+  //     | "info"
+  // ) => {
+  //   if (store && store.mailMeta && store.mailMeta[folder] > 0) {
+  //     return (
+  //       <ListBadge
+  //         skin="light"
+  //         color={color}
+  //         sx={{ ml: 2 }}
+  //         badgeContent={store.mailMeta[folder]}
+  //       />
+  //     );
+  //   } else {
+  //     return null;
+  //   }
+  // };
 
-  const handleActiveItem = (
-    type: "folder" | "label",
-    value: MailFolderType | MailLabelType
-  ) => {
-    if (store && store.filter[type] !== value) {
-      return false;
-    } else {
-      return true;
-    }
-  };
+  // const handleActiveItem = (
+  //   type: "folder" | "label",
+  //   value: MailFolderType | MailLabelType
+  // ) => {
+  //   if (store && store.filter[type] !== value) {
+  //     return false;
+  //   } else {
+  //     return true;
+  //   }
+  // };
 
   const handleListItemClick = () => {
     setMailDetailsOpen(false);
     handleLeftSidebarToggle();
   };
 
-  const activeInboxCondition =
-    store &&
-    handleActiveItem("folder", "inbox") &&
-    store.filter.folder === "inbox" &&
-    store.filter.label === "";
+  // const activeInboxCondition =
+  //   store &&
+  //   handleActiveItem("folder", "inbox") &&
+  //   store.filter.folder === "inbox" &&
+  //   store.filter.label === "";
 
   const ScrollWrapper = ({ children }: { children: ReactNode }) => {
     if (hidden) {
@@ -378,17 +378,19 @@ const SidebarLeft = (props: MailSidebarType) => {
                 onClick={handleListItemClick}
                 sx={{
                   pt: 0.5,
-                  borderLeftColor: (theme) =>
-                    activeInboxCondition
-                      ? theme.palette.primary.main
-                      : "transparent",
+                  borderLeftColor: (theme) => theme.palette.secondary.light,
+
+                  // borderLeftColor: (theme) =>
+                  //   activeInboxCondition
+                  //     ? theme.palette.primary.main
+                  //     : "transparent",
                 }}
               >
                 <ListItemIcon
                   sx={{
-                    color: activeInboxCondition
-                      ? "primary.main"
-                      : "text.secondary",
+                    //activeInboxCondition
+                    color: "primary.main",
+                    //  "text.secondary",
                   }}
                 >
                   <EmailOutline sx={{ fontSize: "1.25rem" }} />
@@ -398,12 +400,11 @@ const SidebarLeft = (props: MailSidebarType) => {
                   primaryTypographyProps={{
                     noWrap: true,
                     sx: {
-                      color: (theme) =>
-                        activeInboxCondition ? theme.palette.primary.main : "",
+                      // color: (theme) => theme.palette.primary,
                     },
                   }}
                 />
-                {RenderBadge("inbox", "primary")}
+                {/* {RenderBadge("inbox", "primary")} */}
               </ListItemStyled>
             </Link>
           </List>
@@ -429,10 +430,7 @@ const SidebarLeft = (props: MailSidebarType) => {
                 onClick={handleListItemClick}
                 sx={{
                   mb: 1,
-                  borderLeftColor: (theme) =>
-                    handleActiveItem("label", "personal")
-                      ? theme.palette.primary.main
-                      : "transparent",
+                  borderLeftColor: (theme) => theme.palette.secondary.light,
                 }}
               >
                 <ListItemIcon>
@@ -445,10 +443,7 @@ const SidebarLeft = (props: MailSidebarType) => {
                   primaryTypographyProps={{
                     noWrap: true,
                     sx: {
-                      color: (theme) =>
-                        handleActiveItem("label", "personal")
-                          ? theme.palette.primary.main
-                          : "",
+                      // color: (theme) => theme.palette.secondary.light,
                     },
                   }}
                 />
@@ -460,10 +455,7 @@ const SidebarLeft = (props: MailSidebarType) => {
                 onClick={handleListItemClick}
                 sx={{
                   mb: 1,
-                  borderLeftColor: (theme) =>
-                    handleActiveItem("label", "company")
-                      ? theme.palette.primary.main
-                      : "transparent",
+                  borderLeftColor: (theme) => theme.palette.secondary.light,
                 }}
               >
                 <ListItemIcon>
@@ -476,10 +468,7 @@ const SidebarLeft = (props: MailSidebarType) => {
                   primaryTypographyProps={{
                     noWrap: true,
                     sx: {
-                      color: (theme) =>
-                        handleActiveItem("label", "company")
-                          ? theme.palette.primary.main
-                          : "",
+                      // color: (theme) => theme.palette.seco,
                     },
                   }}
                 />
@@ -491,10 +480,7 @@ const SidebarLeft = (props: MailSidebarType) => {
                 onClick={handleListItemClick}
                 sx={{
                   mb: 1,
-                  borderLeftColor: (theme) =>
-                    handleActiveItem("label", "important")
-                      ? theme.palette.primary.main
-                      : "transparent",
+                  borderLeftColor: (theme) => theme.palette.secondary.light,
                 }}
               >
                 <ListItemIcon>
@@ -507,10 +493,7 @@ const SidebarLeft = (props: MailSidebarType) => {
                   primaryTypographyProps={{
                     noWrap: true,
                     sx: {
-                      color: (theme) =>
-                        handleActiveItem("label", "important")
-                          ? theme.palette.primary.main
-                          : "",
+                      // color: (theme) => "",
                     },
                   }}
                 />

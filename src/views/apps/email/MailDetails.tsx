@@ -164,6 +164,10 @@ const MailDetails = (props: MailDetailsType) => {
     setAllItems(mail);
   }, [mail]);
 
+  useEffect(() => {
+    console.log("all items");
+    console.log(allItems);
+  }, [allItems]);
   // ** Hook
   const { settings } = useSettings();
   const { user } = useAuth();
@@ -210,6 +214,7 @@ const MailDetails = (props: MailDetailsType) => {
       return items.map((child: any, index: number) => {
         return (
           <Box
+            key={index + "MD"}
             sx={{
               mb: index == totalItems ? 40 : 4,
               boxShadow: 6,
