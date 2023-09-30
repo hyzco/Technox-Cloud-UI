@@ -13,6 +13,7 @@ import { MailLayoutType, MailType } from "src/types/apps/emailTypes";
 
 // ** Demo Components Imports
 import Email from "src/views/apps/email/Email";
+import { ACLObj } from "src/configs/acl";
 
 const EmailApp = ({ folder }: MailLayoutType) => {
   return <Email folder={folder} />;
@@ -40,6 +41,11 @@ export const getStaticProps: GetStaticProps = ({
       folder: params?.folder,
     },
   };
+};
+
+const defaultACLObj: ACLObj = {
+  action: "read",
+  subject: "support-page",
 };
 
 export default EmailApp;

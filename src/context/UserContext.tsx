@@ -9,6 +9,7 @@ import axios from "axios";
 
 // ** Config
 import userConfig from "src/configs/user";
+import authConfig from "src/configs/auth";
 
 // ** Types
 import {
@@ -65,17 +66,22 @@ const UserProvider = ({ children }: Props) => {
       setIsInitialized(true);
       try {
         setLoading(true);
-        getFinance((err) => {
-          console.log(err);
-        });
-        getServer((err) => {
-          console.log(err);
-        });
+        // getFinance((err) => {
+        // console.log(err);
+        // });
+        // getServer((err) => {
+        // console.log(err);
+        // window.localStorage.removeItem("userData");
+        // window.localStorage.removeItem(authConfig.storageTokenKeyName);
+        // router.push("/auth/login");
+        // throw new Error("Login failed");
+        // });
       } catch (e) {
         setLoading(false);
         setError(e);
         console.log("errorUseEffect initUser", e);
       } finally {
+        // console.log("here");
         setLoading(false);
         setIsInitialized(false);
       }

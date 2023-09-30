@@ -50,7 +50,8 @@ import {
 import vmApi from "src/@core/apis/vmApi";
 import { HTTP_METHOD } from "src/@core/enums/axios.enum";
 import React from "react";
-import user from "src/configs/user";
+// import user from "src/configs/user";
+import { useAuth } from "src/hooks/useAuth";
 
 enum REDUCER_ACTIONS {
   SET_REQUEST_DETAILS = "SET_REQUEST_DETAILS",
@@ -104,6 +105,10 @@ const SidebarLeft = (props: MailSidebarType) => {
   } = props;
 
   const theme = useTheme();
+  const { user } = useAuth();
+
+  const userId = user ? user.id : -1;
+
   const [openDialog, setOpenDialog] = useState<boolean>(false);
   const fullScreenDialog = useMediaQuery(theme.breakpoints.down("xs"));
 
@@ -227,7 +232,7 @@ const SidebarLeft = (props: MailSidebarType) => {
         title,
         description,
         department: department ? department : "finance",
-        sentBy: "user",
+        sentBy: userId,
         isParent: 1,
       },
       requestConfig: {

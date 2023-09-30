@@ -1,5 +1,5 @@
 // ** React Imports
-import { useState, useEffect, useRef, useMemo } from "react";
+import { useState, useEffect, useRef, useMemo, useContext } from "react";
 
 // ** Redux Imports
 import { useDispatch, useSelector } from "react-redux";
@@ -25,6 +25,8 @@ import { fetchData, fetchTotalRequest } from "src/store/apps/support";
 import MailDetails from "./MailDetails";
 import select from "src/@core/theme/overrides/select";
 import { useRouter } from "next/router";
+import { AbilityContext } from "src/layouts/components/acl/Can";
+import { useAuth } from "src/hooks/useAuth";
 
 // ** Variables
 const labelColors: MailLabelColors = {
@@ -35,6 +37,8 @@ const labelColors: MailLabelColors = {
 };
 
 const EmailAppLayout = ({ folder, label }: MailLayoutType) => {
+  const ability = useContext(AbilityContext);
+
   const store = useSelector((state: RootState) => state.support);
 
   // ** States
@@ -62,6 +66,9 @@ const EmailAppLayout = ({ folder, label }: MailLayoutType) => {
   const mdAbove = useMediaQuery(theme.breakpoints.up("md"));
   const smAbove = useMediaQuery(theme.breakpoints.up("sm"));
   const hidden = useMediaQuery(theme.breakpoints.down("lg"));
+  const { user } = useAuth();
+  const role = user ? user.role : "user";
+
   // const store = useSelector((state: RootState) => state.support);
 
   // ** Vars
@@ -95,27 +102,16 @@ const EmailAppLayout = ({ folder, label }: MailLayoutType) => {
 
   const containerRef = useRef<HTMLDivElement | null>(null);
 
-  const removeDuplicates = (array: any, key: any) => {
-    const seen = new Set();
-    return array.filter((item: any) => {
-      const value = key ? item[key] : item;
-      if (!seen.has(value)) {
-        seen.add(value);
-        return true;
-      }
-      return false;
-    });
-  };
-
   const fetchMails = async () => {
     console.log("Email.length: " + emails.length);
     console.log("Total Email Count: " + totalEmailCount);
     if (
-      emails.length < totalEmailCount ||
+      (user != null && emails.length < totalEmailCount) ||
       (emails.length === 0 && totalEmailCount === 0) ||
       fetchedEmailCount < totalEmailCount
     ) {
       console.log("here");
+      console.log(role);
       // Fetch data only if we haven't fetched all possible emails
       // if (offset <= attemptLimit) {
       dispatch(
@@ -123,49 +119,59 @@ const EmailAppLayout = ({ folder, label }: MailLayoutType) => {
           offset: fetchedEmailCount,
           limit: limit,
           isParents: true,
+          role: role,
         })
       ).then((data: any) => {
-        // Append the fetched data to the existing emails
-        setEmails((prevEmails: any) => {
-          console.log("Prev emails: " + prevEmails.length);
-          console.log("Data payload length: " + data.payload.length);
-          console.log("\n");
-          if (
-            prevEmails.length < totalEmailCount ||
-            prevEmails.length < data.payload.length
-          ) {
-            setFetchedEmailCount(
-              (prevCount) => prevCount + data.payload.length
-            );
-            setOffset(offset + limit);
+        if (data.payload) {
+          // Append the fetched data to the existing emails
+          setEmails((prevEmails: any) => {
+            console.log("Prev emails: " + prevEmails.length);
+            console.log("Data payload length: " + data.payload.length);
+            console.log("\n");
+            if (
+              prevEmails.length < totalEmailCount ||
+              prevEmails.length < data.payload.length
+            ) {
+              setFetchedEmailCount(
+                (prevCount) => prevCount + data.payload.length
+              );
+              setOffset(offset + limit);
 
-            const newEmailArr = [...prevEmails, ...data.payload];
-            newEmailArr.sort((a, b) => {
-              if (a.createdAt > b.createdAt) {
-                return 1;
-              } else {
-                return 0;
-              }
-            });
+              const newEmailArr = [...prevEmails, ...data.payload];
+              newEmailArr.sort((a, b) => {
+                if (a.createdAt > b.createdAt) {
+                  return 1;
+                } else {
+                  return 0;
+                }
+              });
 
-            // newEmailArr.reduce((a, b) => (a.id == b.id ? 0 : 1));
-            return newEmailArr;
-            // return removeDuplicates(newEmailArr, "id");
-          } else {
-            // console.log(prevEmails.length);
-            // if (prevEmails.length > 0) {
-            // prevEmails.reduce((a: any, b: any) => (a.id == b.id ? 0 : 1));
-            // return prevEmails;
-            // return removeDuplicates(prevEmails, "id");
-            // } else {
-            return prevEmails;
-            // }
-          }
-        });
+              // newEmailArr.reduce((a, b) => (a.id == b.id ? 0 : 1));
+              return newEmailArr;
+              // return removeDuplicates(newEmailArr, "id");
+            } else {
+              // console.log(prevEmails.length);
+              // if (prevEmails.length > 0) {
+              // prevEmails.reduce((a: any, b: any) => (a.id == b.id ? 0 : 1));
+              // return prevEmails;
+              // return removeDuplicates(prevEmails, "id");
+              // } else {
+              return prevEmails;
+              // }
+            }
+          });
+        } else {
+          console.info("No request to fetch.");
+        }
       });
     } else {
       console.log("All emails have been fetched.");
-      dispatch(fetchTotalRequest({})).then((response) => {
+
+      dispatch(
+        fetchTotalRequest({
+          role: role,
+        })
+      ).then((response) => {
         setTotalEmailCount(response.payload);
       });
     }
@@ -176,8 +182,8 @@ const EmailAppLayout = ({ folder, label }: MailLayoutType) => {
     [offset, totalEmailCount]
   );
 
-  if (true) {
-    // return <></>;
+  if (ability && !ability.can("read", "support-page")) {
+    // return;
   }
 
   return (

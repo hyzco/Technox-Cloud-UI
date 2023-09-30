@@ -11,10 +11,11 @@ import EcommerceActivityTimeline from "src/views/dashboards/ecommerce/EcommerceA
 import EcommerceSalesOverviewWithTabs from "src/views/dashboards/ecommerce/DashboardServerOverviewWithTabs";
 import CloudBalanceOverview from "src/views/dashboards/ecommerce/CloudBalanceOverview";
 import CloudAssetsOverview from "src/views/dashboards/ecommerce/CloudAssetsOverview";
-import { Card, CardHeader } from "@mui/material";
+import { Box, Card, CardHeader } from "@mui/material";
 import ServerView from "src/views/components/view-server/serverView";
 import { useRouter } from "next/router";
 import { useEffect, useState } from "react";
+import ServerDetails from "src/views/components/view-server/serverDetails";
 
 const ViewServer = () => {
   const router = useRouter();
@@ -37,8 +38,11 @@ const ViewServer = () => {
     <ApexChartWrapper>
       <KeenSliderWrapper>
         <Grid container spacing={6} className="match-height">
-          <Grid item xs={12} md={6}>
+          <Grid item xs={12} md={5}>
             <ServerView data={isRouterEmpty ? data : router.query} />
+          </Grid>
+          <Grid item xs={12} md={7}>
+            <ServerDetails data={isRouterEmpty ? data : router.query} />
           </Grid>
           {/* <Grid item xs={12} md={6}>
             <Card>

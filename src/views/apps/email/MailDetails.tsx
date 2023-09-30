@@ -65,6 +65,9 @@ import vmApi from "src/@core/apis/vmApi";
 import { HTTP_METHOD } from "src/@core/enums/axios.enum";
 import useAxiosFunction from "src/@core/hooks/useAxiosFunction";
 import userConfig from "src/configs/user";
+import { fetchSingleRequest } from "src/store/apps/support";
+import { useDispatch } from "react-redux";
+import { AppDispatch } from "src/store";
 
 const HiddenReplyBack = styled(Box)<BoxProps>(({ theme }) => ({
   height: 11,
@@ -151,6 +154,9 @@ const MailDetails = (props: MailDetailsType) => {
     route.push("/");
   }
 
+  // ** Hooks
+  const dispatch = useDispatch<AppDispatch>();
+
   // ** State
   const [showReplies, setShowReplies] = useState<boolean>(false);
   const [labelAnchorEl, setLabelAnchorEl] = useState<null | HTMLElement>(null);
@@ -159,10 +165,34 @@ const MailDetails = (props: MailDetailsType) => {
   );
   const [shouldRender, setShouldRender] = useState<boolean>(true);
   const [allItems, setAllItems] = useState<any>({});
+  const [requestId, setRequestId] = useState<number>();
+
+  const [isMessageSent, setIsMessageSent] = useState<boolean>(false);
 
   useEffect(() => {
+    console.log("this is mail");
+    console.log(mail);
+    setRequestId(mail.id);
     setAllItems(mail);
   }, [mail]);
+
+  useEffect(() => {
+    if (isMessageSent) {
+      dispatch(
+        fetchSingleRequest({
+          requestId: requestId,
+        })
+      ).then((response: any) => {
+        if (response.payload.length > 0) {
+          console.log("response");
+          console.log(response.payload[0]);
+          setAllItems(response.payload[0]);
+        }
+      });
+
+      setIsMessageSent(false);
+    }
+  }, [isMessageSent]);
 
   useEffect(() => {
     console.log("all items");
@@ -171,6 +201,10 @@ const MailDetails = (props: MailDetailsType) => {
   // ** Hook
   const { settings } = useSettings();
   const { user } = useAuth();
+
+  const userId = user ? user.id : null;
+  const userRole = user ? user.role : "user";
+
   // ** Vars
   const openLabelMenu = Boolean(labelAnchorEl);
   const openFolderMenu = Boolean(folderAnchorEl);
@@ -198,13 +232,16 @@ const MailDetails = (props: MailDetailsType) => {
     );
   };
 
-  const renderAllItems = (mail: any) => {
-    const tmpParent = Object.assign({}, mail);
+  const renderAllItems = () => {
+    if (allItems.length <= 0) return <></>;
+
+    const tmpParent = Object.assign({}, allItems);
 
     delete tmpParent.children;
 
-    if (showReplies && mail.children) {
-      const items = [...mail.children, tmpParent];
+    if (showReplies && allItems.children) {
+      const items = [...allItems.children, tmpParent];
+
       items.sort((a, b) =>
         new Date(a.createdAt).getTime() > new Date(b.createdAt).getTime()
           ? 0
@@ -250,12 +287,10 @@ const MailDetails = (props: MailDetailsType) => {
                     }}
                   >
                     <Typography sx={{ color: "text.secondary" }}>
-                      {child.sentBy === "user"
-                        ? user?.name + " " + user?.surname
-                        : "OPERATOR"}
+                      {child.user.name} {child.user.surname}
                     </Typography>
                     <Typography variant="body2" sx={{ color: "text.disabled" }}>
-                      {child.sentBy === "user" ? user?.email : "OPERATOR EMAIL"}
+                      {child.user.email}
                     </Typography>
                   </Box>
                 </Box>
@@ -305,12 +340,13 @@ const MailDetails = (props: MailDetailsType) => {
   const renderLastItem = () => {
     let item;
     console.log("RENDER LAST ITEM");
-
     if (mail.children.length > 0) {
       item = mail.children[mail.children.length - 1];
     } else {
       item = mail;
     }
+
+    console.log(item);
 
     return (
       <Box
@@ -344,10 +380,10 @@ const MailDetails = (props: MailDetailsType) => {
               />
               <Box sx={{ display: "flex", flexDirection: "column" }}>
                 <Typography sx={{ color: "text.secondary" }}>
-                  {user?.name} {user?.surname}
+                  {item.user.name} {item.user.surname}
                 </Typography>
                 <Typography variant="body2" sx={{ color: "text.disabled" }}>
-                  {user?.email}
+                  {item.user.email}
                 </Typography>
               </Box>
             </Box>
@@ -391,8 +427,18 @@ const MailDetails = (props: MailDetailsType) => {
   };
 
   const renderSendNewMessage = () => {
-    const [newMessage, setNewMessage] = useState<String>("");
     const [response, error, loading, axiosFetch] = useAxiosFunction();
+    const [newMessage, setNewMessage] = useState<String>("");
+
+    useEffect(() => {
+      console.log("useEffect");
+      console.log(loading);
+      console.log(error);
+      console.log(response);
+      if (!loading && response) {
+        setIsMessageSent(true);
+      }
+    }, [response, error, loading]);
 
     const onSendNewMessage = () => {
       axiosFetch({
@@ -404,7 +450,7 @@ const MailDetails = (props: MailDetailsType) => {
           description: newMessage,
           department: mail.departmentName,
           parentId: mail.id,
-          sentBy: "user",
+          sentBy: userId,
         },
         requestConfig: {
           headers: {
@@ -412,21 +458,11 @@ const MailDetails = (props: MailDetailsType) => {
           },
         },
       });
-
-      // setMailDetailsOpen(false);
-      // setMailDetailsOpen(true);
-      props.refreshData();
-      setShouldRender(false);
-      setTimeout(() => {
-        setShouldRender(true);
-      }, 0);
-
-      // route.push("/views/requests", {
-      //   query: { comeback: mail.id.toString() },
-      // });
     };
 
-    // const { user } = useAuth();
+    const onChange = (e: any) => {
+      setNewMessage(e.target.value);
+    };
 
     const storedToken = window.localStorage.getItem(
       userConfig.storageTokenKeyName
@@ -464,9 +500,7 @@ const MailDetails = (props: MailDetailsType) => {
             autoFocus={true}
             value={newMessage}
             // focused={true}
-            onChange={(e) => {
-              setNewMessage(e.target.value);
-            }}
+            onChange={onChange}
           />
           <IconButton
             color="primary"
@@ -671,6 +705,7 @@ const MailDetails = (props: MailDetailsType) => {
                 justifyContent: "center",
               }}
             >
+              {isMessageSent && <>LOADING...</>}
               {!showReplies && mail.children.length > 0 && (
                 <Typography
                   onClick={() => setShowReplies(true)}
@@ -699,11 +734,11 @@ const MailDetails = (props: MailDetailsType) => {
                       />
                     </Fragment>
                   )}
-                  {shouldRender && renderLastItem()}
+                  {allItems && renderLastItem()}
                 </>
               )}
 
-              {shouldRender && renderAllItems(allItems)}
+              {allItems && renderAllItems()}
             </Box>
           </ScrollWrapper>
           {renderSendNewMessage()}

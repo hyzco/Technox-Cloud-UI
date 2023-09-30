@@ -1,7 +1,9 @@
 import backendConfig from "./backendConfig";
 
 export default {
-  getTotalRequestCount: `${backendConfig.api}/support/totalRequestForUser`,
-  getRequest: `${backendConfig.api}/support/getRequestForUser`,
+  getTotalRequestCountForUser: `${backendConfig.api}/support/totalRequestForUser`,
+  getRequestForUser: `${backendConfig.api}/support/getRequestForUser`,
+  getRequestForOperator: `${backendConfig.api}/support/getRequestForOperator`,
+  getSingleRequest: `${backendConfig.api}/support/getSingleRequest`,
   storageTokenKeyName: `accessToken`,
 };

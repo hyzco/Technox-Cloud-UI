@@ -164,45 +164,13 @@ const ServerView = (props: any) => {
             sx={{
               cursor: "grabbing",
               display: "flex",
-              width: "400px",
+              width: "100%",
               minWidth: "200px",
               height: "100%",
               backgroundColor: "black",
               marginRight: "16px",
             }}
           ></Box>
-          <Box
-            sx={{
-              display: "flex",
-              flexDirection: "column",
-              alignItems: "flex-start",
-              height: "100%",
-              marginLeft: 5,
-              marginTop: 5,
-            }}
-          >
-            <Typography variant="h6">Guest OS</Typography>
-            <Box
-              id="guestOsField"
-              sx={{
-                marginTop: 5,
-                display: "flex",
-                flexDirection: "column",
-              }}
-            >
-              {renderPowerStatus(data.power_state)}
-              <Typography variant="body1">
-                <strong>Guest OS:</strong>&nbsp; {data.os_name}
-              </Typography>
-              <Typography variant="body1">
-                <strong>DNS Name (1):</strong>&nbsp; {data.host_name}
-              </Typography>
-              {renderIpAddress([{ ip: data.ip_address }])}
-              {/* <Typography variant="body1">
-                <strong>Encryption:</strong>&nbsp; Not encrypted
-              </Typography> */}
-            </Box>
-          </Box>
         </Box>
 
         <Box

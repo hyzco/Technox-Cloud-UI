@@ -28,6 +28,7 @@ import useMediaQuery from "@mui/material/useMediaQuery";
 import { AppDispatch, RootState } from "src/store";
 import Badge from "@mui/material/Badge";
 import React from "react";
+import { useAuth } from "src/hooks/useAuth";
 
 const MailItem = styled(ListItem)<ListItemProps>(({ theme }) => ({
   zIndex: 1,
@@ -91,6 +92,9 @@ const ScrollWrapper = React.memo(
 );
 
 const MailLog = React.memo((props: MailListType) => {
+  const { user } = useAuth();
+  const role = user ? user.role : "user";
+
   // ** Props
   const {
     totalMailCount,
@@ -215,6 +219,7 @@ const MailLog = React.memo((props: MailListType) => {
             {supportList ? (
               <List sx={{ p: 0 }}>
                 {supportList.map((support: any, index: number) => {
+                  console.log(support);
                   return (
                     <Box
                       key={index + "SI"}
@@ -275,6 +280,7 @@ const MailLog = React.memo((props: MailListType) => {
                             // src={mail.from.avatar}
                             sx={{ mr: 3.5, width: "2rem", height: "2rem" }}
                           />
+
                           <Box
                             sx={{
                               display: "flex",
@@ -311,6 +317,17 @@ const MailLog = React.memo((props: MailListType) => {
                               {support.departmentName}
                             </Typography>
                           </Box>
+
+                          {role !== "user" && (
+                            <Typography
+                              noWrap
+                              variant="body2"
+                              sx={{ width: "100%" }}
+                            >
+                              Customer: {support.user.name}{" "}
+                              {support.user.surname}
+                            </Typography>
+                          )}
                         </Box>
                       </MailItem>
                     </Box>

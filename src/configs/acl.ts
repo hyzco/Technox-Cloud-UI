@@ -18,11 +18,17 @@ export type ACLObj = {
  */
 const defineRulesFor = (role: string, subject: string) => {
   const { can, rules } = new AbilityBuilder(AppAbility);
+  console.log("DEFINE RULES FOR USERS");
+  console.log(can);
+  console.log(rules);
 
-  if (role === "admin") {
-    can("manage", "all");
-  } else if (role === "client") {
-    can(["read"], "acl-page");
+  console.log("ROLEE:");
+  console.log(role + "");
+  if (role === "user") {
+    console.log(subject);
+    can(["manage"], "all");
+  } else if (role === "admin" || role === "operator") {
+    can(["manage"], "all");
   } else {
     can(["read", "create", "update", "delete"], subject);
   }
