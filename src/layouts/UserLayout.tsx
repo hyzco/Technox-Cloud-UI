@@ -50,10 +50,10 @@ const UserLayout = ({ children }: Props) => {
       {...(settings.layout === "horizontal"
         ? {
             // ** Navigation Items
-            // horizontalNavItems: HorizontalNavItems(),
+            horizontalNavItems: HorizontalNavItems(),
 
             // Uncomment the below line when using server-side menu in horizontal layout and comment the above line
-            horizontalNavItems: ServerSideHorizontalNavItems(),
+            // horizontalNavItems: ServerSideHorizontalNavItems(),
 
             // ** AppBar Content
             horizontalAppBarContent: () => (

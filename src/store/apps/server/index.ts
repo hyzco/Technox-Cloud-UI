@@ -72,7 +72,7 @@ export const userServersSlice = createSlice({
   reducers: {},
   extraReducers: (builder) => {
     builder.addCase(fetchData.fulfilled, (state, action) => {
-      state.serverList = action.payload.serverList;
+      state.serverList = action?.payload?.serverList && [];
     });
   },
 });

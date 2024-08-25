@@ -1,99 +1,78 @@
-import axios, { AxiosInstance, AxiosRequestConfig } from "axios";
-import { useState, useEffect } from "react";
+import { AxiosInstance, AxiosRequestConfig } from "axios";
+import { useState, useEffect, useCallback } from "react";
 import { HTTP_METHOD } from "../enums/axios.enum";
 
-// interface IAxiosConfigObj {
-//   axiosInstance: AxiosInstance;
-//   method: HTTP_METHOD;
-//   url: string;
-//   requestConfig: AxiosRequestConfig;
-//   body?: {};
-// }
 interface IAxiosConfigObj<M extends HTTP_METHOD> {
   axiosInstance: AxiosInstance;
   method: M;
   url: string;
-  requestConfig: AxiosRequestConfig;
-  body?: M extends "POST" ? {} : never; // Set body to {} only if method is 'POST'
+  requestConfig?: AxiosRequestConfig;
+  body?: M extends HTTP_METHOD.POST | HTTP_METHOD.PUT ? {} : never;
+  headers?: { Authorization: string } & Record<string, string>;
 }
 
 const useAxiosFunction = () => {
-  console.log("CALLED");
-  const [response, setResponse] = useState<any>([]);
-  const [error, setError] = useState<string>("");
-  const [loading, setLoading] = useState<boolean>(false); //different!
-  const [controller, setController] = useState<AbortController>();
+  const [response, setResponse] = useState<any>(null);
+  const [error, setError] = useState<string | null>(null);
+  const [loading, setLoading] = useState<boolean>(false);
+  const [controller, setController] = useState<AbortController | null>(null);
 
-  const getMethodInstance = (
-    method: HTTP_METHOD,
-    axiosInstance: AxiosInstance
-  ) => {
-    switch (method) {
-      case HTTP_METHOD.GET.toString():
-        return axiosInstance.get;
-      case HTTP_METHOD.POST.toString():
-        return axiosInstance.post;
-      case HTTP_METHOD.PUT.toString():
-        return axiosInstance.put;
-      case HTTP_METHOD.DELETE.toString():
-        return axiosInstance.delete;
-      default:
-        throw new Error(`Invalid HTTP method`);
-    }
-  };
+  const axiosFetch = useCallback(
+    async <M extends HTTP_METHOD>(configObj: IAxiosConfigObj<M>) => {
+      const {
+        axiosInstance,
+        method,
+        url,
+        requestConfig = {},
+        body,
+        headers,
+      } = configObj;
 
-  const axiosFetch = async (configObj: IAxiosConfigObj<HTTP_METHOD>) => {
-    const {
-      axiosInstance,
-      method,
-      url,
-      requestConfig = {},
-      body,
-    }: IAxiosConfigObj<HTTP_METHOD> = configObj;
-
-    try {
       setLoading(true);
       const ctrl = new AbortController();
       setController(ctrl);
 
-      if (method === HTTP_METHOD.POST || method === HTTP_METHOD.PUT) {
-        const res = await getMethodInstance(method, axiosInstance)(url, body, {
+      try {
+        const axiosMethod = axiosInstance[
+          method.toLowerCase() as keyof AxiosInstance
+        ] as (
+          url: string,
+          data?: any,
+          config?: AxiosRequestConfig
+        ) => Promise<any>;
+
+        const config: AxiosRequestConfig = {
           ...requestConfig,
           signal: ctrl.signal,
-        });
-        console.log("HERE");
+          headers: headers,
+        };
+
+        const res =
+          method === HTTP_METHOD.POST || method === HTTP_METHOD.PUT
+            ? await axiosMethod(url, body, config)
+            : await axiosMethod(url, config);
+
         setResponse(res.data);
-      } else {
-        const res = await getMethodInstance(method, axiosInstance)(url, {
-          ...requestConfig,
-          signal: ctrl.signal,
-        });
-        console.log("HERE");
-        setResponse(res.data);
+        setError(null);
+      } catch (err: any) {
+        setError(err.message);
+        setResponse(null);
+      } finally {
+        setLoading(false);
       }
-    } catch (err: any) {
-      // console.log(err.message);
-      if (err) {
-        setError(err);
-      }
-    } finally {
-      setLoading(false);
-      console.log("DONE");
-    }
-  };
+    },
+    []
+  );
 
   useEffect(() => {
-    // console.log(controller);
-
-    // useEffect cleanup function
     return () => {
-      controller && controller.abort();
-      setError("");
-      setResponse("");
+      controller?.abort();
+      setError(null);
+      setResponse(null);
     };
   }, [controller]);
 
-  return [response, error, loading, axiosFetch];
+  return { response, error, loading, axiosFetch };
 };
 
 export default useAxiosFunction;

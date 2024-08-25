@@ -245,7 +245,7 @@ const CreateServerPanel = () => {
     enableDefaultOnClick: boolean;
     onClick?: () => void;
   }) => {
-    const [response, error, loading, axiosFetch] = useAxiosFunction();
+    const [response, error, loading, axiosFetch] = useAxiosFunction() as any;
 
     const storedToken = window.localStorage.getItem(
       userConfig.storageTokenKeyName

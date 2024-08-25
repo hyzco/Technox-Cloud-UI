@@ -308,8 +308,7 @@ const Records: React.FC = () => {
 
   // ** Hooks
   const dispatch = useDispatch<AppDispatch>();
-  const store = useSelector((state: RootState) => state.user);
-
+  const store = useSelector((state: RootState) => state.user) as any;
   useEffect(() => {
     dispatch(
       fetchData({
@@ -413,7 +412,7 @@ const Records: React.FC = () => {
 
           <DataGrid
             autoHeight
-            rows={store.data}
+            rows={store?.data ?? []}
             columns={columns}
             checkboxSelection
             pageSize={pageSize}

@@ -46,7 +46,7 @@ const EmailAppLayout = ({ folder, label }: MailLayoutType) => {
   const [composeOpen, setComposeOpen] = useState<boolean>(false);
   const [mailDetailsOpen, setMailDetailsOpen] = useState<boolean>(false);
   const [selectedMail, setSelectedMail] = useState<any>({});
-  const [leftSidebarOpen, setLeftSidebarOpen] = useState<boolean>(false);
+  const [leftSidebarOpen, setLeftSidebarOpen] = useState<boolean>(true); // Set to true to make the sidebar visible by default
 
   const [emails, setEmails] = useState<any>(store.supportList);
   const [totalEmailCount, setTotalEmailCount] = useState<any>(
@@ -112,16 +112,15 @@ const EmailAppLayout = ({ folder, label }: MailLayoutType) => {
     ) {
       console.log("here");
       console.log(role);
-      // Fetch data only if we haven't fetched all possible emails
-      // if (offset <= attemptLimit) {
-      dispatch(
-        fetchData({
-          offset: fetchedEmailCount,
-          limit: limit,
-          isParents: true,
-          role: role,
-        })
-      ).then((data: any) => {
+      try {
+        const data = await dispatch(
+          fetchData({
+            offset: fetchedEmailCount,
+            limit: limit,
+            isParents: true,
+            role: role,
+          })
+        );
         if (data.payload) {
           // Append the fetched data to the existing emails
           setEmails((prevEmails: any) => {
@@ -163,17 +162,22 @@ const EmailAppLayout = ({ folder, label }: MailLayoutType) => {
         } else {
           console.info("No request to fetch.");
         }
-      });
+      } catch (error) {
+        console.error("Error fetching emails:", error);
+      }
     } else {
       console.log("All emails have been fetched.");
 
-      dispatch(
-        fetchTotalRequest({
-          role: role,
-        })
-      ).then((response) => {
+      try {
+        const response = await dispatch(
+          fetchTotalRequest({
+            role: role,
+          })
+        );
         setTotalEmailCount(response.payload);
-      });
+      } catch (error) {
+        console.error("Error fetching total email count:", error);
+      }
     }
   };
 
