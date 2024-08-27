@@ -211,6 +211,7 @@ const serverReducer: Reducer<IServerState, IAction> = (
 };
 
 const CreateServerPanel = () => {
+
   const [activeTab, setActiveTab] = useState<string>("packagesTab");
   const { user, logout } = useAuth();
 
@@ -245,33 +246,31 @@ const CreateServerPanel = () => {
     enableDefaultOnClick: boolean;
     onClick?: () => void;
   }) => {
-    const [response, error, loading, axiosFetch] = useAxiosFunction() as any;
-
     const storedToken = window.localStorage.getItem(
       userConfig.storageTokenKeyName
     )!;
+    // const [response, error, loading, axiosFetch] = useAxiosFunction() as any;;
 
-    const requestNewVm = () => {
-      axiosFetch({
-        axiosInstance: vmApi,
-        method: HTTP_METHOD.POST,
-        url: "/server/options/create-vm",
-        requestConfig: {
-          headers: {
-            Authorization: storedToken,
-          },
-        },
-      });
-    };
+    // const requestNewVm = () => {
+    //   axiosFetch({
+    //     axiosInstance: vmApi,
+    //     method: HTTP_METHOD.POST,
+    //     url: "/server/options/create-vm",
+    //     headers: {
+    //       Authorization: storedToken,
+    //     },
+    //     body: {}
+    //   });
+    // };
 
-    useEffect(() => {
-      console.log("response");
-      console.log(response);
-      console.log(error);
-      if (error && typeof error === "string" && error.includes("401")) {
-        logout();
-      }
-    }, [response, error]);
+    // useEffect(() => {
+    //   console.log("response");
+    //   console.log(response);
+    //   console.log(error);
+    //   if (error && typeof error === "string" && error.includes("401")) {
+    //     logout();
+    //   }
+    // }, [response, error]);
 
     const onClick = () => {
       if (activeTab === "submitTab") {
@@ -279,7 +278,7 @@ const CreateServerPanel = () => {
         //all logic regarding if user has enough money etc will be handled on backend.
         //TODO:
         //later make one axios caller and use that instance
-        requestNewVm();
+        // requestNewVm();
       }
       if (props.onClick !== undefined) {
         props.onClick();
@@ -315,11 +314,11 @@ const CreateServerPanel = () => {
             props.enableDefaultOnClick ? footerNextButtonOnSubmit() : onClick();
           }}
         >
-          {loading
+          {/* {loading
             ? "Creating..."
             : activeTab === "submitTab"
             ? "Submit"
-            : "Next"}
+            : "Next"} */}
         </Button>
       </Box>
     );

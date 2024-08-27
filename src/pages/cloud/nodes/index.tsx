@@ -40,6 +40,9 @@ import Logout from "src/pages/auth/logout";
 
 import axios from "axios";
 import backendConfig from "src/configs/backendConfig";
+import { IconButton } from "@mui/material";
+import { ArrowLeft } from "mdi-material-ui";
+import { useRouter } from "next/router";
 
 const CPUUsageChart = ({ cpuUsage, nodeNames }: any) => {
   const options: ApexOptions = {
@@ -282,9 +285,18 @@ const NodeDashboard = () => {
   if (error) {
     return <Alert severity="error">{error}</Alert>;
   }
+  const router = useRouter()
 
   return (
     <ApexChartWrapper>
+         <IconButton
+        color="inherit"
+        aria-haspopup="true"
+        style={{ marginBottom: "1rem" }}
+        onClick={() => router.push("/cloud")}
+      >
+        <ArrowLeft />
+      </IconButton>
       <Grid container spacing={6} className="match-height">
         <Grid item xs={12}>
           <Card>

@@ -7,7 +7,9 @@ interface IAxiosConfigObj<M extends HTTP_METHOD> {
   method: M;
   url: string;
   requestConfig?: AxiosRequestConfig;
-  body?: M extends HTTP_METHOD.POST | HTTP_METHOD.PUT ? {} : never;
+  body?: M extends HTTP_METHOD.POST | HTTP_METHOD.PUT | HTTP_METHOD.DELETE
+    ? {}
+    : never;
   headers?: { Authorization: string } & Record<string, string>;
 }
 

@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import {
   Grid,
   Card,
@@ -21,7 +21,17 @@ import {
   Box,
   Collapse,
   IconButton,
+  Link,
 } from "@mui/material";
+import {
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogContentText,
+  DialogTitle,
+  TextField,
+} from "@mui/material";
+
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import RefreshIcon from "@mui/icons-material/Refresh";
 import KeyboardArrowDownIcon from "@mui/icons-material/KeyboardArrowDown";
@@ -32,6 +42,13 @@ import userConfig from "src/configs/user";
 import axios from "axios";
 import backendConfig from "src/configs/backendConfig";
 import ApexChartWrapper from "src/@core/styles/libs/react-apexcharts";
+import { LoadingButton } from "@mui/lab";
+import NetworkInfoCard from "src/@core/components/cloud/NetworkInfoCard";
+import StopIcon from "@mui/icons-material/Stop";
+import RestartAltIcon from "@mui/icons-material/RestartAlt";
+import PlayArrowIcon from "@mui/icons-material/PlayArrow";
+import { ArrowLeft } from "mdi-material-ui";
+import { useRouter } from "next/router";
 
 interface Container {
   node: string;
@@ -77,66 +94,6 @@ const parseNetworkInfo = (networkInfo: any) => {
         firewall: network.firewall,
       };
     });
-};
-const NetworkInfoCard = ({ networkInfo }: { networkInfo: any }) => {
-  // Parse the networkInfo using the custom function
-  const validNetworkInfo = parseNetworkInfo(networkInfo);
-
-  return (
-    <Card sx={{ mt: 2 }}>
-      <CardContent>
-        <Typography variant="h6" gutterBottom>
-          Network Details
-        </Typography>
-        <Grid container spacing={1} alignItems="center">
-          {validNetworkInfo.map((network, index) => (
-            <Grid container item xs={12} spacing={2} key={index}>
-              <Grid item xs={2}>
-                <Typography variant="subtitle2" color="primary">
-                  Interface
-                </Typography>
-                <Typography variant="body2">{network.name}</Typography>
-              </Grid>
-              <Grid item xs={2}>
-                <Typography variant="subtitle2" color="primary">
-                  Bridge
-                </Typography>
-                <Typography variant="body2">{network.bridge}</Typography>
-              </Grid>
-              <Grid item xs={2}>
-                <Typography variant="subtitle2" color="primary">
-                  IP Address
-                </Typography>
-                <Typography variant="body2">{network.ip}</Typography>
-              </Grid>
-              <Grid item xs={2}>
-                <Typography variant="subtitle2" color="primary">
-                  Gateway
-                </Typography>
-                <Typography variant="body2">{network.gw}</Typography>
-              </Grid>
-              <Grid item xs={2}>
-                <Typography variant="subtitle2" color="primary">
-                  MAC Address
-                </Typography>
-                <Typography variant="body2">{network.hwaddr}</Typography>
-              </Grid>
-              <Grid item xs={2}>
-                <Typography variant="subtitle2" color="primary">
-                  Firewall
-                </Typography>
-                <Chip
-                  label={network.firewall === "0" ? "Disabled" : "Enabled"}
-                  color={network.firewall === "0" ? "error" : "success"}
-                  size="small"
-                />
-              </Grid>
-            </Grid>
-          ))}
-        </Grid>
-      </CardContent>
-    </Card>
-  );
 };
 
 // New Metrics Component
@@ -192,35 +149,34 @@ const AggregatedMetrics = ({
 };
 
 const ContainerDashboard = () => {
-  const { response, error, loading, axiosFetch } = useAxiosFunction() as any;
-
   const [containerData, setContainerData] = useState<Container[]>([]);
   const [expandedNode, setExpandedNode] = useState<string | false>(false);
-  const [refreshTrigger, setRefreshTrigger] = useState(0);
+  const [ctId, setCtId] = useState<number>(-1);
+  const [loadingAction, setLoadingAction] = useState<boolean>(false);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<any>(null);
 
   const axiosInstance = axios.create({ baseURL: backendConfig.api });
   const storedToken = window.localStorage.getItem(
     userConfig.storageTokenKeyName
   )!;
 
-  const fetchData = () => {
-    axiosFetch({
-      axiosInstance,
-      method: HTTP_METHOD.GET,
-      url: "/server/prx/lxc/list/all",
-      headers: { Authorization: storedToken },
-    });
-  };
-
-  useEffect(() => {
-    fetchData();
-  }, [refreshTrigger]);
-
-  useEffect(() => {
-    if (response && Array.isArray(response)) {
-      setContainerData(response);
+  const fetchContainers = useCallback(async () => {
+    try {
+      const response = await axiosInstance.get("/server/prx/lxc/list/all", {
+        headers: { Authorization: storedToken },
+      });
+      setContainerData(response.data);
+    } catch (err: any) {
+      setError(err.message);
+    } finally {
+      setLoading(false);
     }
-  }, [response]);
+  }, [axiosInstance, storedToken]);
+
+  useEffect(() => {
+    fetchContainers();
+  }, []);
 
   const handleNodeExpand =
     (node: string) => (event: React.SyntheticEvent, isExpanded: boolean) => {
@@ -242,71 +198,76 @@ const ContainerDashboard = () => {
   const getStatusColor = (active: boolean) => (active ? "success" : "error");
   const getStatusLabel = (active: boolean) => (active ? "Running" : "Stopped");
 
-  const handleStopContainer = async (vmid: number) => {
-    try {
-      await axiosFetch({
-        axiosInstance,
-        method: HTTP_METHOD.POST,
-        url: `/server/prx/lxc/stop`,
-        headers: { Authorization: storedToken },
-        body: { vmid },
-      });
-      setContainerData((prevData) =>
-        prevData.map((container) =>
-          container.vmid === vmid
-            ? { ...container, status: "stopped" }
-            : container
-        )
-      );
-    } catch (error) {
-      console.error("Failed to stop container:", error);
-    }
-  };
-
-  const handleStartContainer = async (vmid: number) => {
-    try {
-      await axiosFetch({
-        axiosInstance,
-        method: HTTP_METHOD.POST,
-        url: `/server/prx/lxc/start`,
-        headers: { Authorization: storedToken },
-        body: { vmid },
-      });
-      setContainerData((prevData) =>
-        prevData.map((container) =>
-          container.vmid === vmid
-            ? { ...container, status: "running" }
-            : container
-        )
-      );
-    } catch (error) {
-      console.error("Failed to start container:", error);
-    }
-  };
-
-  const handleRestartContainer = async (vmid: number) => {
-    try {
-      await axiosFetch({
-        axiosInstance,
-        method: HTTP_METHOD.POST,
-        url: `/server/prx/lxc/restart`,
-        headers: { Authorization: storedToken },
-        body: { vmid },
-      });
-      setContainerData((prevData) =>
-        prevData.map((container) =>
-          container.vmid === vmid
-            ? { ...container, status: "running" }
-            : container
-        )
-      );
-    } catch (error) {
-      console.error("Failed to restart container:", error);
-    }
-  };
-
   const ContainerRow = ({ container }: { container: Container }) => {
+    const { response, error, loading, axiosFetch } = useAxiosFunction() as any;
+
     const [open, setOpen] = useState(false);
+    const [openRemoveDialog, setOpenRemoveDialog] = useState(false);
+    const [confirmHostname, setConfirmHostname] = useState("");
+
+    const handleAction = async (action: string, vmid: number) => {
+      setCtId(vmid);
+      setLoadingAction(true);
+      try {
+        await axiosFetch({
+          axiosInstance,
+          method: HTTP_METHOD.POST,
+          url: `/server/prx/lxc/${action}`,
+          headers: { Authorization: storedToken },
+          body: { vmid },
+        });
+        setContainerData((prevData) =>
+          prevData.map((c) =>
+            c.vmid === vmid
+              ? { ...c, status: action === "stop" ? "stopped" : "running" }
+              : c
+          )
+        );
+      } catch (error) {
+        console.error(`Failed to ${action} container:`, error);
+      } finally {
+        setLoadingAction(false);
+        setCtId(-1);
+      }
+    };
+
+    useEffect(() => {
+      console.log("Container ID: " + ctId);
+    }, [ctId]);
+
+    const handleRemove = async (vmId: number) => {
+      console.log("Removing container with ID: " + vmId);
+      if (confirmHostname === container.hostname) {
+        try {
+          axiosInstance.delete("/server/prx/lxc/remove", {
+            headers: { Authorization: storedToken },
+            data: { vmid: vmId },
+          });
+          setContainerData((prevData) =>
+            prevData.filter((c) => c.vmid !== vmId)
+          );
+          // await axiosFetch({
+          //   axiosInstance,
+          //   method: HTTP_METHOD.DELETE,
+          //   url: `/server/prx/lxc/remove`,
+          //   headers: { Authorization: storedToken },
+          //   body: { vmid: vmId },
+          // });
+          // setContainerData((prevData) =>
+          //   prevData.filter((c) => c.vmid !== vmId)
+          // );
+        } catch (error) {
+          console.error(`Failed to remove container:`, error);
+        } finally {
+          setOpenRemoveDialog(false);
+          setConfirmHostname("");
+        }
+      }
+    };
+
+    if (error) {
+      return <Alert severity="error">{error.message}</Alert>;
+    }
 
     return (
       <>
@@ -317,7 +278,7 @@ const ContainerDashboard = () => {
               size="small"
               onClick={() => setOpen(!open)}
             >
-              {loading ? (
+              {loading && container.vmid == ctId ? (
                 <CircularProgress size={10} />
               ) : open ? (
                 <KeyboardArrowUpIcon />
@@ -327,7 +288,9 @@ const ContainerDashboard = () => {
             </IconButton>
           </TableCell>
           <TableCell component="th" scope="row">
-            {container.vmid}
+            <Link href={`/cloud/containers/${container.vmid}`}>
+              {container.vmid}
+            </Link>
           </TableCell>
           <TableCell>{container.hostname}</TableCell>
           <TableCell align="right">{container.cores}</TableCell>
@@ -343,34 +306,43 @@ const ContainerDashboard = () => {
           <TableCell align="right">
             {container.status === "running" ? (
               <>
-                <Button
-                  variant="outlined"
+                <IconButton
                   color="error"
                   size="small"
-                  onClick={() => handleStopContainer(container.vmid)}
+                  onClick={() => handleAction("stop", container.vmid)}
                   sx={{ mr: 1 }}
                 >
-                  Stop
-                </Button>
-                <Button
-                  variant="outlined"
+                  <StopIcon />
+                </IconButton>
+                <IconButton
                   color="info"
                   size="small"
-                  onClick={() => handleRestartContainer(container.vmid)}
+                  onClick={() => handleAction("restart", container.vmid)}
+                  sx={{ mr: 1 }}
                 >
-                  Restart
-                </Button>
+                  <RestartAltIcon />
+                </IconButton>
               </>
             ) : (
-              <Button
-                variant="outlined"
-                color="success"
-                size="small"
-                onClick={() => handleStartContainer(container.vmid)}
-              >
-                Start
-              </Button>
+              <>
+                <IconButton
+                  color="success"
+                  size="small"
+                  onClick={() => handleAction("start", container.vmid)}
+                  sx={{ mr: 1 }}
+                >
+                  <PlayArrowIcon />
+                </IconButton>
+              </>
             )}
+            <Button
+              variant="outlined"
+              color="error"
+              size="small"
+              onClick={() => setOpenRemoveDialog(true)}
+            >
+              Remove
+            </Button>
           </TableCell>
         </TableRow>
         <TableRow>
@@ -386,22 +358,101 @@ const ContainerDashboard = () => {
             </Collapse>
           </TableCell>
         </TableRow>
+        <Dialog
+          open={openRemoveDialog}
+          onClose={() => setOpenRemoveDialog(false)}
+        >
+          <DialogTitle>Confirm Container Removal</DialogTitle>
+          <DialogContent>
+            <DialogContentText>
+              {container.status === "running"
+                ? "The container is currently running. \n Turn it off first."
+                : `Are you sure you want to remove this container? This action cannot
+              be undone. Please type the container's hostname "${container.hostname}" to confirm.`}
+            </DialogContentText>
+            {container.status !== "running" && (
+              <TextField
+                autoFocus
+                margin="dense"
+                label="Hostname"
+                fullWidth
+                variant="outlined"
+                value={confirmHostname}
+                onChange={(e) => setConfirmHostname(e.target.value)}
+              />
+            )}
+          </DialogContent>
+          <DialogActions>
+            <Button onClick={() => setOpenRemoveDialog(false)} color="primary">
+              Cancel
+            </Button>
+            {container.status !== "running " && (
+              <Button
+                onClick={() => handleRemove(container.vmid)}
+                color="error"
+                disabled={confirmHostname !== container.hostname}
+              >
+                Remove
+              </Button>
+            )}
+          </DialogActions>
+        </Dialog>
       </>
     );
   };
 
-  // if (loading) {
-  //   return <CircularProgress />;
-  // }
+  if (loading && !loadingAction) {
+    return (
+      <Grid
+        container
+        justifyContent="center"
+        alignItems="center"
+        alignContent="center"
+        style={{ marginBottom: "1rem" }}
+      >
+        <CircularProgress
+          style={{
+            display: "flex",
+            justifyContent: "center",
+            alignItems: "center",
+            justifySelf: "center",
+            // height: "100vh",
+            // width: "50%",
+          }}
+        />
+      </Grid>
+    );
+  }
 
   if (error) {
     return <Alert severity="error">{error.message}</Alert>;
   }
 
   const groupedContainers = groupContainersByNode();
-
+  const router = useRouter();
   return (
     <ApexChartWrapper>
+      <Grid
+        container
+        justifyContent="space-between"
+        alignItems="center"
+        style={{ marginBottom: "1rem" }}
+      >
+        <Grid item>
+          <IconButton
+            color="inherit"
+            aria-haspopup="true"
+            onClick={() => router.push("/cloud")}
+          >
+            <ArrowLeft />
+          </IconButton>
+        </Grid>
+        <Grid item>
+          <Button href="/cloud/containers/create" style={{ marginTop: "1rem" }}>
+            Create Container
+          </Button>
+        </Grid>
+      </Grid>
       <Grid container spacing={3}>
         {Object.keys(groupedContainers).map((node) => (
           <Grid item xs={12} key={node}>
@@ -443,6 +494,7 @@ const ContainerDashboard = () => {
           </Grid>
         ))}
       </Grid>
+
       <AggregatedMetrics containerData={containerData} />
     </ApexChartWrapper>
   );
