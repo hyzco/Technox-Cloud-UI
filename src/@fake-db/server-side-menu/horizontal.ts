@@ -11,7 +11,12 @@ const navigation: HorizontalNavItemsType = [
     path: "/dashboard",
   },
   {
-    title: "My Servers",
+    title: "Cloud Servers",
+    icon: "Cloud",
+    path: "/views/cloud",
+  },
+  {
+    title: "VPS Servers",
     icon: "GoogleCirclesExtended",
     path: "/views/servers",
   },

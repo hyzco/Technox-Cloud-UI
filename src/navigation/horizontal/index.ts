@@ -6,6 +6,7 @@ import MessageOutline from "mdi-material-ui/MessageOutline";
 import HelpCircleOutline from "mdi-material-ui/HelpCircleOutline";
 import GoogleCirclesExtended from "mdi-material-ui/GoogleCirclesExtended";
 import CreditCardSettingsOutline from "mdi-material-ui/CreditCardSettingsOutline";
+import CloudOutline from "mdi-material-ui/CloudOutline";
 
 // ** Type import
 import { HorizontalNavItemsType } from "src/@core/layouts/types";
@@ -18,7 +19,12 @@ const navigation = (): HorizontalNavItemsType => {
       path: "/dashboard",
     },
     {
-      title: "My Servers",
+      title: "Cloud Servers",
+      icon: CloudOutline,
+      path: "/cloud",
+    },
+    {
+      title: "VPS Servers",
       icon: GoogleCirclesExtended,
       path: "/views/servers",
     },

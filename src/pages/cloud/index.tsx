@@ -1,70 +1,105 @@
-// ** React Imports
-import { useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/router';
-
-// ** MUI Imports
+import axios from 'axios';
 import Grid from "@mui/material/Grid";
 import Card from "@mui/material/Card";
 import CardContent from "@mui/material/CardContent";
 import Typography from "@mui/material/Typography";
-import Button from "@mui/material/Button";
 import Box from "@mui/material/Box";
-
-// ** Icons Imports
+import CircularProgress from "@mui/material/CircularProgress";
 import ServerIcon from '@mui/icons-material/Storage';
 import ContainerIcon from '@mui/icons-material/ViewInAr';
 import VirtualMachineIcon from '@mui/icons-material/Computer';
 import NetworkIcon from '@mui/icons-material/Hub';
 import MemoryIcon from '@mui/icons-material/Memory';
 import DiskIcon from '@mui/icons-material/Save';
-import CpuIcon from '@mui/icons-material/Memory';
-
-// ** Styled Component Import
-import KeenSliderWrapper from "src/@core/styles/libs/keen-slider";
-import ApexChartWrapper from "src/@core/styles/libs/react-apexcharts";
+import AccessTimeIcon from '@mui/icons-material/AccessTime';
 import { UrlObject } from 'url';
 
-const OverviewCard = ({ title, value, icon, onClick }: { title: string, value: string, icon: JSX.Element, onClick?: () => void }) => {
+interface OverviewCardProps {
+  title: string;
+  value: string | number;
+  icon: React.ReactNode;
+  onClick?: () => void;
+  isLoading: boolean;
+}
+
+const OverviewCard: React.FC<OverviewCardProps> = ({ title, value, icon, onClick, isLoading }) => {
   return (
-    <Card sx={{ cursor: onClick ? 'pointer' : 'default' }} onClick={onClick}>
-      <CardContent sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', textAlign: 'center' }}>
+    <Card sx={{ cursor: onClick ? 'pointer' : 'default', height: '100%' }} onClick={onClick}>
+      <CardContent sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', textAlign: 'center', height: '100%' }}>
         {icon}
         <Typography variant="h6" sx={{ mt: 2 }}>{title}</Typography>
-        <Typography variant="h4" sx={{ mt: 1 }}>{value}</Typography>
+        {isLoading ? (
+          <CircularProgress size={24} sx={{ mt: 1 }} />
+        ) : (
+          <Typography variant="h6" sx={{ mt: 1 }}>{value}</Typography>
+        )}
       </CardContent>
     </Card>
   );
 };
 
-const CloudOverviewDashboard = () => {
+const formatUptime = (seconds: number) => {
+  const hours = Math.floor(seconds / 3600);
+  const minutes = Math.floor((seconds / 60) % 60);
+  const remainingSeconds = seconds % 60;
+  const hoursText = hours > 0 ? `${hours}h ` : '';
+  return `${hoursText}${minutes}m ${remainingSeconds}s`;
+};
+
+const formatBytes = (bytes: number) => {
+  const gigabytes = bytes / (1024 * 1024 * 1024);
+  return `${gigabytes.toFixed(2)} GB`;
+};
+
+const CloudOverviewDashboard: React.FC = () => {
   const router = useRouter();
+  const [isLoading, setIsLoading] = useState(true);
   const [data, setData] = useState({
     nodes: 0,
-    activeNodes: 0,
     containers: 0,
-    runningContainers: 0,
     virtualMachines: 0,
-    runningVirtualMachines: 0,
-    privateNetworkAdapters: 0,
+    networks: 0,
     totalMemory: '0 GB',
+    usedMemory: '0 GB',
     totalDisk: '0 GB',
-    totalCPU: '0 cores'
+    usedDisk: '0 GB',
+    averageUptime: '0m 0s'
   });
 
   useEffect(() => {
-    // Fetch cloud overview data here
-    setData({
-      nodes: 10,
-      activeNodes: 8,
-      containers: 25,
-      runningContainers: 20,
-      virtualMachines: 15,
-      runningVirtualMachines: 10,
-      privateNetworkAdapters: 5,
-      totalMemory: '128 GB',
-      totalDisk: '2 TB',
-      totalCPU: '32 cores'
-    });
+    const fetchData = async () => {
+      try {
+        setIsLoading(true);
+        const response = await axios.get('http://localhost:3001/cloud/dashboard/info');
+        const apiData = response.data;
+        
+        const totalMemory = apiData.memoryStats.reduce((acc: number, node: { memory: { total: number } }) => acc + node.memory.total, 0);
+        const usedMemory = apiData.memoryStats.reduce((acc: number, node: { memory: { used: number } }) => acc + node.memory.used, 0);
+        const totalDisk = apiData.diskStats.reduce((acc: number, node: { disk: { total: number } }) => acc + node.disk.total, 0);
+        const usedDisk = apiData.diskStats.reduce((acc: number, node: { disk: { used: number } }) => acc + node.disk.used, 0);
+        const averageUptime = Math.floor(apiData.uptime.reduce((acc: number, node: { uptime: number }) => acc + node.uptime, 0) / apiData.uptime.length);
+        
+        setData({
+          nodes: apiData.nodeCount,
+          containers: apiData.lxcCount,
+          virtualMachines: apiData.qemuCount,
+          networks: apiData.networkCount,
+          totalMemory: formatBytes(totalMemory),
+          usedMemory: formatBytes(usedMemory),
+          totalDisk: formatBytes(totalDisk),
+          usedDisk: formatBytes(usedDisk),
+          averageUptime: formatUptime(averageUptime)
+        });
+      } catch (error) {
+        console.error('Error fetching dashboard data:', error);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchData();
   }, []);
 
   const navigateTo = (path: string | UrlObject) => {
@@ -72,72 +107,73 @@ const CloudOverviewDashboard = () => {
   };
 
   return (
-    <ApexChartWrapper>
-      <KeenSliderWrapper>
-        <Box sx={{ mb: 4 }}>
-          <Typography variant="h4">Cloud Overview Dashboard</Typography>
-        </Box>
-        <Grid container spacing={6} className="match-height">
-          <Grid item xs={12} md={4}>
-            <OverviewCard 
-              title="Nodes" 
-              value={`${data.activeNodes} / ${data.nodes}`} 
-              icon={<ServerIcon sx={{ fontSize: 40 }} />}
-              onClick={() => navigateTo('/cloud/nodes')}
-            />
-          </Grid>
-          <Grid item xs={12} md={4}>
-            <OverviewCard 
-              title="Containers" 
-              value={`${data.runningContainers} / ${data.containers}`} 
-              icon={<ContainerIcon sx={{ fontSize: 40 }} />}
-              onClick={() => navigateTo('/cloud/containers')}
-            />
-          </Grid>
-          <Grid item xs={12} md={4}>
-            <OverviewCard 
-              title="Virtual Machines" 
-              value={`${data.runningVirtualMachines} / ${data.virtualMachines}`} 
-              icon={<VirtualMachineIcon sx={{ fontSize: 40 }} />}
-            />
-          </Grid>
-          <Grid item xs={12} md={3}>
-            <OverviewCard 
-              title="Network Adapters" 
-              value={data.privateNetworkAdapters.toString()} 
-              icon={<NetworkIcon sx={{ fontSize: 40 }} />}
-            />
-          </Grid>
-          <Grid item xs={12} md={3}>
-            <OverviewCard 
-              title="Memory in Use" 
-              value={data.totalMemory} 
-              icon={<MemoryIcon sx={{ fontSize: 40 }} />}
-            />
-          </Grid>
-          <Grid item xs={12} md={3}>
-            <OverviewCard 
-              title="Disk in Use" 
-              value={data.totalDisk} 
-              icon={<DiskIcon sx={{ fontSize: 40 }} />}
-            />
-          </Grid>
-          <Grid item xs={12} md={3}>
-            <OverviewCard 
-              title="CPU in Use" 
-              value={data.totalCPU} 
-              icon={<CpuIcon sx={{ fontSize: 40 }} />}
-            />
-          </Grid>
+    <Box sx={{ width: '100%', typography: 'body1' }}>
+      <Box sx={{ mb: 4 }}>
+        <Typography variant="h4">Cloud Overview Dashboard</Typography>
+      </Box>
+      <Grid container spacing={3}>
+        <Grid item xs={12} sm={6} md={3}>
+          <OverviewCard 
+            title="Nodes" 
+            value={data.nodes.toString()} 
+            icon={<ServerIcon sx={{ fontSize: 40 }} />}
+            onClick={() => navigateTo('/cloud/nodes')}
+            isLoading={isLoading}
+          />
         </Grid>
-      </KeenSliderWrapper>
-    </ApexChartWrapper>
+        <Grid item xs={12} sm={6} md={3}>
+          <OverviewCard 
+            title="Containers" 
+            value={data.containers.toString()} 
+            icon={<ContainerIcon sx={{ fontSize: 40 }} />}
+            onClick={() => navigateTo('/cloud/containers')}
+            isLoading={isLoading}
+          />
+        </Grid>
+        <Grid item xs={12} sm={6} md={3}>
+          <OverviewCard 
+            title="Virtual Machines"
+            value={data.virtualMachines.toString()}
+            icon={<VirtualMachineIcon sx={{ fontSize: 40 }} />}
+            isLoading={isLoading}
+          />
+        </Grid>
+        <Grid item xs={12} sm={6} md={3}>
+          <OverviewCard 
+            title="Networks"
+            value={data.networks.toString()}
+            icon={<NetworkIcon sx={{ fontSize: 40 }} />}
+            isLoading={isLoading}
+            onClick={() => navigateTo('/cloud/nodes/network')}
+          />
+        </Grid>
+        <Grid item xs={12} sm={6} md={3}>
+          <OverviewCard 
+            title="Memory Usage"
+            value={`${data.usedMemory} / ${data.totalMemory}`}
+            icon={<MemoryIcon sx={{ fontSize: 40 }} />}
+            isLoading={isLoading}
+          />
+        </Grid>
+        <Grid item xs={12} sm={6} md={3}>
+          <OverviewCard 
+            title="Disk Usage"
+            value={`${data.usedDisk} / ${data.totalDisk}`}
+            icon={<DiskIcon sx={{ fontSize: 40 }} />}
+            isLoading={isLoading}
+          />
+        </Grid>
+        <Grid item xs={12} sm={6} md={3}>
+          <OverviewCard 
+            title="Average Uptime"
+            value={data.averageUptime}
+            icon={<AccessTimeIcon sx={{ fontSize: 40 }} />}
+            isLoading={isLoading}
+          />
+        </Grid>
+      </Grid>
+    </Box>
   );
-};
-
-CloudOverviewDashboard.acl = {
-  action: "read",
-  subject: "cloud-dashboard",
 };
 
 export default CloudOverviewDashboard;

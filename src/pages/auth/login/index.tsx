@@ -177,7 +177,7 @@ const LoginPage = () => {
                 variant="caption"
                 sx={{ mb: 2, display: "block", color: "primary.main" }}
               >
-                Admin: <strong>admin@materialize.com</strong> / Pass:{" "}
+                Admin: <strong>admin@theycloud.com</strong> / Pass:{" "}
                 <strong>admin</strong>
               </Typography>
               <Typography
@@ -206,7 +206,7 @@ const LoginPage = () => {
                       onBlur={onBlur}
                       onChange={onChange}
                       error={Boolean(errors.email)}
-                      placeholder="admin@materialize.com"
+                      placeholder="admin@theycloud.com"
                     />
                   )}
                 />
@@ -438,5 +438,5 @@ const schema = yup.object().shape({
 
 const defaultValues = {
   password: "admin",
-  email: "admin@materialize.com",
+  email: "admin@theycloud.com",
 };

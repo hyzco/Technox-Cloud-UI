@@ -10,6 +10,7 @@ import HelpCircleOutline from "mdi-material-ui/HelpCircleOutline";
 
 // ** Type import
 import { VerticalNavItemsType } from "src/@core/layouts/types";
+import { CloudOutline } from "mdi-material-ui";
 
 const navigation = (): VerticalNavItemsType => {
   return [
@@ -19,7 +20,12 @@ const navigation = (): VerticalNavItemsType => {
       path: "/dashboard",
     },
     {
-      title: "My Servers",
+      title: "Cloud Servers",
+      icon: CloudOutline,
+      path: "/cloud",
+    },
+    {
+      title: "VPS Servers",
       icon: GoogleCirclesExtended,
       path: "/views/servers",
     },
