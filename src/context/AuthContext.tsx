@@ -75,6 +75,9 @@ const AuthProvider = ({ children }: Props) => {
             localStorage.removeItem("accessToken");
             setUser(null);
             setLoading(false);
+          })
+          .finally(() => {
+            setLoading(false);
           });
       } else {
         setLoading(false);
@@ -109,7 +112,7 @@ const AuthProvider = ({ children }: Props) => {
             const returnUrl = router.query.returnUrl;
 
             setUser({ ...response.data.userData });
-            await window.localStorage.setItem(
+            window.localStorage.setItem(
               "userData",
               JSON.stringify(response.data.userData)
             );

@@ -38,6 +38,7 @@ import NetworkInfoCard from "src/@core/components/cloud/NetworkInfoCard";
 import { ArrowLeft } from "mdi-material-ui";
 
 interface ContainerData {
+  [x: string]: ReactNode;
   mem: number;
   type: string;
   maxmem: number;
@@ -276,7 +277,9 @@ const ContainerControls: React.FC<{
         color="success"
         startIcon={<PlayArrowIcon />}
         onClick={() => onAction("start")}
-        disabled={status === "running" || status === "starting" || status === "stopping"}
+        disabled={
+          status === "running" || status === "starting" || status === "stopping"
+        }
       >
         Start
       </Button>
@@ -285,7 +288,9 @@ const ContainerControls: React.FC<{
         color="error"
         startIcon={<StopIcon />}
         onClick={() => onAction("stop")}
-        disabled={status !== "running" || status === "stopping" || status === "starting"}
+        disabled={
+          status !== "running" || status === "stopping" || status === "starting"
+        }
       >
         Stop
       </Button>
@@ -305,8 +310,7 @@ const ContainerControls: React.FC<{
 const ContainerDashboard: React.FC = () => {
   const router = useRouter();
   const { ctId } = router.query;
-  const { response, error, loading, axiosFetch } =
-    useAxiosFunction() as AxiosResponse;
+  const { response, error, loading, axiosFetch } = useAxiosFunction();
   const [containerData, setContainerData] = useState<ContainerData | null>(
     null
   );
@@ -533,6 +537,35 @@ const ContainerDashboard: React.FC = () => {
 
         <Grid item xs={12}>
           {containerData && <VNCView vmid={containerData.vmid} />}
+        </Grid>
+
+        {/* New Section: OS and Architecture */}
+        <Grid item xs={12}>
+          <Card>
+            <CardContent>
+              <Typography variant="h6" gutterBottom>
+                System Information
+              </Typography>
+              <TableContainer component={Paper}>
+                <Table>
+                  <TableBody>
+                    <TableRow>
+                      <TableCell>OS Type</TableCell>
+                      <TableCell>{containerData.ostype}</TableCell>
+                    </TableRow>
+                    <TableRow>
+                      <TableCell>Architecture</TableCell>
+                      <TableCell>{containerData.arch}</TableCell>
+                    </TableRow>
+                    <TableRow>
+                      <TableCell>Hostname</TableCell>
+                      <TableCell>{containerData.hostname}</TableCell>
+                    </TableRow>
+                  </TableBody>
+                </Table>
+              </TableContainer>
+            </CardContent>
+          </Card>
         </Grid>
 
         {/* Network Usage Section */}

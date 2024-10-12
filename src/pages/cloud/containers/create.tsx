@@ -195,7 +195,7 @@ const CreateVMDashboard = () => {
             </Button>
             {error && (
               <Typography color="error" sx={{ mt: 2 }}>
-                Error: {error.message}
+                {error.response.data}
               </Typography>
             )}
             {response && (

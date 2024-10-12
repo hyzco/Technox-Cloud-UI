@@ -68,6 +68,8 @@ import userConfig from "src/configs/user";
 import { fetchSingleRequest } from "src/store/apps/support";
 import { useDispatch } from "react-redux";
 import { AppDispatch } from "src/store";
+import axios from "axios";
+import backendConfig from "src/configs/backendConfig";
 
 const HiddenReplyBack = styled(Box)<BoxProps>(({ theme }) => ({
   height: 11,
@@ -427,7 +429,7 @@ const MailDetails = (props: MailDetailsType) => {
   };
 
   const renderSendNewMessage = () => {
-    const [response, error, loading, axiosFetch] = useAxiosFunction();
+    const { response, error, loading, axiosFetch } = useAxiosFunction();
     const [newMessage, setNewMessage] = useState<String>("");
 
     useEffect(() => {
@@ -440,9 +442,16 @@ const MailDetails = (props: MailDetailsType) => {
       }
     }, [response, error, loading]);
 
+    const axiosInstance = axios.create({
+      baseURL: backendConfig.api,
+    });
+    const storedToken = window.localStorage.getItem(
+      userConfig.storageTokenKeyName
+    )!;
+
     const onSendNewMessage = () => {
       axiosFetch({
-        axiosInstance: vmApi,
+        axiosInstance,
         method: HTTP_METHOD.POST,
         url: "/support/request",
         body: {
@@ -452,10 +461,8 @@ const MailDetails = (props: MailDetailsType) => {
           parentId: mail.id,
           sentBy: userId,
         },
-        requestConfig: {
-          headers: {
-            Authorization: storedToken,
-          },
+        headers: {
+          Authorization: storedToken,
         },
       });
     };
@@ -463,10 +470,6 @@ const MailDetails = (props: MailDetailsType) => {
     const onChange = (e: any) => {
       setNewMessage(e.target.value);
     };
-
-    const storedToken = window.localStorage.getItem(
-      userConfig.storageTokenKeyName
-    );
 
     return (
       <Box

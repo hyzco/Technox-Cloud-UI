@@ -211,7 +211,6 @@ const serverReducer: Reducer<IServerState, IAction> = (
 };
 
 const CreateServerPanel = () => {
-
   const [activeTab, setActiveTab] = useState<string>("packagesTab");
   const { user, logout } = useAuth();
 
@@ -249,19 +248,19 @@ const CreateServerPanel = () => {
     const storedToken = window.localStorage.getItem(
       userConfig.storageTokenKeyName
     )!;
-    // const [response, error, loading, axiosFetch] = useAxiosFunction() as any;;
+    const { response, error, loading, axiosFetch } = useAxiosFunction();
 
-    // const requestNewVm = () => {
-    //   axiosFetch({
-    //     axiosInstance: vmApi,
-    //     method: HTTP_METHOD.POST,
-    //     url: "/server/options/create-vm",
-    //     headers: {
-    //       Authorization: storedToken,
-    //     },
-    //     body: {}
-    //   });
-    // };
+    const requestNewVm = () => {
+      axiosFetch({
+        axiosInstance: vmApi,
+        method: HTTP_METHOD.POST,
+        url: "/server/options/create-vm",
+        headers: {
+          Authorization: storedToken,
+        },
+        body: {},
+      });
+    };
 
     // useEffect(() => {
     //   console.log("response");
@@ -278,7 +277,7 @@ const CreateServerPanel = () => {
         //all logic regarding if user has enough money etc will be handled on backend.
         //TODO:
         //later make one axios caller and use that instance
-        // requestNewVm();
+        requestNewVm();
       }
       if (props.onClick !== undefined) {
         props.onClick();
@@ -314,11 +313,11 @@ const CreateServerPanel = () => {
             props.enableDefaultOnClick ? footerNextButtonOnSubmit() : onClick();
           }}
         >
-          {/* {loading
+          {loading
             ? "Creating..."
             : activeTab === "submitTab"
             ? "Submit"
-            : "Next"} */}
+            : "Next"}
         </Button>
       </Box>
     );

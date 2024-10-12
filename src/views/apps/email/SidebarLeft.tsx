@@ -52,6 +52,8 @@ import { HTTP_METHOD } from "src/@core/enums/axios.enum";
 import React from "react";
 // import user from "src/configs/user";
 import { useAuth } from "src/hooks/useAuth";
+import axios from "axios";
+import backendConfig from "src/configs/backendConfig";
 
 enum REDUCER_ACTIONS {
   SET_REQUEST_DETAILS = "SET_REQUEST_DETAILS",
@@ -103,6 +105,14 @@ const SidebarLeft = (props: MailSidebarType) => {
     handleLeftSidebarToggle,
     // setTotalEmailCount,
   } = props;
+  const { response, error, loading, axiosFetch } = useAxiosFunction();
+  const axiosInstance = axios.create({
+    baseURL: backendConfig.api,
+  });
+
+  const storedToken = window.localStorage.getItem(
+    userConfig.storageTokenKeyName
+  );
 
   const theme = useTheme();
   const { user } = useAuth();
@@ -224,7 +234,7 @@ const SidebarLeft = (props: MailSidebarType) => {
     });
     setOpenDialog(false);
     axiosFetch({
-      axiosInstance: vmApi,
+      axiosInstance,
       method: HTTP_METHOD.POST,
       url: "/support/request",
       body: {
@@ -235,22 +245,15 @@ const SidebarLeft = (props: MailSidebarType) => {
         sentBy: userId,
         isParent: 1,
       },
-      requestConfig: {
-        headers: {
-          Authorization: storedToken,
-        },
+      headers: {
+        Authorization: storedToken,
       },
     }).finally(() => {
       // setTotalEmailCount((prevCount: number) => prevCount + 1);
     });
   };
 
-  const [response, error, loading, axiosFetch] = useAxiosFunction();
   // const { user } = useAuth();
-
-  const storedToken = window.localStorage.getItem(
-    userConfig.storageTokenKeyName
-  );
 
   return (
     <Drawer
