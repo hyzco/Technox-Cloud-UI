@@ -105,9 +105,9 @@ const CardPlanUpgrade = () => {
           </Box>
         </Box>
 
-        <Typography variant='body2' sx={{ mb: 4, fontWeight: 600, fontSize: '0.875rem' }}>
+        {/* <Typography variant='body2' sx={{ mb: 4, fontWeight: 600, fontSize: '0.875rem' }}>
           Payment details
-        </Typography>
+        </Typography> */}
 
         <Box sx={{ mb: 2, display: 'flex', alignItems: 'center' }}>
           <img width={42} height={30} alt='mastercard' src='/images/cards/logo-mastercard-2.png' />

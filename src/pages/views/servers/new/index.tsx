@@ -99,9 +99,9 @@ const tabsArr = [
   "packagesTab",
   "detailsTab",
   "applicationTab",
-  "DatabaseTab",
-  "customScriptTab",
-  "paymentTab",
+  // "DatabaseTab",
+  // "customScriptTab",
+  // "paymentTab",
   "submitTab",
 ];
 
@@ -404,7 +404,7 @@ const CreateServerPanel = () => {
                 />
               }
             />
-            <Tab
+            {/* <Tab
               disableRipple
               value="DatabaseTab"
               label={
@@ -415,8 +415,8 @@ const CreateServerPanel = () => {
                   icon={<ChartDonut />}
                 />
               }
-            />
-            <Tab
+            /> */}
+            {/* <Tab
               disableRipple
               value="customScriptTab"
               label={
@@ -427,8 +427,8 @@ const CreateServerPanel = () => {
                   icon={<ChartDonut />}
                 />
               }
-            />
-            <Tab
+            /> */}
+            {/* <Tab
               disableRipple
               value="paymentTab"
               label={
@@ -439,7 +439,7 @@ const CreateServerPanel = () => {
                   icon={<CreditCardOutline />}
                 />
               }
-            />
+            /> */}
             <Tab
               disableRipple
               value="submitTab"
@@ -509,10 +509,10 @@ const CreateServerPanel = () => {
             <DialogTabCustomScript />
             {renderTabFooter({ enableDefaultOnClick: true })}
           </TabPanel>
-          <TabPanel value="paymentTab" sx={{ flexGrow: 1 }}>
+          {/* <TabPanel value="paymentTab" sx={{ flexGrow: 1 }}>
             <DialogTabBilling />
             {renderTabFooter({ enableDefaultOnClick: true })}
-          </TabPanel>
+          </TabPanel> */}
           <TabPanel value="submitTab" sx={{ flexGrow: 1 }}>
             <Box sx={{ textAlign: "center" }}>
               <Typography variant="h6">Submit</Typography>
