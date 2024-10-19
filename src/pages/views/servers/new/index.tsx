@@ -304,21 +304,25 @@ const CreateServerPanel = () => {
         >
           Previous
         </Button>
-        <Button
-          type="submit"
-          variant="contained"
-          endIcon={activeTab === "submitTab" ? <Check /> : <NextArrow />}
-          color={activeTab === "submitTab" ? "success" : "primary"}
-          onClick={() => {
-            props.enableDefaultOnClick ? footerNextButtonOnSubmit() : onClick();
-          }}
-        >
-          {loading
-            ? "Creating..."
-            : activeTab === "submitTab"
-            ? "Submit"
-            : "Next"}
-        </Button>
+        {activeTab !== "packagesTab" && (
+          <Button
+            type="submit"
+            variant="contained"
+            endIcon={activeTab === "submitTab" ? <Check /> : <NextArrow />}
+            color={activeTab === "submitTab" ? "success" : "primary"}
+            onClick={() => {
+              props.enableDefaultOnClick
+                ? footerNextButtonOnSubmit()
+                : onClick();
+            }}
+          >
+            {loading
+              ? "Creating..."
+              : activeTab === "submitTab"
+              ? "Submit"
+              : "Next"}
+          </Button>
+        )}
       </Box>
     );
   };
@@ -492,7 +496,7 @@ const CreateServerPanel = () => {
               tabFooter={renderTabFooter}
             />
           </TabPanel>
-          <TabPanel value="DatabaseTab" sx={{ flexGrow: 1 }}>
+          {/* <TabPanel value="DatabaseTab" sx={{ flexGrow: 1 }}>
             <DialogTabDatabase
               callback={(dbDetails: string) => {
                 dispatch({
@@ -504,11 +508,11 @@ const CreateServerPanel = () => {
               }}
               tabFooter={renderTabFooter}
             />
-          </TabPanel>
-          <TabPanel value="customScriptTab" sx={{ flexGrow: 1 }}>
+          </TabPanel> */}
+          {/* <TabPanel value="customScriptTab" sx={{ flexGrow: 1 }}>
             <DialogTabCustomScript />
             {renderTabFooter({ enableDefaultOnClick: true })}
-          </TabPanel>
+          </TabPanel> */}
           {/* <TabPanel value="paymentTab" sx={{ flexGrow: 1 }}>
             <DialogTabBilling />
             {renderTabFooter({ enableDefaultOnClick: true })}

@@ -242,6 +242,7 @@ const TabDetails = (props: IDetailsProps) => {
                   sx={{ mr: 3, width: 48, height: 48 }}
                 >
                   <img
+                    key={osName}
                     width="48"
                     height="48"
                     style={{ background: "white" }}
