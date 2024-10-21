@@ -48,7 +48,7 @@ const osList = [
   },
   {
     osName: "Debian",
-    osVersions: ["10", "11"],
+    osVersions: ["12.2-1"],
     osDesc: "Debian <version> operating system",
     osImage: "https://img.icons8.com/color/48/debian.png",
   },

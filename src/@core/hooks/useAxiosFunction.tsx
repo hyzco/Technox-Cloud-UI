@@ -1,6 +1,7 @@
 import { AxiosInstance, AxiosRequestConfig } from "axios";
 import { useState, useEffect, useCallback } from "react";
 import { HTTP_METHOD } from "../enums/axios.enum";
+import { useRouter } from "next/router";
 
 interface IAxiosConfigObj<M extends HTTP_METHOD> {
   axiosInstance: AxiosInstance;
@@ -53,9 +54,14 @@ const useAxiosFunction = () => {
           method === HTTP_METHOD.POST || method === HTTP_METHOD.PUT
             ? await axiosMethod(url, body, config)
             : await axiosMethod(url, config);
-
-        setResponse(res.data);
-        setError(null);
+        if (res.status === 200) {
+          setResponse(res.data);
+          setError(null);
+        } else if (res.status === 401) {
+          const router = useRouter();
+          setError("Unauthorized");
+          router.push("/login");
+        }
       } catch (err: any) {
         setError(err);
         setResponse(null);

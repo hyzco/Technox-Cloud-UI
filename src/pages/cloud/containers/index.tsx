@@ -49,6 +49,7 @@ import RestartAltIcon from "@mui/icons-material/RestartAlt";
 import PlayArrowIcon from "@mui/icons-material/PlayArrow";
 import { ArrowLeft } from "mdi-material-ui";
 import { useRouter } from "next/router";
+import { useAuth } from "src/hooks/useAuth";
 
 interface Container {
   node: string;
@@ -149,8 +150,9 @@ const AggregatedMetrics = ({
 };
 
 const ContainerDashboard = () => {
+  const { user } = useAuth();
   const [containerData, setContainerData] = useState<Container[]>([]);
-  const [expandedNode, setExpandedNode] = useState<string | false>(false);
+  const [expandedNode, setExpandedNode] = useState<string | true | false>(true);
   const [ctId, setCtId] = useState<number>(-1);
   const [loadingAction, setLoadingAction] = useState<boolean>(false);
   const [loading, setLoading] = useState(true);
@@ -180,7 +182,7 @@ const ContainerDashboard = () => {
 
   const handleNodeExpand =
     (node: string) => (event: React.SyntheticEvent, isExpanded: boolean) => {
-      setExpandedNode(isExpanded ? node : false);
+      setExpandedNode(isExpanded ? node : true);
     };
 
   const groupContainersByNode = () => {
@@ -430,6 +432,9 @@ const ContainerDashboard = () => {
 
   const groupedContainers = groupContainersByNode();
   const router = useRouter();
+  const createUrl = () => {
+    return user?.role === "admin" ? "/cloud/containers/create" : "/cloud/new";
+  };
   return (
     <ApexChartWrapper>
       <Grid
@@ -448,8 +453,8 @@ const ContainerDashboard = () => {
           </IconButton>
         </Grid>
         <Grid item>
-          <Button href="/cloud/containers/create" style={{ marginTop: "1rem" }}>
-            Create Container
+          <Button href={createUrl()} style={{ marginTop: "1rem" }}>
+            New
           </Button>
         </Grid>
       </Grid>
@@ -495,7 +500,9 @@ const ContainerDashboard = () => {
         ))}
       </Grid>
 
-      <AggregatedMetrics containerData={containerData} />
+      {user?.role === "admin" && (
+        <AggregatedMetrics containerData={containerData} />
+      )}
     </ApexChartWrapper>
   );
 };

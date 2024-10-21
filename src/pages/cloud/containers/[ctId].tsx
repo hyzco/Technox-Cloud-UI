@@ -310,7 +310,7 @@ const ContainerControls: React.FC<{
 const ContainerDashboard: React.FC = () => {
   const router = useRouter();
   const { ctId } = router.query;
-  const { response, error, loading, axiosFetch } = useAxiosFunction();
+  const { response, error, loading, axiosFetch } = useAxiosFunction() as any;
   const [containerData, setContainerData] = useState<ContainerData | null>(
     null
   );

@@ -21,6 +21,7 @@ export type UserDataType = {
   name: string;
   surname: string;
   avatar?: string | null;
+  balance: number;
 };
 
 export type UserFinanceDataType = {

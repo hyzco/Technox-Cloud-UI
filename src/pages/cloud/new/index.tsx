@@ -251,25 +251,29 @@ const CreateServerPanel = () => {
     const { response, error, loading, axiosFetch } = useAxiosFunction();
 
     const requestNewVm = () => {
+      if (!state) {
+        return;
+      }
+
       axiosFetch({
         axiosInstance: vmApi,
         method: HTTP_METHOD.POST,
-        url: "/server/options/create-vm",
+        url: "/cloud/purchase",
         headers: {
           Authorization: storedToken,
         },
-        body: {},
+        body: state,
       });
     };
 
-    // useEffect(() => {
-    //   console.log("response");
-    //   console.log(response);
-    //   console.log(error);
-    //   if (error && typeof error === "string" && error.includes("401")) {
-    //     logout();
-    //   }
-    // }, [response, error]);
+    useEffect(() => {
+      console.log("response");
+      console.log(response);
+      console.log(error);
+      if (error && typeof error === "string" && error.includes("401")) {
+        logout();
+      }
+    }, [response, error]);
 
     const onClick = () => {
       if (activeTab === "submitTab") {

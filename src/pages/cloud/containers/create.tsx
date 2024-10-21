@@ -21,6 +21,7 @@ import userConfig from "src/configs/user";
 import axios from "axios";
 import backendConfig from "src/configs/backendConfig";
 import { useRouter } from "next/router";
+import { useAuth } from "src/hooks/useAuth";
 
 const CreateVMDashboard = () => {
   const [config, setConfig] = useState({
@@ -77,137 +78,151 @@ const CreateVMDashboard = () => {
     }
   }, [response, loading, error]);
 
-  return (
-    <Grid container spacing={2}>
-      <Grid item xs={12} md={8}>
-        <Paper elevation={3} sx={{ p: 3 }}>
-          <Typography variant="h5" gutterBottom>
-            VM Configuration
-          </Typography>
-          <FormControl fullWidth margin="normal">
-            <InputLabel>OS Type</InputLabel>
-            <Select
-              value={config.osType}
-              onChange={(e) => handleChange("osType", e.target.value)}
-            >
-              <MenuItem value="debian">Debian</MenuItem>
-              <MenuItem value="ubuntu">Ubuntu</MenuItem>
-              <MenuItem value="centos">CentOS</MenuItem>
-            </Select>
-          </FormControl>
-          <FormControl fullWidth margin="normal">
-            <InputLabel>OS Version</InputLabel>
-            <Select
-              value={config.osVersion}
-              onChange={(e) => handleChange("osVersion", e.target.value)}
-            >
-              <MenuItem value="12.2-1">12.2-1</MenuItem>
-              <MenuItem value="11.0">11.0</MenuItem>
-            </Select>
-          </FormControl>
-          <FormControl fullWidth margin="normal">
-            <InputLabel>Architecture</InputLabel>
-            <Select
-              value={config.arch}
-              onChange={(e) => handleChange("arch", e.target.value)}
-            >
-              <MenuItem value="amd64">amd64</MenuItem>
-              <MenuItem value="arm64">arm64</MenuItem>
-            </Select>
-          </FormControl>
-          <Box mt={3}>
-            <Typography gutterBottom>CPU Cores: {config.cores}</Typography>
-            <Slider
-              value={config.cores}
-              onChange={(e, newValue) => handleChange("cores", newValue)}
-              min={1}
-              max={16}
-              step={1}
-              marks
-              valueLabelDisplay="auto"
-            />
-          </Box>
-          <Box mt={3}>
-            <Typography gutterBottom>Memory (MB): {config.memory}</Typography>
-            <Slider
-              value={config.memory}
-              onChange={(e, newValue) => handleChange("memory", newValue)}
-              min={512}
-              max={16384}
-              step={512}
-              marks
-              valueLabelDisplay="auto"
-            />
-          </Box>
-          <Box mt={3}>
-            <Typography gutterBottom>Swap (MB): {config.swap}</Typography>
-            <Slider
-              value={config.swap}
-              onChange={(e, newValue) => handleChange("swap", newValue)}
-              min={0}
-              max={8192}
-              step={512}
-              marks
-              valueLabelDisplay="auto"
-            />
-          </Box>
-          <Box mt={3}>
-            <Typography gutterBottom>
-              Disk Size (GB): {config.diskSize}
-            </Typography>
-            <Slider
-              value={config.diskSize}
-              onChange={(e, newValue) => handleChange("diskSize", newValue)}
-              min={5}
-              max={500}
-              step={1}
-              marks
-              valueLabelDisplay="auto"
-            />
-          </Box>
-        </Paper>
-      </Grid>
-      <Grid item xs={12} md={4}>
-        <Card elevation={3}>
-          <CardContent>
+  if (useAuth().user?.role !== "admin") {
+    router.push("/404.html");
+    return <> </>;
+  } else {
+    return (
+      <Grid container spacing={2}>
+        <Grid item xs={12} md={8}>
+          <Paper elevation={3} sx={{ p: 3 }}>
             <Typography variant="h5" gutterBottom>
-              Pricing
+              VM Configuration
             </Typography>
-            <Divider sx={{ my: 2 }} />
-            <Typography variant="body1">CPU: ${config.cores * 5}/mo</Typography>
-            <Typography variant="body1">
-              Memory: ${((config.memory / 1024) * 10).toFixed(2)}/mo
-            </Typography>
-            <Typography variant="body1">
-              Disk: ${(config.diskSize * 0.1).toFixed(2)}/mo
-            </Typography>
-            <Divider sx={{ my: 2 }} />
-            <Typography variant="h6">Total: ${price.toFixed(2)}/mo</Typography>
-            <Button
-              variant="contained"
-              color="primary"
-              fullWidth
-              sx={{ mt: 2 }}
-              onClick={handleSubmit}
-              disabled={loading}
-            >
-              {loading ? "Creating..." : "Create VM"}
-            </Button>
-            {error && (
-              <Typography color="error" sx={{ mt: 2 }}>
-                {error.response.data}
+            <FormControl fullWidth margin="normal">
+              <InputLabel>OS Type</InputLabel>
+              <Select
+                value={config.osType}
+                onChange={(e) => handleChange("osType", e.target.value)}
+              >
+                <MenuItem value="debian">Debian</MenuItem>
+                <MenuItem value="ubuntu">Ubuntu</MenuItem>
+                <MenuItem value="centos">CentOS</MenuItem>
+              </Select>
+            </FormControl>
+            <FormControl fullWidth margin="normal">
+              <InputLabel>OS Version</InputLabel>
+              <Select
+                value={config.osVersion}
+                onChange={(e) => handleChange("osVersion", e.target.value)}
+              >
+                <MenuItem value="12.2-1">12.2-1</MenuItem>
+                <MenuItem value="11.0">11.0</MenuItem>
+              </Select>
+            </FormControl>
+            <FormControl fullWidth margin="normal">
+              <InputLabel>Architecture</InputLabel>
+              <Select
+                value={config.arch}
+                onChange={(e) => handleChange("arch", e.target.value)}
+              >
+                <MenuItem value="amd64">amd64</MenuItem>
+                <MenuItem value="arm64">arm64</MenuItem>
+              </Select>
+            </FormControl>
+            <Box mt={3}>
+              <Typography gutterBottom>CPU Cores: {config.cores}</Typography>
+              <Slider
+                value={config.cores}
+                onChange={(e, newValue) => handleChange("cores", newValue)}
+                min={1}
+                max={16}
+                step={1}
+                marks
+                valueLabelDisplay="auto"
+              />
+            </Box>
+            <Box mt={3}>
+              <Typography gutterBottom>Memory (MB): {config.memory}</Typography>
+              <Slider
+                value={config.memory}
+                onChange={(e, newValue) => handleChange("memory", newValue)}
+                min={512}
+                max={16384}
+                step={512}
+                marks
+                valueLabelDisplay="auto"
+              />
+            </Box>
+            <Box mt={3}>
+              <Typography gutterBottom>Swap (MB): {config.swap}</Typography>
+              <Slider
+                value={config.swap}
+                onChange={(e, newValue) => handleChange("swap", newValue)}
+                min={0}
+                max={8192}
+                step={512}
+                marks
+                valueLabelDisplay="auto"
+              />
+            </Box>
+            <Box mt={3}>
+              <Typography gutterBottom>
+                Disk Size (GB): {config.diskSize}
               </Typography>
-            )}
-            {response && (
-              <Typography color="success" sx={{ mt: 2 }}>
-                VM created successfully!
+              <Slider
+                value={config.diskSize}
+                onChange={(e, newValue) => handleChange("diskSize", newValue)}
+                min={5}
+                max={500}
+                step={1}
+                marks
+                valueLabelDisplay="auto"
+              />
+            </Box>
+          </Paper>
+        </Grid>
+        <Grid item xs={12} md={4}>
+          <Card elevation={3}>
+            <CardContent>
+              <Typography variant="h5" gutterBottom>
+                Pricing
               </Typography>
-            )}
-          </CardContent>
-        </Card>
+              <Divider sx={{ my: 2 }} />
+              <Typography variant="body1">
+                CPU: ${config.cores * 5}/mo
+              </Typography>
+              <Typography variant="body1">
+                Memory: ${((config.memory / 1024) * 10).toFixed(2)}/mo
+              </Typography>
+              <Typography variant="body1">
+                Disk: ${(config.diskSize * 0.1).toFixed(2)}/mo
+              </Typography>
+              <Divider sx={{ my: 2 }} />
+              <Typography variant="h6">
+                Total: ${price.toFixed(2)}/mo
+              </Typography>
+              <Button
+                variant="contained"
+                color="primary"
+                fullWidth
+                sx={{ mt: 2 }}
+                onClick={handleSubmit}
+                disabled={loading}
+              >
+                {loading ? "Creating..." : "Create VM"}
+              </Button>
+              {error && (
+                <Typography color="error" sx={{ mt: 2 }}>
+                  {error.response.data}
+                </Typography>
+              )}
+              {response && (
+                <Typography color="success" sx={{ mt: 2 }}>
+                  VM created successfully!
+                </Typography>
+              )}
+            </CardContent>
+          </Card>
+        </Grid>
       </Grid>
-    </Grid>
-  );
+    );
+  }3
+};
+
+CreateVMDashboard.acl = {
+  action: "read",
+  subject: "createAdminVm",
 };
 
 export default CreateVMDashboard;

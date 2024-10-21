@@ -41,31 +41,31 @@ const osList = [
   {
     osName: "Centos",
     osVersions: ["6.0", "7.0"],
-    osDesc: "Centos <version> operating system",
+    osDesc: "Centos operating system",
     osImage: "https://img.icons8.com/color/48/centos.png",
   },
   {
     osName: "Ubuntu",
     osVersions: ["18.04", "22.04"],
-    osDesc: "Ubuntu <version> operating system",
+    osDesc: "Ubuntu operating system",
     osImage: "https://img.icons8.com/color/48/ubuntu--v1.png",
   },
   {
     osName: "Debian",
-    osVersions: ["10", "11"],
-    osDesc: "Debian <version> operating system",
+    osVersions: ["12.2-1"],
+    osDesc: "Debian operating system",
     osImage: "https://img.icons8.com/color/48/debian.png",
   },
   {
     osName: "Fedora",
     osVersions: ["6", "7", "8"],
-    osDesc: "Fedora <version> operating system",
+    osDesc: "Fedora operating system",
     osImage: "https://img.icons8.com/fluency/48/fedora.png",
   },
   {
     osName: "SUSE",
     osVersions: ["6", "7", "8"],
-    osDesc: "SUSE <version> operating system",
+    osDesc: "SUSE operating system",
     osImage: "https://img.icons8.com/color/48/suse.png",
   },
 ];
@@ -136,7 +136,7 @@ const TabDetails = (props: IDetailsProps) => {
     const selectOsVersion = (event: ChangeEvent<HTMLSelectElement>) => {
       event.preventDefault();
       cachedOsVersion.current = event.target.value;
-      cachedDesc.current = replaceDesc(event.target.value);
+      // cachedDesc.current = replaceDesc(event.target.value);
       forceUpdate();
     };
 
@@ -148,23 +148,23 @@ const TabDetails = (props: IDetailsProps) => {
       };
     });
 
-    const replaceDesc = (osVersion: string) => {
-      if (
-        cachedDesc.current != "" &&
-        !cachedDesc.current.includes(cachedOsVersion.current)
-      ) {
-        const replacedDesc = osDesc.replace("<version>", osVersion);
-        // setOsDesc(replacedDesc);
-        cachedDesc.current = replacedDesc;
-        return replacedDesc;
-      }
+    // const replaceDesc = (osVersion: string) => {
+    //   if (
+    //     cachedDesc.current != "" &&
+    //     !cachedDesc.current.includes(cachedOsVersion.current)
+    //   ) {
+    //     const replacedDesc = osDesc.replaceAll("<version>", osVersion);
+    //     // setOsDesc(replacedDesc);
+    //     cachedDesc.current = replacedDesc;
+    //     return replacedDesc;
+    //   }
 
-      const replacedDesc = osDesc.replace(cachedOsVersion.current, osVersion);
-      // setOsDesc(replacedDesc);
-      cachedDesc.current = replacedDesc;
+    //   const replacedDesc = osDesc.replace(cachedOsVersion.current, osVersion);
+    //   // setOsDesc(replacedDesc);
+    //   cachedDesc.current = replacedDesc;
 
-      return replacedDesc;
-    };
+    //   return replacedDesc;
+    // };
 
     const OsVersionOptions = useMemo(
       () => (props: any) => {

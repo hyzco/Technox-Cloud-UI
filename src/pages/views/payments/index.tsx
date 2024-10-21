@@ -1,439 +1,393 @@
-import React, { useState, useMemo } from "react";
+import React, { useEffect, useState } from "react";
 import {
-  DataGrid,
-  GridColDef,
-  GridRowParams,
-  GridValueGetterParams,
-} from "@mui/x-data-grid";
-import {
-  Button,
-  Card,
-  CardHeader,
-  Dialog,
-  DialogTitle,
-  DialogContent,
-  DialogActions,
-  TextField,
-  Select,
-  MenuItem,
-  IconButton,
-  Typography,
-  CircularProgress,
-  Grid,
   Box,
-  Chip,
-  Paper,
-  Tooltip,
-  AppBar,
-  Toolbar,
-  InputAdornment,
+  Typography,
+  Grid,
+  Card,
   CardContent,
+  CircularProgress,
+  Button,
+  Chip,
+  useTheme,
+  Avatar,
+  List,
+  ListItem,
+  ListItemAvatar,
+  ListItemText,
+  Divider,
 } from "@mui/material";
 import {
-  Add as AddIcon,
-  Visibility as VisibilityIcon,
-  FilterList as FilterListIcon,
-  Save as SaveIcon,
-  Search as SearchIcon,
-  PieChart as PieChartIcon,
-  BarChart as BarChartIcon,
-  MonetizationOn as MonetizationOnIcon,
-  DateRange as DateRangeIcon,
+  AttachMoney,
+  CreditCard,
+  History,
+  Subscriptions,
+  ShoppingCart,
+  CalendarToday,
 } from "@mui/icons-material";
-import {
-  PieChart,
-  Pie,
-  Cell,
-  Tooltip as RechartsTooltip,
-  Legend,
-  BarChart,
-  Bar,
-  XAxis,
-  YAxis,
-  CartesianGrid,
-  ResponsiveContainer,
-} from "recharts";
+import { HTTP_METHOD } from "src/@core/enums/axios.enum";
+import vmApi from "src/@core/apis/vmApi";
+import useAxiosFunction from "src/@core/hooks/useAxiosFunction";
+import userConfig from "src/configs/user";
+import { useAuth } from "src/hooks/useAuth";
 
-// Define types
-type PaymentStatus = "Paid" | "Unpaid" | "Overdue";
-type PaymentMethod =
-  | "Credit Card"
-  | "Bank Transfer"
-  | "PayPal"
-  | "Cryptocurrency";
-
-interface Payment {
+interface PurchaseHistory {
   id: number;
-  customerName: string;
-  amount: number;
-  paymentMethod: PaymentMethod;
-  status: PaymentStatus;
-  date: string;
-  serviceName: string;
+  service_name: string;
+  plan_name: string;
+  price: string;
+  purchase_date: string;
 }
 
-const initialPayments: Payment[] = [
-  {
-    id: 1,
-    customerName: "John Doe",
-    amount: 100,
-    paymentMethod: "Credit Card",
-    status: "Paid",
-    date: "2024-09-10",
-    serviceName: "VPS Hosting",
-  },
-  {
-    id: 2,
-    customerName: "Jane Smith",
-    amount: 50,
-    paymentMethod: "PayPal",
-    status: "Unpaid",
-    date: "2024-09-12",
-    serviceName: "DNS Hosting",
-  },
-  {
-    id: 3,
-    customerName: "Michael Brown",
-    amount: 200,
-    paymentMethod: "Bank Transfer",
-    status: "Overdue",
-    date: "2024-08-01",
-    serviceName: "Dedicated Server",
-  },
-  {
-    id: 4,
-    customerName: "Emily Johnson",
-    amount: 150,
-    paymentMethod: "Credit Card",
-    status: "Paid",
-    date: "2024-09-15",
-    serviceName: "Cloud Storage",
-  },
-  {
-    id: 5,
-    customerName: "David Lee",
-    amount: 75,
-    paymentMethod: "Cryptocurrency",
-    status: "Unpaid",
-    date: "2024-09-18",
-    serviceName: "Email Hosting",
-  },
-];
+interface ActiveSubscription {
+  subscription_id: number;
+  service_name: string;
+  plan_name: string;
+  start_date: string;
+  expiry_date: string;
+  status: string;
+}
+
+const formatDate = (dateString: string) => {
+  const options: Intl.DateTimeFormatOptions = {
+    year: "numeric",
+    month: "long",
+    day: "numeric",
+    hour: "2-digit",
+    minute: "2-digit",
+    hour12: true,
+  };
+  return new Date(dateString).toLocaleString(undefined, options);
+};
 
 const PaymentsView: React.FC = () => {
-  const [payments, setPayments] = useState<Payment[]>(initialPayments);
-  const [selectedPayment, setSelectedPayment] = useState<Payment | null>(null);
-  const [isViewingPayment, setIsViewingPayment] = useState<boolean>(false);
-  const [filterStatus, setFilterStatus] = useState<PaymentStatus | "">("");
-  const [searchTerm, setSearchTerm] = useState<string>("");
+  const theme = useTheme();
+  const [purchaseHistory, setPurchaseHistory] = useState<PurchaseHistory[]>([]);
+  const [activeSubscriptions, setActiveSubscriptions] = useState<
+    ActiveSubscription[]
+  >([]);
+  const [totalSpent, setTotalSpent] = useState<number>(0);
+  const {
+    response: purchaseResponse,
+    error: purchaseError,
+    loading: purchaseLoading,
+    axiosFetch: fetchPurchaseHistory,
+  } = useAxiosFunction();
+  const {
+    response: subscriptionsResponse,
+    error: subscriptionsError,
+    loading: subscriptionsLoading,
+    axiosFetch: fetchSubscriptions,
+  } = useAxiosFunction();
 
-  const filteredPayments = useMemo(() => {
-    return payments.filter(
-      (payment) =>
-        (filterStatus === "" || payment.status === filterStatus) &&
-        (searchTerm === "" ||
-          payment.customerName
-            .toLowerCase()
-            .includes(searchTerm.toLowerCase()) ||
-          payment.serviceName.toLowerCase().includes(searchTerm.toLowerCase()))
-    );
-  }, [payments, filterStatus, searchTerm]);
+  const storedToken = window.localStorage.getItem(
+    userConfig.storageTokenKeyName
+  )!;
+  const { user } = useAuth();
 
-  const totalPaid = payments
-    .filter((p) => p.status === "Paid")
-    .reduce((sum, p) => sum + p.amount, 0);
-  const totalDue = payments.reduce((sum, p) => sum + p.amount, 0);
-  const unpaid = payments.filter((p) => p.status === "Unpaid").length;
-  const overdue = payments.filter((p) => p.status === "Overdue").length;
-
-  const balanceData = [
-    { name: "Paid", value: totalPaid },
-    { name: "Due", value: totalDue - totalPaid },
-  ];
-
-  const statusData = [
-    { name: "Paid", value: payments.filter((p) => p.status === "Paid").length },
-    { name: "Unpaid", value: unpaid },
-    { name: "Overdue", value: overdue },
-  ];
-
-  const COLORS = ["#4caf50", "#ff9800", "#f44336"];
-
-  const handleViewPayment = (payment: Payment) => {
-    setSelectedPayment(payment);
-    setIsViewingPayment(true);
+  const fetchData = () => {
+    fetchPurchaseHistory({
+      axiosInstance: vmApi,
+      method: HTTP_METHOD.GET,
+      url: "/user/purchase/history",
+      headers: { Authorization: storedToken },
+    });
+    fetchSubscriptions({
+      axiosInstance: vmApi,
+      method: HTTP_METHOD.GET,
+      url: "/user/subscriptions/active",
+      headers: { Authorization: storedToken },
+    });
   };
 
-  const getStatusColor = (status: PaymentStatus) => {
-    switch (status) {
-      case "Paid":
-        return "#4caf50";
-      case "Unpaid":
-        return "#ff9800";
-      case "Overdue":
-        return "#f44336";
-      default:
-        return "#9e9e9e";
+  useEffect(() => {
+    fetchData();
+  }, []);
+
+  useEffect(() => {
+    if (purchaseResponse) {
+      setPurchaseHistory(purchaseResponse);
+      const total = purchaseResponse.reduce(
+        (sum: number, purchase: { price: string }) =>
+          sum + parseFloat(purchase.price),
+        0
+      );
+      setTotalSpent(total);
     }
-  };
+  }, [purchaseResponse]);
 
-  const paymentColumns: GridColDef[] = [
-    {
-      field: "actions",
-      headerName: "Actions",
-      width: 100,
-      renderCell: (params: any) => (
-        <Tooltip title="View Details">
-          <IconButton onClick={() => handleViewPayment(params.row as Payment)}>
-            <VisibilityIcon color="primary" />
-          </IconButton>
-        </Tooltip>
-      ),
-    },
-    { field: "customerName", headerName: "Customer", flex: 1 },
-    {
-      field: "amount",
-      headerName: "Amount",
-      width: 120,
-      renderCell: (params: GridValueGetterParams) => (
-        <Typography>${params.value}</Typography>
-      ),
-    },
-    { field: "paymentMethod", headerName: "Method", width: 150 },
-    {
-      field: "status",
-      headerName: "Status",
-      width: 120,
-      renderCell: (params: GridValueGetterParams) => (
-        <Chip
-          label={params.value}
-          style={{
-            backgroundColor: getStatusColor(params.value as PaymentStatus),
-            color: "white",
-          }}
-        />
-      ),
-    },
-    { field: "date", headerName: "Date", width: 120 },
-    { field: "serviceName", headerName: "Service", flex: 1 },
-  ];
+  useEffect(() => {
+    if (subscriptionsResponse) {
+      setActiveSubscriptions(subscriptionsResponse);
+    }
+  }, [subscriptionsResponse]);
 
   return (
-    <Box sx={{ flexGrow: 1, p: 3 }}>
-      <AppBar
-        position="static"
-        color="default"
-        elevation={0}
-        sx={{ borderBottom: "1px solid rgba(0, 0, 0, 0.12)" }}
+    <Box
+      sx={{
+        flexGrow: 1,
+        p: 3,
+        backgroundColor: theme.palette.background.default,
+      }}
+    >
+      <Typography
+        variant="h4"
+        gutterBottom
+        sx={{ mb: 4, color: theme.palette.text.primary }}
       >
-        <Toolbar>
-          <Typography variant="h6" color="inherit" noWrap sx={{ flexGrow: 1 }}>
-            Payment Dashboard
-          </Typography>
-          {/* <Button startIcon={<AddIcon />} variant="contained" color="primary">
-            Add Payment
-          </Button> */}
-        </Toolbar>
-      </AppBar>
+        Payment Dashboard
+      </Typography>
 
-      <Grid container spacing={3} sx={{ mt: 3 }}>
+      <Grid container spacing={3}>
         <Grid item xs={12} md={4}>
-          <Card>
-            <CardHeader
-              title="Current Balance"
-              avatar={<MonetizationOnIcon />}
-            />
+          <Card
+            elevation={3}
+            sx={{
+              height: "100%",
+              backgroundColor: theme.palette.background.paper,
+            }}
+          >
             <CardContent>
-              <ResponsiveContainer width="100%" height={200}>
-                <PieChart>
-                  <Pie
-                    data={balanceData}
-                    cx="50%"
-                    cy="50%"
-                    labelLine={false}
-                    outerRadius={80}
-                    fill="#8884d8"
-                    dataKey="value"
-                  >
-                    {balanceData.map((entry, index) => (
-                      <Cell
-                        key={`cell-${index}`}
-                        fill={COLORS[index % COLORS.length]}
-                      />
-                    ))}
-                  </Pie>
-                  <RechartsTooltip />
-                  <Legend />
-                </PieChart>
-              </ResponsiveContainer>
-              <Typography variant="body2" align="center">
-                Total Paid: ${totalPaid} | Total Due: ${totalDue - totalPaid}
+              <Box sx={{ display: "flex", alignItems: "center", mb: 2 }}>
+                <Avatar sx={{ bgcolor: theme.palette.primary.main, mr: 2 }}>
+                  <AttachMoney />
+                </Avatar>
+                <Typography variant="h6" color="text.primary">
+                  Balance
+                </Typography>
+              </Box>
+              <Typography variant="h4" color="text.primary">
+                ${user?.balance}
               </Typography>
             </CardContent>
           </Card>
         </Grid>
-
         <Grid item xs={12} md={4}>
-          <Card>
-            <CardHeader title="Payment Status" avatar={<PieChartIcon />} />
+          <Card
+            elevation={3}
+            sx={{
+              height: "100%",
+              backgroundColor: theme.palette.background.paper,
+            }}
+          >
             <CardContent>
-              <ResponsiveContainer width="100%" height={200}>
-                <PieChart>
-                  <Pie
-                    data={statusData}
-                    cx="50%"
-                    cy="50%"
-                    labelLine={false}
-                    outerRadius={80}
-                    fill="#8884d8"
-                    dataKey="value"
-                  >
-                    {statusData.map((entry, index) => (
-                      <Cell
-                        key={`cell-${index}`}
-                        fill={COLORS[index % COLORS.length]}
-                      />
-                    ))}
-                  </Pie>
-                  <RechartsTooltip />
-                  <Legend />
-                </PieChart>
-              </ResponsiveContainer>
+              <Box sx={{ display: "flex", alignItems: "center", mb: 2 }}>
+                <Avatar sx={{ bgcolor: theme.palette.background.paper, mr: 2 }}>
+                  <ShoppingCart />
+                </Avatar>
+                <Typography variant="h6" color="text.primary">
+                  Total Purchases
+                </Typography>
+              </Box>
+              <Typography variant="h4" color="text.primary">
+                ${totalSpent.toFixed(2)}
+              </Typography>
             </CardContent>
           </Card>
         </Grid>
-
         <Grid item xs={12} md={4}>
-          <Card>
-            <CardHeader title="Monthly Payments" avatar={<BarChartIcon />} />
+          <Card
+            elevation={3}
+            sx={{
+              height: "100%",
+              backgroundColor: theme.palette.background.paper,
+            }}
+          >
             <CardContent>
-              <ResponsiveContainer width="100%" height={200}>
-                <BarChart
-                  data={[
-                    { name: "Jan", amount: 4000 },
-                    { name: "Feb", amount: 3000 },
-                    { name: "Mar", amount: 5000 },
-                  ]}
-                >
-                  <CartesianGrid strokeDasharray="3 3" />
-                  <XAxis dataKey="name" />
-                  <YAxis />
-                  <RechartsTooltip />
-                  <Bar dataKey="amount" fill="#8884d8" />
-                </BarChart>
-              </ResponsiveContainer>
+              <Box sx={{ display: "flex", alignItems: "center", mb: 2 }}>
+                <Avatar sx={{ bgcolor: theme.palette.background.paper, mr: 2 }}>
+                  <Subscriptions />
+                </Avatar>
+                <Typography variant="h6" color="text.primary">
+                  Active Subscriptions
+                </Typography>
+              </Box>
+              <Typography variant="h4" color="text.primary">
+                {activeSubscriptions.length}
+              </Typography>
             </CardContent>
           </Card>
-        </Grid>
-
-        <Grid item xs={12}>
-          <Paper sx={{ p: 2 }}>
-            <Box
-              display="flex"
-              justifyContent="space-between"
-              alignItems="center"
-              mb={2}
-            >
-              <TextField
-                variant="outlined"
-                size="small"
-                placeholder="Search payments..."
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                InputProps={{
-                  startAdornment: (
-                    <InputAdornment position="start">
-                      <SearchIcon />
-                    </InputAdornment>
-                  ),
-                }}
-              />
-              <Select
-                value={filterStatus}
-                onChange={(e) =>
-                  setFilterStatus(e.target.value as PaymentStatus)
-                }
-                displayEmpty
-                size="small"
-                startAdornment={<FilterListIcon />}
-              >
-                <MenuItem value="">All Statuses</MenuItem>
-                <MenuItem value="Paid">Paid</MenuItem>
-                <MenuItem value="Unpaid">Unpaid</MenuItem>
-                <MenuItem value="Overdue">Overdue</MenuItem>
-              </Select>
-            </Box>
-            <DataGrid
-              rows={filteredPayments}
-              columns={paymentColumns}
-              pageSize={5}
-              rowsPerPageOptions={[5, 10, 20]}
-              checkboxSelection
-              disableSelectionOnClick
-              autoHeight
-            />
-          </Paper>
         </Grid>
       </Grid>
 
-      <Dialog
-        open={isViewingPayment}
-        onClose={() => setIsViewingPayment(false)}
-        maxWidth="sm"
-        fullWidth
-      >
-        <DialogTitle>Payment Details</DialogTitle>
-        <DialogContent>
-          {selectedPayment && (
-            <Grid container spacing={2}>
-              <Grid item xs={6}>
-                <Typography variant="subtitle2">Customer</Typography>
-                <Typography variant="body1">
-                  {selectedPayment.customerName}
+      <Grid container spacing={3} sx={{ mt: 3 }}>
+        <Grid item xs={12} md={6}>
+          <Card
+            elevation={3}
+            sx={{ backgroundColor: theme.palette.background.paper }}
+          >
+            <CardContent>
+              <Typography
+                variant="h6"
+                gutterBottom
+                sx={{
+                  display: "flex",
+                  alignItems: "center",
+                  color: theme.palette.text.primary,
+                }}
+              >
+                <History sx={{ mr: 1 }} /> Purchase History
+              </Typography>
+              {purchaseLoading ? (
+                <CircularProgress />
+              ) : purchaseError ? (
+                <Typography color="error">
+                  Failed to load purchase history
                 </Typography>
-              </Grid>
-              <Grid item xs={6}>
-                <Typography variant="subtitle2">Amount</Typography>
-                <Typography variant="body1">
-                  ${selectedPayment.amount}
+              ) : purchaseHistory.length === 0 ? (
+                <Typography color="text.secondary">
+                  You have no purchase history.
                 </Typography>
-              </Grid>
-              <Grid item xs={6}>
-                <Typography variant="subtitle2">Payment Method</Typography>
-                <Typography variant="body1">
-                  {selectedPayment.paymentMethod}
+              ) : (
+                <List>
+                  {purchaseHistory.map((purchase, index) => (
+                    <React.Fragment key={purchase.id}>
+                      <ListItem alignItems="flex-start">
+                        <ListItemAvatar>
+                          <Avatar sx={{ bgcolor: theme.palette.primary.main }}>
+                            <CreditCard />
+                          </Avatar>
+                        </ListItemAvatar>
+                        <ListItemText
+                          primary={
+                            <Typography
+                              variant="subtitle1"
+                              color="text.primary"
+                            >
+                              {purchase.service_name} - {purchase.plan_name}
+                            </Typography>
+                          }
+                          secondary={
+                            <>
+                              <Typography
+                                component="span"
+                                variant="body2"
+                                color="text.secondary"
+                              >
+                                ${purchase.price}
+                              </Typography>
+                              {" — "}
+                              <Typography
+                                component="span"
+                                variant="body2"
+                                color="text.secondary"
+                              >
+                                {formatDate(purchase.purchase_date)}
+                              </Typography>
+                            </>
+                          }
+                        />
+                      </ListItem>
+                      {index < purchaseHistory.length - 1 && (
+                        <Divider variant="inset" component="li" />
+                      )}
+                    </React.Fragment>
+                  ))}
+                </List>
+              )}
+            </CardContent>
+          </Card>
+        </Grid>
+        <Grid item xs={12} md={6}>
+          <Card
+            elevation={3}
+            sx={{ backgroundColor: theme.palette.background.paper }}
+          >
+            <CardContent>
+              <Typography
+                variant="h6"
+                gutterBottom
+                sx={{
+                  display: "flex",
+                  alignItems: "center",
+                  color: theme.palette.text.primary,
+                }}
+              >
+                <Subscriptions sx={{ mr: 1 }} /> Active Subscriptions
+              </Typography>
+              {subscriptionsLoading ? (
+                <CircularProgress />
+              ) : subscriptionsError ? (
+                <Typography color="error">
+                  Failed to load active subscriptions
                 </Typography>
-              </Grid>
-              <Grid item xs={6}>
-                <Typography variant="subtitle2">Status</Typography>
-                <Chip
-                  label={selectedPayment.status}
-                  style={{
-                    backgroundColor: getStatusColor(selectedPayment.status),
-                    color: "white",
-                  }}
-                />
-              </Grid>
-              <Grid item xs={6}>
-                <Typography variant="subtitle2">Date</Typography>
-                <Typography variant="body1">{selectedPayment.date}</Typography>
-              </Grid>
-              <Grid item xs={6}>
-                <Typography variant="subtitle2">Service</Typography>
-                <Typography variant="body1">
-                  {selectedPayment.serviceName}
+              ) : activeSubscriptions.length === 0 ? (
+                <Typography color="text.secondary">
+                  You have no active subscriptions.
                 </Typography>
-              </Grid>
-            </Grid>
-          )}
-        </DialogContent>
-        <DialogActions>
-          <Button onClick={() => setIsViewingPayment(false)}>Close</Button>
-          <Button variant="contained" color="primary" startIcon={<SaveIcon />}>
-            Edit Payment
-          </Button>
-        </DialogActions>
-      </Dialog>
+              ) : (
+                <List>
+                  {activeSubscriptions.map((subscription, index) => (
+                    <React.Fragment key={subscription.subscription_id}>
+                      <ListItem alignItems="flex-start">
+                        <ListItemAvatar>
+                          <Avatar
+                            sx={{ bgcolor: theme.palette.secondary.main }}
+                          >
+                            <CalendarToday />
+                          </Avatar>
+                        </ListItemAvatar>
+                        <ListItemText
+                          primary={
+                            <Typography
+                              variant="subtitle1"
+                              color="text.primary"
+                            >
+                              {subscription.service_name} -{" "}
+                              {subscription.plan_name}
+                            </Typography>
+                          }
+                          secondary={
+                            <>
+                              <Typography
+                                component="span"
+                                variant="body2"
+                                color="text.secondary"
+                              >
+                                Status:{" "}
+                                <Chip
+                                  label={subscription.status}
+                                  color={
+                                    subscription.status === "active"
+                                      ? "primary"
+                                      : "warning"
+                                  }
+                                  size="small"
+                                />
+                              </Typography>
+                              <br />
+                              <Typography
+                                component="span"
+                                variant="body2"
+                                color="text.secondary"
+                              >
+                                Expires: {formatDate(subscription.expiry_date)}
+                              </Typography>
+                            </>
+                          }
+                        />
+                      </ListItem>
+                      {index < activeSubscriptions.length - 1 && (
+                        <Divider variant="inset" component="li" />
+                      )}
+                    </React.Fragment>
+                  ))}
+                </List>
+              )}
+            </CardContent>
+          </Card>
+        </Grid>
+      </Grid>
+
+      {/* <Box sx={{ display: "flex", justifyContent: "center", mt: 4 }}>
+        <Button
+          variant="contained"
+          color="primary"
+          onClick={fetchData}
+          startIcon={<Subscriptions />}
+        >
+          Refresh Data
+        </Button>
+      </Box> */}
     </Box>
   );
 };
