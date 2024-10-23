@@ -377,6 +377,7 @@ const ContainerDashboard = () => {
                 autoFocus
                 margin="dense"
                 label="Hostname"
+                defaultValue={container.hostname}
                 fullWidth
                 variant="outlined"
                 value={confirmHostname}

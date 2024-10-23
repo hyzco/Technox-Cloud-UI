@@ -44,6 +44,35 @@ import { IconButton } from "@mui/material";
 import { ArrowLeft } from "mdi-material-ui";
 import { useRouter } from "next/router";
 
+const formatBytes = (bytes: number, decimals: number = 2): string => {
+  if (bytes === 0) return "0 Bytes";
+  const k = 1024;
+  const dm = decimals < 0 ? 0 : decimals;
+  const sizes = ["Bytes", "KB", "MB", "GB", "TB"];
+  const i = Math.floor(Math.log(bytes) / Math.log(k));
+  return parseFloat((bytes / Math.pow(k, i)).toFixed(dm)) + " " + sizes[i];
+};
+
+const formatNetworkSpeed = (
+  bytesPerSecond: number,
+  decimals: number = 2
+): string => {
+  const k = 1024; // Base for conversion
+  const dm = decimals < 0 ? 0 : decimals; // Decimal places to display
+  const sizes = ["B/s", "KB/s", "MB/s", "GB/s", "TB/s"]; // Units
+
+  // Return "0 B/s" if the input is zero
+  if (bytesPerSecond === 0) return "0 B/s";
+
+  // Determine the index for the size array based on the logarithm of the input value
+  const i = Math.floor(Math.log(Math.abs(bytesPerSecond)) / Math.log(k));
+
+  // Return formatted value with the appropriate unit
+  return (
+    parseFloat((bytesPerSecond / Math.pow(k, i)).toFixed(dm)) + " " + sizes[i]
+  );
+};
+
 const CPUUsageChart = ({ cpuUsage, nodeNames }: any) => {
   const options: ApexOptions = {
     chart: { type: "line" },
@@ -145,10 +174,25 @@ const NetworkTrafficChart = ({ networkTraffic, nodeNames }: any) => {
   const options: ApexOptions = {
     chart: { type: "bar" },
     series: [
-      { name: "Inbound", data: networkTraffic.inbound },
-      { name: "Outbound", data: networkTraffic.outbound },
+      {
+        name: "Inbound",
+        data: networkTraffic.inbound.map((value: number) =>
+          formatNetworkSpeed(value)
+        ),
+      },
+      {
+        name: "Outbound",
+        data: networkTraffic.outbound.map((value: number) =>
+          formatNetworkSpeed(value)
+        ),
+      },
     ],
     xaxis: { categories: nodeNames },
+    tooltip: {
+      y: {
+        formatter: (val: number) => formatNetworkSpeed(val), // Format on tooltip
+      },
+    },
   };
 
   return (
@@ -184,14 +228,12 @@ const NodeList = ({ nodes }: any) => (
             <TableCell>{node.uptime}</TableCell>
             <TableCell>
               {((node.mem / node.maxmem) * 100).toFixed(2)}% (
-              {node.mem.toLocaleString()} of {node.maxmem.toLocaleString()}{" "}
-              bytes)
+              {formatBytes(node.mem)} of {formatBytes(node.maxmem)})
             </TableCell>
             <TableCell>{(node.cpu * 100).toFixed(2)}%</TableCell>
             <TableCell>
               {((node.disk / node.maxdisk) * 100).toFixed(2)}% (
-              {node.disk.toLocaleString()} of {node.maxdisk.toLocaleString()}{" "}
-              bytes)
+              {formatBytes(node.disk)} of {formatBytes(node.maxdisk)})
             </TableCell>
           </TableRow>
         ))}
@@ -285,11 +327,11 @@ const NodeDashboard = () => {
   if (error) {
     return <Alert severity="error">{error}</Alert>;
   }
-  const router = useRouter()
+  const router = useRouter();
 
   return (
     <ApexChartWrapper>
-         <IconButton
+      <IconButton
         color="inherit"
         aria-haspopup="true"
         style={{ marginBottom: "1rem" }}

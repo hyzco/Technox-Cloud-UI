@@ -7,7 +7,6 @@ import {
   CardContent,
   CircularProgress,
   Button,
-  Chip,
   useTheme,
   Avatar,
   List,
@@ -23,12 +22,14 @@ import {
   Subscriptions,
   ShoppingCart,
   CalendarToday,
+  Wallet,
 } from "@mui/icons-material";
 import { HTTP_METHOD } from "src/@core/enums/axios.enum";
 import vmApi from "src/@core/apis/vmApi";
 import useAxiosFunction from "src/@core/hooks/useAxiosFunction";
 import userConfig from "src/configs/user";
 import { useAuth } from "src/hooks/useAuth";
+import TopUpDialog from "./topUfDialog";
 
 interface PurchaseHistory {
   id: number;
@@ -61,11 +62,10 @@ const formatDate = (dateString: string) => {
 
 const PaymentsView: React.FC = () => {
   const theme = useTheme();
-  const [purchaseHistory, setPurchaseHistory] = useState<PurchaseHistory[]>([]);
-  const [activeSubscriptions, setActiveSubscriptions] = useState<
-    ActiveSubscription[]
-  >([]);
-  const [totalSpent, setTotalSpent] = useState<number>(0);
+  const [purchaseHistory, setPurchaseHistory] = useState([]);
+  const [activeSubscriptions, setActiveSubscriptions] = useState([]);
+  const [totalSpent, setTotalSpent] = useState(0);
+  const [topUpDialogOpen, setTopUpDialogOpen] = useState(false);
   const {
     response: purchaseResponse,
     error: purchaseError,
@@ -120,6 +120,14 @@ const PaymentsView: React.FC = () => {
       setActiveSubscriptions(subscriptionsResponse);
     }
   }, [subscriptionsResponse]);
+
+  const handleTopUpSuccess = (amount: number) => {
+    // Optionally update the user's balance after a successful top-up
+    // This can be done by fetching user data again or updating local state
+    console.log(`Successfully topped up: $${amount}`);
+    // Re-fetch user data or update the local state here if needed
+    fetchData();
+  };
 
   return (
     <Box
@@ -239,7 +247,7 @@ const PaymentsView: React.FC = () => {
                 </Typography>
               ) : (
                 <List>
-                  {purchaseHistory.map((purchase, index) => (
+                  {purchaseHistory.map((purchase: PurchaseHistory, index) => (
                     <React.Fragment key={purchase.id}>
                       <ListItem alignItems="flex-start">
                         <ListItemAvatar>
@@ -271,7 +279,9 @@ const PaymentsView: React.FC = () => {
                                 variant="body2"
                                 color="text.secondary"
                               >
-                                {formatDate(purchase.purchase_date)}
+                                {new Date(
+                                  purchase.purchase_date
+                                ).toLocaleString()}
                               </Typography>
                             </>
                           }
@@ -316,61 +326,57 @@ const PaymentsView: React.FC = () => {
                 </Typography>
               ) : (
                 <List>
-                  {activeSubscriptions.map((subscription, index) => (
-                    <React.Fragment key={subscription.subscription_id}>
-                      <ListItem alignItems="flex-start">
-                        <ListItemAvatar>
-                          <Avatar
-                            sx={{ bgcolor: theme.palette.secondary.main }}
-                          >
-                            <CalendarToday />
-                          </Avatar>
-                        </ListItemAvatar>
-                        <ListItemText
-                          primary={
-                            <Typography
-                              variant="subtitle1"
-                              color="text.primary"
+                  {activeSubscriptions.map(
+                    (subscription: ActiveSubscription, index) => (
+                      <React.Fragment key={subscription.subscription_id}>
+                        <ListItem alignItems="flex-start">
+                          <ListItemAvatar>
+                            <Avatar
+                              sx={{ bgcolor: theme.palette.secondary.main }}
                             >
-                              {subscription.service_name} -{" "}
-                              {subscription.plan_name}
-                            </Typography>
-                          }
-                          secondary={
-                            <>
+                              <CalendarToday />
+                            </Avatar>
+                          </ListItemAvatar>
+                          <ListItemText
+                            primary={
                               <Typography
-                                component="span"
-                                variant="body2"
-                                color="text.secondary"
+                                variant="subtitle1"
+                                color="text.primary"
                               >
-                                Status:{" "}
-                                <Chip
-                                  label={subscription.status}
-                                  color={
-                                    subscription.status === "active"
-                                      ? "primary"
-                                      : "warning"
-                                  }
-                                  size="small"
-                                />
+                                {subscription.service_name} -{" "}
+                                {subscription.plan_name}
                               </Typography>
-                              <br />
-                              <Typography
-                                component="span"
-                                variant="body2"
-                                color="text.secondary"
-                              >
-                                Expires: {formatDate(subscription.expiry_date)}
-                              </Typography>
-                            </>
-                          }
-                        />
-                      </ListItem>
-                      {index < activeSubscriptions.length - 1 && (
-                        <Divider variant="inset" component="li" />
-                      )}
-                    </React.Fragment>
-                  ))}
+                            }
+                            secondary={
+                              <>
+                                <Typography
+                                  component="span"
+                                  variant="body2"
+                                  color="text.secondary"
+                                >
+                                  Status: <span>{subscription.status}</span>
+                                </Typography>
+                                <br />
+                                <Typography
+                                  component="span"
+                                  variant="body2"
+                                  color="text.secondary"
+                                >
+                                  Expires:{" "}
+                                  {new Date(
+                                    subscription.expiry_date
+                                  ).toLocaleString()}
+                                </Typography>
+                              </>
+                            }
+                          />
+                        </ListItem>
+                        {index < activeSubscriptions.length - 1 && (
+                          <Divider variant="inset" component="li" />
+                        )}
+                      </React.Fragment>
+                    )
+                  )}
                 </List>
               )}
             </CardContent>
@@ -378,16 +384,23 @@ const PaymentsView: React.FC = () => {
         </Grid>
       </Grid>
 
-      {/* <Box sx={{ display: "flex", justifyContent: "center", mt: 4 }}>
+      <Box sx={{ display: "flex", justifyContent: "center", mt: 4 }}>
         <Button
           variant="contained"
           color="primary"
-          onClick={fetchData}
-          startIcon={<Subscriptions />}
+          onClick={() => setTopUpDialogOpen(true)} // Open the dialog
+          startIcon={<Wallet />}
         >
-          Refresh Data
+          Top Up Balance
         </Button>
-      </Box> */}
+      </Box>
+
+      <TopUpDialog
+        open={topUpDialogOpen}
+        onClose={() => setTopUpDialogOpen(false)}
+        onSuccess={handleTopUpSuccess}
+        currentBalance={user?.balance}
+      />
     </Box>
   );
 };
